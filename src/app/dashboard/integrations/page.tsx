@@ -14,6 +14,7 @@ import {
 } from 'lucide-react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { Profile, Integration, IntegrationConfig, IntegrationProvider } from '@/types'
+import { IntegrationLogos } from '@/components/integrations/integration-logos'
 
 // Integration configurations
 const INTEGRATION_CONFIGS: IntegrationConfig[] = [
@@ -408,17 +409,7 @@ export default function IntegrationsPage() {
               }`}>
                 <CardHeader>
                   <div className="flex items-start justify-between mb-3">
-                    <div className={`w-12 h-12 rounded-xl flex items-center justify-center ${
-                      config.category === 'email' ? 'bg-gradient-to-br from-blue-400 to-blue-500' :
-                      config.category === 'automation' ? 'bg-gradient-to-br from-purple-400 to-purple-500' :
-                      config.category === 'analytics' ? 'bg-gradient-to-br from-green-400 to-green-500' :
-                      config.category === 'payment' ? 'bg-gradient-to-br from-yellow-400 to-yellow-500' :
-                      config.category === 'calendar' ? 'bg-gradient-to-br from-pink-400 to-pink-500' :
-                      config.category === 'social' ? 'bg-gradient-to-br from-orange-400 to-orange-500' :
-                      'bg-gradient-to-br from-gray-400 to-gray-500'
-                    }`}>
-                      <IconComponent className="w-6 h-6 text-white" />
-                    </div>
+                    {IntegrationLogos[config.provider]()}
                     {isConnected && (
                       <div className="flex items-center gap-2">
                         <Switch
