@@ -10,6 +10,33 @@ export async function middleware(req: NextRequest) {
     data: { session },
   } = await supabase.auth.getSession()
 
+  // Handle custom domain routing
+  const hostname = req.headers.get('host') || ''
+  const isCustomDomain = !hostname.includes('localhost') &&
+                         !hostname.includes('vercel.app') &&
+                         !hostname.includes('clicky.com') &&
+                         hostname !== ''
+
+  if (isCustomDomain) {
+    // Look up profile with this custom domain
+    const { data: profile } = await supabase
+      .from('profiles')
+      .select('slug')
+      .eq('custom_domain', hostname)
+      .eq('domain_verified', true)
+      .single()
+
+    if (profile) {
+      // Rewrite to the profile page
+      const url = req.nextUrl.clone()
+      url.pathname = `/${profile.slug}`
+      return NextResponse.rewrite(url)
+    }
+
+    // If custom domain not found or not verified, show error
+    return new NextResponse('Domain not configured correctly', { status: 404 })
+  }
+
   // Protect dashboard routes
   if (req.nextUrl.pathname.startsWith('/dashboard')) {
     if (!session) {
@@ -33,5 +60,5 @@ export async function middleware(req: NextRequest) {
 }
 
 export const config = {
-  matcher: ['/dashboard/:path*', '/login', '/signup'],
+  matcher: ['/((?!_next/static|_next/image|favicon.ico|api).*)'],
 }

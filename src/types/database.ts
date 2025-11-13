@@ -52,6 +52,9 @@ export interface Database {
           style: Json | null
           analytics_enabled: boolean
           published: boolean
+          custom_domain: string | null
+          domain_verified: boolean
+          domain_verified_at: string | null
           created_at: string
           updated_at: string
         }
@@ -68,6 +71,9 @@ export interface Database {
           style?: Json | null
           analytics_enabled?: boolean
           published?: boolean
+          custom_domain?: string | null
+          domain_verified?: boolean
+          domain_verified_at?: string | null
           created_at?: string
           updated_at?: string
         }
@@ -84,6 +90,9 @@ export interface Database {
           style?: Json | null
           analytics_enabled?: boolean
           published?: boolean
+          custom_domain?: string | null
+          domain_verified?: boolean
+          domain_verified_at?: string | null
           created_at?: string
           updated_at?: string
         }
