@@ -22,6 +22,21 @@ const config: Config = {
           900: '#0c4a6e',
           950: '#082f49',
         },
+        neo: {
+          yellow: '#FFE500',
+          pink: '#FF6EC7',
+          blue: '#00D4FF',
+          green: '#00FF85',
+          purple: '#B066FF',
+          orange: '#FF8A00',
+          black: '#0A0A0A',
+          white: '#FFFFFF',
+        },
+      },
+      boxShadow: {
+        'brutal': '4px 4px 0px 0px rgba(0,0,0,1)',
+        'brutal-lg': '8px 8px 0px 0px rgba(0,0,0,1)',
+        'brutal-sm': '2px 2px 0px 0px rgba(0,0,0,1)',
       },
       animation: {
         'fade-in': 'fadeIn 0.3s ease-in-out',

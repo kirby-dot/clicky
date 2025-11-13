@@ -191,17 +191,19 @@ export default function LinksPage() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Links</h1>
-          <p className="text-gray-600 mt-1">Add and organize your links</p>
+    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* Left side: Link Editor */}
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-black text-gray-900">Links</h1>
+            <p className="text-gray-600 mt-1 font-medium">Add and organize your links</p>
+          </div>
+          <Button onClick={() => setShowAddLink(true)}>
+            <Plus className="w-5 h-5 mr-2" />
+            Add link
+          </Button>
         </div>
-        <Button onClick={() => setShowAddLink(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add link
-        </Button>
-      </div>
 
       {showAddLink && (
         <Card>
@@ -299,6 +301,37 @@ export default function LinksPage() {
           </SortableContext>
         </DndContext>
       )}
+      </div>
+
+      {/* Right side: Live Preview */}
+      <div className="lg:sticky lg:top-6 lg:h-[calc(100vh-8rem)]">
+        <Card className="h-full overflow-hidden">
+          <CardHeader className="bg-neo-yellow border-b-4 border-black">
+            <CardTitle className="flex items-center justify-between">
+              <span>Live Preview</span>
+              <a
+                href={`/${profile.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm font-medium underline flex items-center gap-1"
+              >
+                View Page
+                <ExternalLink className="w-4 h-4" />
+              </a>
+            </CardTitle>
+            <CardDescription className="text-gray-700">
+              This is how your profile looks to visitors
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="p-0 h-[calc(100%-5rem)] bg-gray-50">
+            <iframe
+              src={`/${profile.slug}`}
+              className="w-full h-full border-0"
+              title="Profile Preview"
+            />
+          </CardContent>
+        </Card>
+      </div>
     </div>
   )
 }
@@ -321,29 +354,29 @@ function SortableLink({
   }
 
   return (
-    <div
+    <Card
       ref={setNodeRef}
       style={style}
-      className={`bg-white border rounded-lg p-4 ${
+      className={`p-4 transition-all hover:shadow-brutal-lg ${
         link.active ? '' : 'opacity-50'
       }`}
     >
       <div className="flex items-center space-x-4">
         <button
-          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-gray-600"
+          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-black transition-colors"
           {...attributes}
           {...listeners}
         >
-          <GripVertical className="w-5 h-5" />
+          <GripVertical className="w-6 h-6" />
         </button>
 
         <div className="flex-1 min-w-0">
-          <h3 className="font-medium text-gray-900 truncate">{link.title}</h3>
+          <h3 className="font-bold text-gray-900 truncate text-lg">{link.title}</h3>
           <a
             href={link.url || '#'}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-sm text-gray-500 hover:text-primary-600 truncate flex items-center space-x-1"
+            className="text-sm text-gray-600 hover:text-neo-blue font-medium truncate flex items-center space-x-1 transition-colors"
           >
             <span className="truncate">{link.url}</span>
             <ExternalLink className="w-3 h-3 flex-shrink-0" />
@@ -351,7 +384,9 @@ function SortableLink({
         </div>
 
         <div className="flex items-center space-x-2">
-          <span className="text-sm text-gray-500">{link.clicks} clicks</span>
+          <div className="bg-neo-yellow border-2 border-black px-3 py-1 text-sm font-bold">
+            {link.clicks} clicks
+          </div>
           <Button
             size="icon"
             variant="ghost"
@@ -359,20 +394,21 @@ function SortableLink({
             title={link.active ? 'Hide link' : 'Show link'}
           >
             {link.active ? (
-              <Eye className="w-4 h-4" />
+              <Eye className="w-5 h-5" />
             ) : (
-              <EyeOff className="w-4 h-4" />
+              <EyeOff className="w-5 h-5" />
             )}
           </Button>
           <Button
             size="icon"
-            variant="ghost"
+            variant="destructive"
             onClick={() => onDelete(link.id)}
+            className="hover:scale-105 transition-transform"
           >
-            <Trash2 className="w-4 h-4 text-red-600" />
+            <Trash2 className="w-5 h-5" />
           </Button>
         </div>
       </div>
-    </div>
+    </Card>
   )
 }

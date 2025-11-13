@@ -117,14 +117,7 @@ export default function ProfileView({ profile, links, theme }: ProfileViewProps)
   }
 
   return (
-    <div
-      className="min-h-screen py-12 px-4"
-      style={{
-        backgroundColor: themeConfig.colors.background,
-        color: themeConfig.colors.text,
-        fontFamily: themeConfig.fonts.body,
-      }}
-    >
+    <div className="min-h-screen py-12 px-4 bg-white">
       <motion.div
         className="max-w-2xl mx-auto"
         variants={container}
@@ -132,71 +125,60 @@ export default function ProfileView({ profile, links, theme }: ProfileViewProps)
         animate="show"
       >
         {/* Profile Header */}
-        <motion.div variants={item} className="text-center mb-8">
+        <motion.div variants={item} className="text-center mb-12">
           {profile.avatar_url && (
-            <div className="mb-4">
+            <div className="mb-6">
               <img
                 src={profile.avatar_url}
                 alt={profile.title}
-                className="w-24 h-24 rounded-full mx-auto object-cover border-4"
-                style={{ borderColor: themeConfig.colors.primary }}
+                className="w-32 h-32 mx-auto object-cover border-4 border-black shadow-brutal"
               />
             </div>
           )}
 
-          <h1
-            className="text-3xl font-bold mb-2"
-            style={{ fontFamily: themeConfig.fonts.heading }}
-          >
+          <h1 className="text-4xl md:text-5xl font-black mb-4 text-black">
             {profile.title}
           </h1>
 
           {profile.bio && (
-            <p className="text-lg opacity-80 max-w-lg mx-auto">{profile.bio}</p>
+            <p className="text-lg text-gray-700 max-w-lg mx-auto font-medium">{profile.bio}</p>
           )}
         </motion.div>
 
         {/* Links */}
-        <motion.div variants={item} className={`max-w-lg mx-auto ${getSpacingClass()}`}>
-          {links.map((link, index) => (
-            <motion.a
-              key={link.id}
-              href={link.url || '#'}
-              target="_blank"
-              rel="noopener noreferrer"
-              onClick={() => handleLinkClick(link)}
-              className={`${getLinkStyle()} ${getHoverAnimation()} flex items-center justify-center space-x-2`}
-              style={{
-                backgroundColor:
-                  themeConfig.linkStyle === 'filled'
-                    ? themeConfig.colors.linkBackground
-                    : 'transparent',
-                color: themeConfig.colors.linkText,
-                borderColor:
-                  themeConfig.linkStyle === 'outlined'
-                    ? themeConfig.colors.primary
-                    : undefined,
-              }}
-              whileHover={{ scale: themeConfig.animations.hover === 'scale' ? 1.05 : 1 }}
-              whileTap={{ scale: 0.95 }}
-            >
-              <span>{link.title}</span>
-              <ExternalLink className="w-4 h-4" />
-            </motion.a>
-          ))}
+        <motion.div variants={item} className="max-w-lg mx-auto space-y-4">
+          {links.map((link, index) => {
+            const colors = ['bg-neo-yellow', 'bg-neo-pink', 'bg-neo-blue', 'bg-neo-green', 'bg-neo-purple', 'bg-neo-orange']
+            const bgColor = colors[index % colors.length]
+
+            return (
+              <motion.a
+                key={link.id}
+                href={link.url || '#'}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() => handleLinkClick(link)}
+                className={`block w-full px-6 py-4 text-center font-bold transition-all ${bgColor} border-4 border-black shadow-brutal hover:shadow-brutal-lg hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none flex items-center justify-center space-x-2 text-black text-lg`}
+                whileTap={{ scale: 0.98 }}
+              >
+                <span>{link.title}</span>
+                <ExternalLink className="w-5 h-5" />
+              </motion.a>
+            )
+          })}
         </motion.div>
 
         {links.length === 0 && (
-          <motion.div variants={item} className="text-center text-gray-500 py-12">
+          <motion.div variants={item} className="text-center text-gray-700 py-12 font-medium">
             <p>No links yet</p>
           </motion.div>
         )}
 
         {/* Footer */}
-        <motion.div variants={item} className="text-center mt-12">
+        <motion.div variants={item} className="text-center mt-16">
           <a
             href="/"
-            className="text-sm opacity-60 hover:opacity-100 transition-opacity"
+            className="inline-block text-sm text-black font-bold hover:underline bg-neo-yellow border-3 border-black px-6 py-3 shadow-brutal hover:shadow-brutal-lg transition-all"
           >
             Create your own Clicky
           </a>

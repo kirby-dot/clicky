@@ -12,18 +12,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         className={cn(
-          'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+          'inline-flex items-center justify-center whitespace-nowrap font-bold border-3 border-black transition-all active:translate-x-1 active:translate-y-1 active:shadow-none disabled:pointer-events-none disabled:opacity-50',
           {
-            'bg-primary-600 text-white hover:bg-primary-700': variant === 'default',
-            'border-2 border-gray-300 bg-white hover:bg-gray-50': variant === 'outline',
-            'hover:bg-gray-100': variant === 'ghost',
-            'bg-red-600 text-white hover:bg-red-700': variant === 'destructive',
+            'bg-neo-yellow shadow-brutal hover:shadow-brutal-lg': variant === 'default',
+            'border-4 border-black bg-white hover:bg-gray-50 shadow-brutal': variant === 'outline',
+            'border-2 hover:bg-gray-100 shadow-brutal-sm': variant === 'ghost',
+            'bg-neo-pink shadow-brutal hover:shadow-brutal-lg': variant === 'destructive',
           },
           {
-            'h-10 px-4 py-2': size === 'default',
-            'h-9 rounded-md px-3': size === 'sm',
-            'h-11 rounded-md px-8': size === 'lg',
-            'h-10 w-10': size === 'icon',
+            'h-11 px-6 py-2 text-base': size === 'default',
+            'h-9 px-4 text-sm': size === 'sm',
+            'h-13 px-8 text-lg': size === 'lg',
+            'h-11 w-11': size === 'icon',
           },
           className
         )}
