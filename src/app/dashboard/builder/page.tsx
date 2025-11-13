@@ -1729,142 +1729,446 @@ function PageStyleEditor({
   onSave,
   onCancel,
 }: {
-  style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained"; animation?: 'none' | 'fade-in' | 'fade-up' | 'scale-in'; borderAnimation?: boolean }
+  style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained"; animation?: 'none' | 'fade-in' | 'fade-up' | 'scale-in'; borderAnimation?: boolean; moduleSpacing?: 'tight' | 'normal' | 'relaxed'; borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'full'; shadowStyle?: 'none' | 'soft' | 'medium' | 'bold'; glassEffect?: boolean }
   profile: Profile | null
-  onSave: (style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained"; animation?: 'none' | 'fade-in' | 'fade-up' | 'scale-in'; borderAnimation?: boolean }) => Promise<void>
+  onSave: (style: any) => Promise<void>
   onCancel: () => void
 }) {
   const [editedStyle, setEditedStyle] = useState(style)
+  const [activeTab, setActiveTab] = useState<'background' | 'layout' | 'effects' | 'presets'>('background')
+
+  // Style presets
+  const stylePresets = [
+    {
+      name: 'Minimal White',
+      preview: 'bg-white',
+      style: {
+        backgroundColor: '#ffffff',
+        containerWidth: 'contained',
+        moduleSpacing: 'normal',
+        borderRadius: 'lg',
+        shadowStyle: 'soft',
+        animation: 'fade-up',
+        borderAnimation: false,
+      }
+    },
+    {
+      name: 'Modern Gradient',
+      preview: 'bg-gradient-to-br from-purple-100 to-pink-100',
+      style: {
+        backgroundColor: 'linear-gradient(to bottom right, #f3e8ff, #fce7f3)',
+        containerWidth: 'contained',
+        moduleSpacing: 'relaxed',
+        borderRadius: 'full',
+        shadowStyle: 'medium',
+        animation: 'scale-in',
+        borderAnimation: true,
+      }
+    },
+    {
+      name: 'Dark Mode',
+      preview: 'bg-gray-900',
+      style: {
+        backgroundColor: '#111827',
+        containerWidth: 'contained',
+        moduleSpacing: 'normal',
+        borderRadius: 'lg',
+        shadowStyle: 'bold',
+        animation: 'fade-in',
+        borderAnimation: false,
+      }
+    },
+    {
+      name: 'Glass Morphism',
+      preview: 'bg-gradient-to-br from-blue-200 to-purple-200',
+      style: {
+        backgroundColor: 'linear-gradient(to bottom right, #bfdbfe, #e9d5ff)',
+        containerWidth: 'contained',
+        moduleSpacing: 'relaxed',
+        borderRadius: 'lg',
+        shadowStyle: 'soft',
+        animation: 'fade-up',
+        glassEffect: true,
+        borderAnimation: false,
+      }
+    },
+    {
+      name: 'Vibrant Pop',
+      preview: 'bg-gradient-to-br from-yellow-200 via-pink-200 to-purple-300',
+      style: {
+        backgroundColor: 'linear-gradient(135deg, #fef08a, #fbcfe8, #d8b4fe)',
+        containerWidth: 'full',
+        moduleSpacing: 'relaxed',
+        borderRadius: 'full',
+        shadowStyle: 'bold',
+        animation: 'scale-in',
+        borderAnimation: true,
+      }
+    },
+    {
+      name: 'Professional',
+      preview: 'bg-gradient-to-br from-slate-100 to-blue-100',
+      style: {
+        backgroundColor: 'linear-gradient(to bottom right, #f1f5f9, #dbeafe)',
+        containerWidth: 'contained',
+        moduleSpacing: 'normal',
+        borderRadius: 'md',
+        shadowStyle: 'soft',
+        animation: 'fade-in',
+        borderAnimation: false,
+      }
+    },
+  ]
 
   const backgroundPresets = [
-    { name: 'Light Gray', value: '#f9fafb' },
-    { name: 'White', value: '#ffffff' },
-    { name: 'Sky', value: 'linear-gradient(to-br, #f0f9ff, #e0f2fe)' },
-    { name: 'Sunset', value: 'linear-gradient(to-br, #fef3c7, #fecaca)' },
-    { name: 'Ocean', value: 'linear-gradient(to-br, #dbeafe, #e0e7ff)' },
+    { name: 'White', value: '#ffffff', gradient: false },
+    { name: 'Light', value: '#f9fafb', gradient: false },
+    { name: 'Dark', value: '#111827', gradient: false },
+    { name: 'Sky Blue', value: 'linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%)', gradient: true },
+    { name: 'Sunset', value: 'linear-gradient(135deg, #fef3c7 0%, #fecaca 100%)', gradient: true },
+    { name: 'Ocean', value: 'linear-gradient(135deg, #dbeafe 0%, #e0e7ff 100%)', gradient: true },
+    { name: 'Forest', value: 'linear-gradient(135deg, #d1fae5 0%, #dcfce7 100%)', gradient: true },
+    { name: 'Purple Dream', value: 'linear-gradient(135deg, #f3e8ff 0%, #fce7f3 100%)', gradient: true },
+    { name: 'Warm', value: 'linear-gradient(135deg, #ffedd5 0%, #fed7aa 100%)', gradient: true },
+    { name: 'Cool Mint', value: 'linear-gradient(135deg, #ecfeff 0%, #cffafe 100%)', gradient: true },
   ]
 
   return (
     <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-lg" onClick={onCancel}>
-      <div className="max-w-3xl w-full bg-white rounded-3xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
-        <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-8 rounded-t-3xl">
-          <h2 className="text-3xl font-bold text-white">Page Styling</h2>
-          <p className="text-white/90 mt-1">Customize your page appearance and animations</p>
+      <div className="max-w-5xl w-full bg-white rounded-3xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+        {/* Header */}
+        <div className="bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 p-6">
+          <h2 className="text-3xl font-bold text-white">✨ Page Styling</h2>
+          <p className="text-white/90 mt-1">Design your perfect page with style presets and custom options</p>
         </div>
 
-        <div className="p-8 space-y-6 max-h-[60vh] overflow-y-auto">
-          <div className="space-y-3">
-            <label className="font-bold text-gray-900">Background</label>
-            <div className="grid grid-cols-5 gap-3">
-              {backgroundPresets.map((preset) => (
-                <button
-                  key={preset.name}
-                  onClick={() => setEditedStyle({ ...editedStyle, backgroundColor: preset.value })}
-                  className={`h-20 rounded-xl border-2 ${editedStyle.backgroundColor === preset.value ? 'ring-4 ring-purple-500' : 'border-gray-200'}`}
-                  style={{ background: preset.value }}
-                >
-                  <span className="text-xs font-bold bg-white/90 px-2 py-1 rounded">{preset.name}</span>
-                </button>
-              ))}
-            </div>
-            <Input
-              value={editedStyle.backgroundColor || ''}
-              onChange={(e) => setEditedStyle({ ...editedStyle, backgroundColor: e.target.value })}
-              placeholder="Custom color or gradient"
-              className="mt-2"
-            />
-          </div>
-
-          <div className="space-y-3">
-            <label className="font-bold text-gray-900">Background Image URL (optional)</label>
-            <Input
-              value={editedStyle.backgroundImage || ''}
-              onChange={(e) => setEditedStyle({ ...editedStyle, backgroundImage: e.target.value })}
-              placeholder="https://example.com/bg.jpg"
-            />
-          </div>
-
-          <div className="space-y-3">
-            <label className="font-bold text-gray-900">Container Width</label>
-            <div className="grid grid-cols-2 gap-4">
+        {/* Tabs */}
+        <div className="border-b border-gray-200 bg-gray-50 px-6">
+          <div className="flex gap-2 -mb-px">
+            {[
+              { id: 'presets', label: '⚡ Quick Presets', icon: '🎨' },
+              { id: 'background', label: 'Background', icon: '🌈' },
+              { id: 'layout', label: 'Layout', icon: '📐' },
+              { id: 'effects', label: 'Effects', icon: '✨' },
+            ].map((tab) => (
               <button
-                onClick={() => setEditedStyle({ ...editedStyle, containerWidth: 'contained' })}
-                className={`p-4 rounded-xl border-2 ${editedStyle.containerWidth === 'contained' ? 'border-purple-500 bg-purple-50' : 'border-gray-200'}`}
-              >
-                <p className="font-bold">Contained</p>
-                <p className="text-sm text-gray-600">Max width with margins</p>
-              </button>
-              <button
-                onClick={() => setEditedStyle({ ...editedStyle, containerWidth: 'full' })}
-                className={`p-4 rounded-xl border-2 ${editedStyle.containerWidth === 'full' ? 'border-purple-500 bg-purple-50' : 'border-gray-200'}`}
-              >
-                <p className="font-bold">Full Width</p>
-                <p className="text-sm text-gray-600">Edge to edge content</p>
-              </button>
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <label className="font-bold text-gray-900">Module Animations</label>
-            <p className="text-sm text-gray-600">Choose how modules appear on your page</p>
-            <div className="grid grid-cols-2 gap-3">
-              {[
-                { value: 'fade-up', label: 'Fade Up', desc: 'Slide up with fade' },
-                { value: 'fade-in', label: 'Fade In', desc: 'Simple fade effect' },
-                { value: 'scale-in', label: 'Scale In', desc: 'Zoom in effect' },
-                { value: 'none', label: 'None', desc: 'No animation' },
-              ].map((anim) => (
-                <button
-                  key={anim.value}
-                  onClick={() => setEditedStyle({ ...editedStyle, animation: anim.value as any })}
-                  className={`p-4 rounded-xl border-2 transition-all ${
-                    (editedStyle.animation || 'fade-up') === anim.value
-                      ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-300'
-                      : 'border-gray-200 hover:border-gray-300'
-                  }`}
-                >
-                  <p className="font-bold text-sm">{anim.label}</p>
-                  <p className="text-xs text-gray-600 mt-1">{anim.desc}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          <div className="space-y-3">
-            <label className="font-bold text-gray-900">Animated Borders (Beams)</label>
-            <p className="text-sm text-gray-600">Add moving gradient borders to your modules</p>
-            <div className="grid grid-cols-2 gap-3">
-              <button
-                onClick={() => setEditedStyle({ ...editedStyle, borderAnimation: false })}
-                className={`p-4 rounded-xl border-2 transition-all ${
-                  !editedStyle.borderAnimation
-                    ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-300'
-                    : 'border-gray-200 hover:border-gray-300'
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`px-6 py-3 font-semibold text-sm transition-all ${
+                  activeTab === tab.id
+                    ? 'border-b-2 border-purple-500 text-purple-600 bg-white'
+                    : 'text-gray-600 hover:text-gray-900'
                 }`}
               >
-                <p className="font-bold text-sm">Disabled</p>
-                <p className="text-xs text-gray-600 mt-1">No border effects</p>
+                <span className="mr-2">{tab.icon}</span>
+                {tab.label}
               </button>
-              <button
-                onClick={() => setEditedStyle({ ...editedStyle, borderAnimation: true })}
-                className={`p-4 rounded-xl border-2 transition-all ${
-                  editedStyle.borderAnimation
-                    ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-300'
-                    : 'border-gray-200 hover:border-gray-300'
-                }`}
-              >
-                <p className="font-bold text-sm">Enabled</p>
-                <p className="text-xs text-gray-600 mt-1">Animated gradient borders</p>
-              </button>
-            </div>
+            ))}
           </div>
         </div>
 
-        <div className="border-t p-6 flex gap-4">
-          <Button onClick={() => onSave(editedStyle)} className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500">
-            Apply Styling
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6">
+          {/* Presets Tab */}
+          {activeTab === 'presets' && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-2">Choose a Style Template</h3>
+                <p className="text-gray-600 mb-6">Start with a professionally designed preset and customize from there</p>
+              </div>
+
+              <div className="grid grid-cols-2 lg:grid-cols-3 gap-4">
+                {stylePresets.map((preset) => (
+                  <button
+                    key={preset.name}
+                    onClick={() => setEditedStyle({ ...editedStyle, ...preset.style as any })}
+                    className="group relative overflow-hidden rounded-2xl border-2 border-gray-200 hover:border-purple-400 hover:shadow-lg transition-all"
+                  >
+                    <div className={`h-32 ${preset.preview} flex items-center justify-center`}>
+                      <div className="text-center">
+                        <div className="w-16 h-16 bg-white/80 backdrop-blur-sm rounded-xl mx-auto mb-2 flex items-center justify-center shadow-md">
+                          <div className="w-10 h-10 bg-gradient-to-br from-purple-400 to-pink-400 rounded-lg"></div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="p-4 bg-white">
+                      <p className="font-bold text-gray-900 text-sm">{preset.name}</p>
+                      <p className="text-xs text-gray-500 mt-1">Click to apply</p>
+                    </div>
+                    <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="w-8 h-8 bg-purple-500 rounded-full flex items-center justify-center text-white text-xs">
+                        ✓
+                      </div>
+                    </div>
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Background Tab */}
+          {activeTab === 'background' && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Background Style</h3>
+
+                <div className="space-y-4">
+                  <div>
+                    <label className="font-semibold text-gray-900 block mb-3">Color Presets</label>
+                    <div className="grid grid-cols-5 gap-3">
+                      {backgroundPresets.map((preset) => (
+                        <button
+                          key={preset.name}
+                          onClick={() => setEditedStyle({ ...editedStyle, backgroundColor: preset.value })}
+                          className={`group relative h-24 rounded-xl border-2 overflow-hidden transition-all ${
+                            editedStyle.backgroundColor === preset.value
+                              ? 'ring-4 ring-purple-400 border-purple-500 scale-105'
+                              : 'border-gray-300 hover:border-gray-400 hover:scale-105'
+                          }`}
+                          style={{ background: preset.value }}
+                        >
+                          <div className="absolute inset-0 flex items-end p-2">
+                            <span className="text-xs font-bold bg-white/95 px-2 py-1 rounded shadow-sm w-full text-center truncate">
+                              {preset.name}
+                            </span>
+                          </div>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-gray-900 block mb-2">Custom Background</label>
+                    <Input
+                      value={editedStyle.backgroundColor || ''}
+                      onChange={(e) => setEditedStyle({ ...editedStyle, backgroundColor: e.target.value })}
+                      placeholder="e.g., #ff6b6b or linear-gradient(...)"
+                      className="font-mono"
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Enter a color code or CSS gradient</p>
+                  </div>
+
+                  <div>
+                    <label className="font-semibold text-gray-900 block mb-2">Background Image (optional)</label>
+                    <Input
+                      value={editedStyle.backgroundImage || ''}
+                      onChange={(e) => setEditedStyle({ ...editedStyle, backgroundImage: e.target.value })}
+                      placeholder="https://images.unsplash.com/..."
+                    />
+                    <p className="text-xs text-gray-500 mt-1">Add a background image URL</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Layout Tab */}
+          {activeTab === 'layout' && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Layout Settings</h3>
+
+                {/* Container Width */}
+                <div className="space-y-3 mb-6">
+                  <label className="font-semibold text-gray-900 block">Container Width</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={() => setEditedStyle({ ...editedStyle, containerWidth: 'contained' })}
+                      className={`p-6 rounded-xl border-2 transition-all ${
+                        editedStyle.containerWidth === 'contained'
+                          ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-200'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="mb-2">📏</div>
+                      <p className="font-bold text-sm">Contained</p>
+                      <p className="text-xs text-gray-600 mt-1">Centered with max width</p>
+                      <div className="mt-3 h-8 bg-gray-300 rounded mx-4"></div>
+                    </button>
+                    <button
+                      onClick={() => setEditedStyle({ ...editedStyle, containerWidth: 'full' })}
+                      className={`p-6 rounded-xl border-2 transition-all ${
+                        editedStyle.containerWidth === 'full'
+                          ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-200'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="mb-2">↔️</div>
+                      <p className="font-bold text-sm">Full Width</p>
+                      <p className="text-xs text-gray-600 mt-1">Edge to edge content</p>
+                      <div className="mt-3 h-8 bg-gray-300 rounded"></div>
+                    </button>
+                  </div>
+                </div>
+
+                {/* Module Spacing */}
+                <div className="space-y-3 mb-6">
+                  <label className="font-semibold text-gray-900 block">Module Spacing</label>
+                  <div className="grid grid-cols-3 gap-3">
+                    {[
+                      { value: 'tight', label: 'Tight', gap: 'gap-2', icon: '▪' },
+                      { value: 'normal', label: 'Normal', gap: 'gap-4', icon: '▪ ▪' },
+                      { value: 'relaxed', label: 'Relaxed', gap: 'gap-6', icon: '▪  ▪' },
+                    ].map((spacing) => (
+                      <button
+                        key={spacing.value}
+                        onClick={() => setEditedStyle({ ...editedStyle, moduleSpacing: spacing.value as any })}
+                        className={`p-4 rounded-xl border-2 transition-all ${
+                          (editedStyle.moduleSpacing || 'normal') === spacing.value
+                            ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-200'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <div className="text-2xl mb-1">{spacing.icon}</div>
+                        <p className="font-bold text-sm">{spacing.label}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Border Radius */}
+                <div className="space-y-3">
+                  <label className="font-semibold text-gray-900 block">Corner Radius</label>
+                  <div className="grid grid-cols-5 gap-2">
+                    {[
+                      { value: 'none', label: 'None', class: 'rounded-none' },
+                      { value: 'sm', label: 'Small', class: 'rounded-sm' },
+                      { value: 'md', label: 'Medium', class: 'rounded-md' },
+                      { value: 'lg', label: 'Large', class: 'rounded-lg' },
+                      { value: 'full', label: 'Full', class: 'rounded-full' },
+                    ].map((radius) => (
+                      <button
+                        key={radius.value}
+                        onClick={() => setEditedStyle({ ...editedStyle, borderRadius: radius.value as any })}
+                        className={`p-3 border-2 transition-all ${radius.class} ${
+                          (editedStyle.borderRadius || 'lg') === radius.value
+                            ? 'border-purple-500 bg-purple-50'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <div className={`w-full h-8 bg-gradient-to-br from-purple-400 to-pink-400 ${radius.class}`}></div>
+                        <p className="text-xs font-semibold mt-2">{radius.label}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Effects Tab */}
+          {activeTab === 'effects' && (
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-xl font-bold text-gray-900 mb-4">Visual Effects</h3>
+
+                {/* Shadow Style */}
+                <div className="space-y-3 mb-6">
+                  <label className="font-semibold text-gray-900 block">Shadow Style</label>
+                  <div className="grid grid-cols-4 gap-3">
+                    {[
+                      { value: 'none', label: 'None', class: 'shadow-none' },
+                      { value: 'soft', label: 'Soft', class: 'shadow-soft' },
+                      { value: 'medium', label: 'Medium', class: 'shadow-lg' },
+                      { value: 'bold', label: 'Bold', class: 'shadow-2xl' },
+                    ].map((shadow) => (
+                      <button
+                        key={shadow.value}
+                        onClick={() => setEditedStyle({ ...editedStyle, shadowStyle: shadow.value as any })}
+                        className={`p-4 rounded-xl border-2 transition-all ${
+                          (editedStyle.shadowStyle || 'soft') === shadow.value
+                            ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-200'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <div className={`w-full h-12 bg-white border-2 border-gray-200 rounded-lg mb-2 ${shadow.class}`}></div>
+                        <p className="font-bold text-xs">{shadow.label}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Animations */}
+                <div className="space-y-3 mb-6">
+                  <label className="font-semibold text-gray-900 block">Module Animations</label>
+                  <p className="text-sm text-gray-600">Choose how modules appear on your page</p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { value: 'fade-up', label: '↑ Fade Up', desc: 'Slide up with fade', emoji: '⬆️' },
+                      { value: 'fade-in', label: '✨ Fade In', desc: 'Simple fade effect', emoji: '✨' },
+                      { value: 'scale-in', label: '🔍 Scale In', desc: 'Zoom in effect', emoji: '🔍' },
+                      { value: 'none', label: '⚡ Instant', desc: 'No animation', emoji: '⚡' },
+                    ].map((anim) => (
+                      <button
+                        key={anim.value}
+                        onClick={() => setEditedStyle({ ...editedStyle, animation: anim.value as any })}
+                        className={`p-4 rounded-xl border-2 transition-all text-left ${
+                          (editedStyle.animation || 'fade-up') === anim.value
+                            ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-200'
+                            : 'border-gray-200 hover:border-gray-300'
+                        }`}
+                      >
+                        <div className="text-2xl mb-2">{anim.emoji}</div>
+                        <p className="font-bold text-sm">{anim.label}</p>
+                        <p className="text-xs text-gray-600 mt-1">{anim.desc}</p>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Special Effects */}
+                <div className="space-y-3">
+                  <label className="font-semibold text-gray-900 block">Special Effects</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={() => setEditedStyle({ ...editedStyle, borderAnimation: !editedStyle.borderAnimation })}
+                      className={`p-6 rounded-xl border-2 transition-all text-left ${
+                        editedStyle.borderAnimation
+                          ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-200'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="text-2xl mb-2">✨</div>
+                      <p className="font-bold text-sm">Animated Borders</p>
+                      <p className="text-xs text-gray-600 mt-1">Moving gradient borders</p>
+                      <div className="mt-3 text-xs font-semibold text-purple-600">
+                        {editedStyle.borderAnimation ? '✓ Enabled' : 'Disabled'}
+                      </div>
+                    </button>
+
+                    <button
+                      onClick={() => setEditedStyle({ ...editedStyle, glassEffect: !editedStyle.glassEffect })}
+                      className={`p-6 rounded-xl border-2 transition-all text-left ${
+                        editedStyle.glassEffect
+                          ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-200'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="text-2xl mb-2">💎</div>
+                      <p className="font-bold text-sm">Glass Morphism</p>
+                      <p className="text-xs text-gray-600 mt-1">Frosted glass effect</p>
+                      <div className="mt-3 text-xs font-semibold text-purple-600">
+                        {editedStyle.glassEffect ? '✓ Enabled' : 'Disabled'}
+                      </div>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Footer */}
+        <div className="border-t border-gray-200 p-6 bg-gray-50 flex gap-4">
+          <Button
+            onClick={() => onSave(editedStyle)}
+            className="flex-1 bg-gradient-to-r from-purple-500 via-pink-500 to-orange-500 hover:from-purple-600 hover:via-pink-600 hover:to-orange-600 text-white font-bold py-3 text-base shadow-lg"
+          >
+            ✨ Apply Styling
           </Button>
-          <Button onClick={onCancel} variant="outline">Cancel</Button>
+          <Button onClick={onCancel} variant="outline" className="px-8">
+            Cancel
+          </Button>
         </div>
       </div>
     </div>
