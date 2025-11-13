@@ -23,9 +23,10 @@ interface ModuleRendererProps {
   profileId: string
   index: number
   borderAnimation?: boolean
+  allModules?: Module[]
 }
 
-export function ModuleRenderer({ module, profileId, index, borderAnimation = false }: ModuleRendererProps) {
+export function ModuleRenderer({ module, profileId, index, borderAnimation = false, allModules = [] }: ModuleRendererProps) {
   const colors = ['bg-pastel-sky', 'bg-pastel-lavender', 'bg-pastel-mint', 'bg-pastel-rose', 'bg-pastel-peach', 'bg-pastel-butter']
   const bgColor = colors[index % colors.length]
 
@@ -65,7 +66,7 @@ export function ModuleRenderer({ module, profileId, index, borderAnimation = fal
       case 'button-grid':
         return <ButtonGridModule module={module} />
       case 'two-column':
-        return <TwoColumnModule module={module} />
+        return <TwoColumnModule module={module} allModules={allModules} profileId={profileId} />
       default:
         return null
     }

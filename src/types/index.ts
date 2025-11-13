@@ -250,10 +250,8 @@ export interface ButtonGridContent {
 }
 
 export interface TwoColumnContent {
-  leftType: 'video' | 'text' | 'image' | 'social-links'
-  leftContent: VideoContent | TextContent | ImageContent | SocialLinksContent
-  rightType: 'video' | 'text' | 'image' | 'social-links'
-  rightContent: VideoContent | TextContent | ImageContent | SocialLinksContent
+  leftModuleId?: string | null
+  rightModuleId?: string | null
   ratio: '50-50' | '60-40' | '40-60'
 }
 

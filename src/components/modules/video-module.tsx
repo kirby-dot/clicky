@@ -7,7 +7,18 @@ interface VideoModuleProps {
 export function VideoModule({ module }: VideoModuleProps) {
   const content = module.content as VideoContent
 
+  // Return placeholder if no URL provided
+  if (!content?.url) {
+    return (
+      <div className="relative w-full rounded-2xl bg-gray-100 border-2 border-dashed border-gray-300 flex items-center justify-center text-gray-500 p-12 text-center">
+        <p className="text-sm">Add a video URL to display here</p>
+      </div>
+    )
+  }
+
   const getEmbedUrl = (url: string) => {
+    if (!url) return ''
+
     // YouTube
     if (url.includes('youtube.com') || url.includes('youtu.be')) {
       const videoId = url.match(/(?:youtube\.com\/(?:watch\?v=|embed\/|shorts\/)|youtu\.be\/)([^&\s?]+)/)?.[1]

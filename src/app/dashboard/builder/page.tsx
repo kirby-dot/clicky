@@ -187,10 +187,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Two Column',
     description: 'Split layout',
     defaultContent: {
-      leftType: 'video',
-      leftContent: { url: '' },
-      rightType: 'social-links',
-      rightContent: { links: [], layout: 'horizontal' },
+      leftModuleId: null,
+      rightModuleId: null,
       ratio: '50-50'
     },
     color: 'bg-pastel-sky'
@@ -570,6 +568,7 @@ export default function BuilderPage() {
       {editingModule && (
         <ModuleEditor
           module={editingModule}
+          modules={modules}
           onSave={handleUpdateModule}
           onCancel={() => setEditingModule(null)}
         />
@@ -751,6 +750,7 @@ function LivePreview({ profile, modules, containerWidth }: { profile: Profile; m
               module={module}
               profileId={profile.id}
               index={index}
+              allModules={modules}
             />
           ))}
         </div>
@@ -767,10 +767,12 @@ function LivePreview({ profile, modules, containerWidth }: { profile: Profile; m
 
 function ModuleEditor({
   module,
+  modules,
   onSave,
   onCancel,
 }: {
   module: Module
+  modules: Module[]
   onSave: (module: Module) => void
   onCancel: () => void
 }) {
@@ -1404,236 +1406,11 @@ function ModuleEditor({
           )}
 
           {module.type === 'two-column' && (
-            <div className="space-y-6">
-              <div className="space-y-3">
-                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
-                  Column Layout
-                </label>
-                <div className="grid grid-cols-3 gap-3">
-                  {[
-                    { value: '50-50', label: '50/50', desc: 'Equal width' },
-                    { value: '60-40', label: '60/40', desc: 'Left wider' },
-                    { value: '40-60', label: '40/60', desc: 'Right wider' }
-                  ].map((ratio) => (
-                    <button
-                      key={ratio.value}
-                      type="button"
-                      onClick={() => updateContent('ratio', ratio.value)}
-                      className={`h-20 rounded-xl font-semibold transition-all flex flex-col items-center justify-center gap-2 ${
-                        ((editedModule.content as any).ratio || '50-50') === ratio.value
-                          ? 'bg-primary-500 text-white ring-4 ring-primary-300 scale-105'
-                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                      }`}
-                    >
-                      <span className="text-sm">{ratio.label}</span>
-                      <span className="text-xs opacity-70">{ratio.desc}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Left Column */}
-              <div className="p-6 bg-gradient-to-br from-pastel-sky to-pastel-lavender rounded-2xl space-y-4">
-                <h3 className="font-bold text-lg text-gray-900">Left Column</h3>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-900">Content Type</label>
-                  <select
-                    value={(editedModule.content as any).leftType || 'video'}
-                    onChange={(e) => {
-                      const type = e.target.value
-                      updateContent('leftType', type)
-                      // Set default content based on type
-                      const defaults: Record<string, any> = {
-                        video: { url: '' },
-                        text: { text: 'Add your text...', align: 'left' },
-                        image: { url: '', alt: '' },
-                        'social-links': { links: [], layout: 'horizontal' }
-                      }
-                      updateContent('leftContent', defaults[type] || {})
-                    }}
-                    className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-primary-500 bg-white text-base"
-                  >
-                    <option value="video">Video Embed</option>
-                    <option value="text">Text Block</option>
-                    <option value="image">Image</option>
-                    <option value="social-links">Social Links</option>
-                  </select>
-                </div>
-
-                {/* Left column content editors */}
-                {(editedModule.content as any).leftType === 'video' && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Video URL</label>
-                    <Input
-                      value={((editedModule.content as any).leftContent?.url) || ''}
-                      onChange={(e) => updateContent('leftContent', { ...((editedModule.content as any).leftContent || {}), url: e.target.value })}
-                      placeholder="YouTube, Vimeo, TikTok, or Loom URL"
-                      className="h-12 bg-white"
-                    />
-                  </div>
-                )}
-
-                {(editedModule.content as any).leftType === 'text' && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Text Content</label>
-                    <Textarea
-                      value={((editedModule.content as any).leftContent?.text) || ''}
-                      onChange={(e) => updateContent('leftContent', { ...((editedModule.content as any).leftContent || {}), text: e.target.value })}
-                      rows={4}
-                      placeholder="Your text here..."
-                      className="bg-white"
-                    />
-                  </div>
-                )}
-
-                {(editedModule.content as any).leftType === 'image' && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Image URL</label>
-                    <Input
-                      value={((editedModule.content as any).leftContent?.url) || ''}
-                      onChange={(e) => updateContent('leftContent', { ...((editedModule.content as any).leftContent || {}), url: e.target.value })}
-                      placeholder="https://example.com/image.jpg"
-                      className="h-12 bg-white"
-                    />
-                  </div>
-                )}
-              </div>
-
-              {/* Right Column */}
-              <div className="p-6 bg-gradient-to-br from-pastel-mint to-pastel-peach rounded-2xl space-y-4">
-                <h3 className="font-bold text-lg text-gray-900">Right Column</h3>
-
-                <div className="space-y-2">
-                  <label className="text-sm font-bold text-gray-900">Content Type</label>
-                  <select
-                    value={(editedModule.content as any).rightType || 'social-links'}
-                    onChange={(e) => {
-                      const type = e.target.value
-                      updateContent('rightType', type)
-                      // Set default content based on type
-                      const defaults: Record<string, any> = {
-                        video: { url: '' },
-                        text: { text: 'Add your text...', align: 'left' },
-                        image: { url: '', alt: '' },
-                        'social-links': { links: [], layout: 'horizontal' }
-                      }
-                      updateContent('rightContent', defaults[type] || {})
-                    }}
-                    className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-primary-500 bg-white text-base"
-                  >
-                    <option value="social-links">Social Links</option>
-                    <option value="video">Video Embed</option>
-                    <option value="text">Text Block</option>
-                    <option value="image">Image</option>
-                  </select>
-                </div>
-
-                {/* Right column content editors */}
-                {(editedModule.content as any).rightType === 'video' && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Video URL</label>
-                    <Input
-                      value={((editedModule.content as any).rightContent?.url) || ''}
-                      onChange={(e) => updateContent('rightContent', { ...((editedModule.content as any).rightContent || {}), url: e.target.value })}
-                      placeholder="YouTube, Vimeo, TikTok, or Loom URL"
-                      className="h-12 bg-white"
-                    />
-                  </div>
-                )}
-
-                {(editedModule.content as any).rightType === 'text' && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Text Content</label>
-                    <Textarea
-                      value={((editedModule.content as any).rightContent?.text) || ''}
-                      onChange={(e) => updateContent('rightContent', { ...((editedModule.content as any).rightContent || {}), text: e.target.value })}
-                      rows={4}
-                      placeholder="Your text here..."
-                      className="bg-white"
-                    />
-                  </div>
-                )}
-
-                {(editedModule.content as any).rightType === 'image' && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-semibold text-gray-700">Image URL</label>
-                    <Input
-                      value={((editedModule.content as any).rightContent?.url) || ''}
-                      onChange={(e) => updateContent('rightContent', { ...((editedModule.content as any).rightContent || {}), url: e.target.value })}
-                      placeholder="https://example.com/image.jpg"
-                      className="h-12 bg-white"
-                    />
-                  </div>
-                )}
-
-                {(editedModule.content as any).rightType === 'social-links' && (
-                  <div className="space-y-3">
-                    <label className="text-sm font-semibold text-gray-700">Social Platforms</label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {[
-                        { platform: 'instagram', label: 'Instagram', icon: Instagram },
-                        { platform: 'twitter', label: 'Twitter', icon: Twitter },
-                        { platform: 'youtube', label: 'YouTube', icon: Youtube },
-                        { platform: 'tiktok', label: 'TikTok', icon: Music },
-                        { platform: 'linkedin', label: 'LinkedIn', icon: Linkedin },
-                        { platform: 'github', label: 'GitHub', icon: Github },
-                      ].map((social) => {
-                        const rightContent = (editedModule.content as any).rightContent || {}
-                        const links = (rightContent.links || []) as Array<{ platform: string; url: string }>
-                        const isSelected = links.some(l => l.platform === social.platform)
-                        const Icon = social.icon
-
-                        return (
-                          <button
-                            key={social.platform}
-                            type="button"
-                            onClick={() => {
-                              const currentLinks = links
-                              let newLinks
-                              if (isSelected) {
-                                newLinks = currentLinks.filter(l => l.platform !== social.platform)
-                              } else {
-                                newLinks = [...currentLinks, { platform: social.platform, url: '' }]
-                              }
-                              updateContent('rightContent', { ...rightContent, links: newLinks })
-                            }}
-                            className={`h-16 rounded-lg font-semibold transition-all flex flex-col items-center justify-center gap-1 ${
-                              isSelected ? 'bg-primary-500 text-white scale-105' : 'bg-white text-gray-700 opacity-60 hover:opacity-100'
-                            }`}
-                          >
-                            <Icon className="w-4 h-4" />
-                            <span className="text-xs">{social.label}</span>
-                          </button>
-                        )
-                      })}
-                    </div>
-
-                    {/* URL inputs for selected platforms */}
-                    {((editedModule.content as any).rightContent?.links || []).length > 0 && (
-                      <div className="space-y-2 mt-4">
-                        {((editedModule.content as any).rightContent?.links || []).map((link: any, index: number) => (
-                          <div key={index} className="space-y-1">
-                            <label className="text-xs font-semibold text-gray-700 capitalize">{link.platform}</label>
-                            <Input
-                              value={link.url || ''}
-                              onChange={(e) => {
-                                const rightContent = (editedModule.content as any).rightContent || {}
-                                const newLinks = [...(rightContent.links || [])]
-                                newLinks[index] = { ...newLinks[index], url: e.target.value }
-                                updateContent('rightContent', { ...rightContent, links: newLinks })
-                              }}
-                              placeholder={`https://${link.platform}.com/yourprofile`}
-                              className="h-10 text-sm bg-white"
-                            />
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
+            <TwoColumnEditor
+              content={(editedModule.content as any)}
+              modules={modules.filter(m => m.id !== module.id)}
+              updateContent={updateContent}
+            />
           )}
 
           {module.type === 'social-links' && (
@@ -1803,6 +1580,144 @@ function ModuleEditor({
           </div>
         </div>
       </div>
+    </div>
+  )
+}
+
+// Two Column Editor Component
+function TwoColumnEditor({
+  content,
+  modules,
+  updateContent,
+}: {
+  content: { leftModuleId?: string | null; rightModuleId?: string | null; ratio?: string }
+  modules: Module[]
+  updateContent: (key: string, value: any) => void
+}) {
+  // Filter out two-column modules to prevent nesting
+  const availableModules = modules.filter(m => m.type !== 'two-column')
+  const leftModule = availableModules.find(m => m.id === content.leftModuleId)
+  const rightModule = availableModules.find(m => m.id === content.rightModuleId)
+
+  return (
+    <div className="space-y-6">
+      <div className="p-4 bg-blue-50 border border-blue-200 rounded-xl">
+        <h4 className="font-semibold text-blue-900 mb-2">How it works</h4>
+        <p className="text-sm text-blue-700">
+          Select existing modules from your page to display in a two-column layout. Create other modules first, then assign them to the left and right columns here.
+        </p>
+      </div>
+
+      {/* Column Ratio */}
+      <div className="space-y-3">
+        <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+          Column Layout
+        </label>
+        <div className="grid grid-cols-3 gap-3">
+          {[
+            { value: '50-50', label: '50/50', desc: 'Equal width' },
+            { value: '60-40', label: '60/40', desc: 'Left wider' },
+            { value: '40-60', label: '40/60', desc: 'Right wider' }
+          ].map((ratio) => (
+            <button
+              key={ratio.value}
+              type="button"
+              onClick={() => updateContent('ratio', ratio.value)}
+              className={`h-20 rounded-xl font-semibold transition-all flex flex-col items-center justify-center gap-2 ${
+                (content.ratio || '50-50') === ratio.value
+                  ? 'bg-primary-500 text-white ring-4 ring-primary-300 scale-105'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              <span className="text-sm">{ratio.label}</span>
+              <span className="text-xs opacity-70">{ratio.desc}</span>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Left Column Selection */}
+      <div className="p-6 bg-gradient-to-br from-pastel-sky to-pastel-lavender rounded-2xl space-y-4">
+        <h3 className="font-bold text-lg text-gray-900">Left Column</h3>
+
+        <div className="space-y-2">
+          <label className="text-sm font-bold text-gray-900">Select Module</label>
+          <select
+            value={content.leftModuleId || ''}
+            onChange={(e) => updateContent('leftModuleId', e.target.value || null)}
+            className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-primary-500 bg-white text-base"
+          >
+            <option value="">-- None (empty column) --</option>
+            {availableModules.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.title || `${m.type} module`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {leftModule && (
+          <div className="p-4 bg-white rounded-xl border-2 border-gray-200">
+            <p className="text-sm font-semibold text-gray-700 mb-1">Preview:</p>
+            <p className="text-xs text-gray-600">
+              <span className="font-semibold">{MODULE_TEMPLATES.find(t => t.type === leftModule.type)?.label}</span>
+              {' - '}{leftModule.title}
+            </p>
+          </div>
+        )}
+
+        {!leftModule && (
+          <div className="p-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 text-center text-gray-500 text-sm">
+            No module selected
+          </div>
+        )}
+      </div>
+
+      {/* Right Column Selection */}
+      <div className="p-6 bg-gradient-to-br from-pastel-mint to-pastel-peach rounded-2xl space-y-4">
+        <h3 className="font-bold text-lg text-gray-900">Right Column</h3>
+
+        <div className="space-y-2">
+          <label className="text-sm font-bold text-gray-900">Select Module</label>
+          <select
+            value={content.rightModuleId || ''}
+            onChange={(e) => updateContent('rightModuleId', e.target.value || null)}
+            className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-primary-500 bg-white text-base"
+          >
+            <option value="">-- None (empty column) --</option>
+            {availableModules.map((m) => (
+              <option key={m.id} value={m.id}>
+                {m.title || `${m.type} module`}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {rightModule && (
+          <div className="p-4 bg-white rounded-xl border-2 border-gray-200">
+            <p className="text-sm font-semibold text-gray-700 mb-1">Preview:</p>
+            <p className="text-xs text-gray-600">
+              <span className="font-semibold">{MODULE_TEMPLATES.find(t => t.type === rightModule.type)?.label}</span>
+              {' - '}{rightModule.title}
+            </p>
+          </div>
+        )}
+
+        {!rightModule && (
+          <div className="p-4 bg-gray-50 rounded-xl border-2 border-dashed border-gray-300 text-center text-gray-500 text-sm">
+            No module selected
+          </div>
+        )}
+      </div>
+
+      {availableModules.length === 0 && (
+        <div className="p-6 bg-yellow-50 border border-yellow-200 rounded-xl">
+          <p className="text-sm font-semibold text-yellow-900 mb-1">No modules available</p>
+          <p className="text-sm text-yellow-700">
+            Create other modules first (video, social links, text, etc.) then come back here to assign them to columns.
+          </p>
+        </div>
+      )}
     </div>
   )
 }
