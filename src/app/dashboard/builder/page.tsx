@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
+import { ModuleRenderer } from '@/components/modules/module-renderer'
 import {
   Trash2,
   GripVertical,
@@ -484,34 +485,12 @@ export default function BuilderPage() {
                   )}
                 </CardTitle>
                 <CardDescription className="text-gray-700">
-                  {profile.slug ? 'Updates automatically after changes' : 'Set your username in Settings to see preview'}
+                  Real-time preview - updates instantly as you build
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
-                <div className="relative w-full bg-gray-50" style={{ height: '600px' }}>
-                  {profile.slug ? (
-                    <iframe
-                      key={previewKey}
-                      src={`/${profile.slug}?preview=${Date.now()}`}
-                      className="w-full h-full border-0"
-                      title="Profile Preview"
-                    />
-                  ) : (
-                    <div className="flex items-center justify-center h-full">
-                      <div className="text-center p-8">
-                        <p className="text-gray-900 font-semibold text-lg mb-2">No username set</p>
-                        <p className="text-gray-600 mb-6">
-                          Go to Settings to set your username before viewing your page
-                        </p>
-                        <a
-                          href="/dashboard/settings"
-                          className="inline-flex items-center px-6 py-3 bg-primary-500 text-white font-semibold rounded-xl hover:bg-primary-600 transition-all shadow-soft hover:scale-105"
-                        >
-                          Go to Settings
-                        </a>
-                      </div>
-                    </div>
-                  )}
+                <div className="relative w-full bg-gradient-to-br from-pastel-sky/20 to-pastel-lavender/20 overflow-y-auto" style={{ height: '600px' }}>
+                  <LivePreview profile={profile} modules={modules.filter(m => m.active)} />
                 </div>
               </CardContent>
             </Card>
@@ -640,6 +619,54 @@ function SortableModule({
   )
 }
 
+// Live Preview Component
+function LivePreview({ profile, modules }: { profile: Profile; modules: Module[] }) {
+  return (
+    <div className="min-h-full py-12 px-4">
+      <div className="max-w-2xl mx-auto">
+        {/* Profile Header */}
+        <div className="text-center mb-12">
+          {profile.avatar_url && (
+            <div className="mb-6">
+              <img
+                src={profile.avatar_url}
+                alt={profile.title}
+                className="w-32 h-32 mx-auto object-cover rounded-full border-2 border-gray-200 shadow-soft-lg"
+              />
+            </div>
+          )}
+
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
+            {profile.title}
+          </h1>
+
+          {profile.bio && (
+            <p className="text-lg text-gray-600 max-w-lg mx-auto">{profile.bio}</p>
+          )}
+        </div>
+
+        {/* Modules */}
+        <div className="max-w-lg mx-auto space-y-4">
+          {modules.map((module, index) => (
+            <ModuleRenderer
+              key={module.id}
+              module={module}
+              profileId={profile.id}
+              index={index}
+            />
+          ))}
+        </div>
+
+        {modules.length === 0 && (
+          <div className="text-center text-gray-600 py-12">
+            <p>Add modules from the left sidebar to see them here!</p>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
 function ModuleEditor({
   module,
   onSave,
@@ -712,274 +739,380 @@ function ModuleEditor({
   const template = MODULE_TEMPLATES.find((t) => t.type === module.type)
 
   return (
-    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-md animate-in fade-in duration-200">
+    <div
+      className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-lg animate-in fade-in duration-200"
+      onClick={onCancel}
+    >
       <div
-        className="max-w-2xl w-full max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-soft-xl border border-gray-200 animate-in slide-in-from-bottom-4 duration-300"
+        className="max-w-4xl w-full max-h-[92vh] overflow-hidden bg-white rounded-3xl shadow-2xl border-2 border-gray-100 animate-in slide-in-from-bottom-6 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div className={`sticky top-0 z-10 bg-gradient-to-r from-pastel-lavender via-pastel-sky to-pastel-mint p-6 rounded-t-3xl border-b border-gray-200/50 backdrop-blur-sm`}>
-          <div className="flex items-center gap-4">
-            <div className={`p-3 ${template?.color || 'bg-white'} rounded-2xl shadow-soft border border-gray-200`}>
-              {template?.icon}
+        <div className={`bg-gradient-to-r from-pastel-lavender via-pastel-sky to-pastel-mint p-8`}>
+          <div className="flex items-center gap-5">
+            <div className={`p-4 ${template?.color || 'bg-white'} rounded-2xl shadow-soft-lg border-2 border-white`}>
+              <div className="w-8 h-8 flex items-center justify-center">
+                {template?.icon}
+              </div>
             </div>
             <div className="flex-1">
-              <h2 className="text-2xl font-bold text-gray-900">Edit {template?.label}</h2>
-              <p className="text-sm text-gray-600 mt-1">{template?.description}</p>
+              <h2 className="text-3xl font-bold text-gray-900">Edit {template?.label}</h2>
+              <p className="text-sm text-gray-700 mt-1.5 font-medium">{template?.description}</p>
             </div>
             <button
               onClick={onCancel}
-              className="p-2 hover:bg-white/50 rounded-xl transition-colors"
+              className="p-3 hover:bg-white/60 rounded-2xl transition-all active:scale-95 group"
               aria-label="Close"
             >
-              <svg className="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              <svg className="w-6 h-6 text-gray-700 group-hover:text-gray-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M6 18L18 6M6 6l12 12" />
               </svg>
             </button>
           </div>
         </div>
 
         {/* Content */}
-        <div className="p-8 space-y-6">
-          <div>
-            <label className="block text-sm font-semibold text-gray-900 mb-2">Title</label>
+        <div className="overflow-y-auto" style={{ maxHeight: 'calc(92vh - 240px)' }}>
+          <div className="p-8 space-y-8">
+          {/* Title Field */}
+          <div className="space-y-2">
+            <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+              <Type className="w-4 h-4 text-primary-500" />
+              Module Title
+            </label>
             <Input
               value={editedModule.title || ''}
               onChange={(e) =>
                 setEditedModule({ ...editedModule, title: e.target.value })
               }
+              className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+              placeholder="Enter a title..."
             />
+            <p className="text-xs text-gray-500 pl-1">This is the internal name for your module</p>
           </div>
 
           {/* Module-specific fields */}
           {module.type === 'link' && (
-            <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">URL</label>
-              <Input
-                value={(editedModule.content as any).url || ''}
-                onChange={(e) => updateContent('url', e.target.value)}
-                placeholder="https://example.com"
-              />
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                <LinkIcon className="w-4 h-4 text-primary-500" />
+                Destination URL
+              </label>
+              <div className="relative">
+                <Input
+                  value={(editedModule.content as any).url || ''}
+                  onChange={(e) => updateContent('url', e.target.value)}
+                  placeholder="https://example.com"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all pl-4"
+                />
+              </div>
+              <p className="text-xs text-gray-500 pl-1">Where should this link go?</p>
             </div>
           )}
 
           {module.type === 'header' && (
             <>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Text</label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <Type className="w-4 h-4 text-primary-500" />
+                  Header Text
+                </label>
                 <Input
                   value={(editedModule.content as any).text || ''}
                   onChange={(e) => updateContent('text', e.target.value)}
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                  placeholder="Your heading text..."
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">Level</label>
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  Heading Size
+                </label>
                 <select
                   value={(editedModule.content as any).level || 'h2'}
                   onChange={(e) => updateContent('level', e.target.value)}
-                  className="w-full h-11 px-4 rounded-xl border border-gray-300 bg-white"
+                  className="w-full h-12 px-4 rounded-xl border-2 border-gray-200 focus:border-primary-500 bg-white text-base transition-all"
                 >
-                  <option value="h1">H1</option>
-                  <option value="h2">H2</option>
-                  <option value="h3">H3</option>
+                  <option value="h1">Large (H1)</option>
+                  <option value="h2">Medium (H2)</option>
+                  <option value="h3">Small (H3)</option>
                 </select>
               </div>
             </>
           )}
 
           {module.type === 'text' && (
-            <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Text</label>
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                <Type className="w-4 h-4 text-primary-500" />
+                Text Content
+              </label>
               <Textarea
                 value={(editedModule.content as any).text || ''}
                 onChange={(e) => updateContent('text', e.target.value)}
                 rows={6}
+                className="text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all resize-none"
+                placeholder="Write your text here..."
               />
+              <p className="text-xs text-gray-500 pl-1">Supports line breaks and paragraphs</p>
             </div>
           )}
 
           {module.type === 'image' && (
             <>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Image
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <ImageIcon className="w-4 h-4 text-primary-500" />
+                  Image Source
                 </label>
-                <div className="space-y-3">
-                  <div className="flex gap-3">
-                    <label className="flex-1">
-                      <input
-                        type="file"
-                        accept="image/*"
-                        onChange={handleImageUpload}
-                        disabled={uploading}
-                        className="hidden"
-                        id="image-upload"
-                      />
-                      <Button
-                        type="button"
-                        variant="outline"
-                        className="w-full"
-                        onClick={() => document.getElementById('image-upload')?.click()}
-                        disabled={uploading}
-                      >
-                        {uploading ? 'Uploading...' : 'Upload Image'}
-                      </Button>
-                    </label>
-                  </div>
-                  <div className="text-center text-sm text-gray-500">or</div>
-                  <Input
-                    value={(editedModule.content as any).url || ''}
-                    onChange={(e) => updateContent('url', e.target.value)}
-                    placeholder="https://example.com/image.jpg"
+
+                {/* Upload Button */}
+                <div className="relative">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    disabled={uploading}
+                    className="hidden"
+                    id="image-upload"
                   />
-                  {(editedModule.content as any).url && (
-                    <div className="mt-3">
-                      <img
-                        src={(editedModule.content as any).url}
-                        alt="Preview"
-                        className="max-h-48 mx-auto rounded-xl border border-gray-200"
-                      />
-                    </div>
-                  )}
+                  <button
+                    type="button"
+                    onClick={() => document.getElementById('image-upload')?.click()}
+                    disabled={uploading}
+                    className="w-full h-32 border-2 border-dashed border-gray-300 rounded-2xl hover:border-primary-500 hover:bg-primary-50/50 transition-all flex flex-col items-center justify-center gap-3 group disabled:opacity-50"
+                  >
+                    {uploading ? (
+                      <>
+                        <div className="w-8 h-8 border-4 border-primary-500 border-t-transparent rounded-full animate-spin"></div>
+                        <span className="text-sm font-semibold text-gray-600">Uploading...</span>
+                      </>
+                    ) : (
+                      <>
+                        <div className="w-12 h-12 rounded-full bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center group-hover:scale-110 transition-transform">
+                          <ImageIcon className="w-6 h-6 text-white" />
+                        </div>
+                        <div className="text-center">
+                          <p className="text-sm font-bold text-gray-900">Click to upload</p>
+                          <p className="text-xs text-gray-500">Max 5MB • PNG, JPG, GIF</p>
+                        </div>
+                      </>
+                    )}
+                  </button>
+                </div>
+
+                <div className="relative flex items-center gap-4 py-2">
+                  <div className="flex-1 border-t border-gray-300"></div>
+                  <span className="text-xs font-semibold text-gray-400 uppercase">or paste url</span>
+                  <div className="flex-1 border-t border-gray-300"></div>
+                </div>
+
+                <Input
+                  value={(editedModule.content as any).url || ''}
+                  onChange={(e) => updateContent('url', e.target.value)}
+                  placeholder="https://example.com/image.jpg"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                />
+
+                {/* Image Preview */}
+                {(editedModule.content as any).url && (
+                  <div className="mt-4 p-4 bg-gradient-to-br from-gray-50 to-gray-100 rounded-2xl border-2 border-gray-200">
+                    <p className="text-xs font-bold text-gray-600 uppercase tracking-wide mb-3">Preview</p>
+                    <img
+                      src={(editedModule.content as any).url}
+                      alt="Preview"
+                      className="max-h-64 mx-auto rounded-xl shadow-soft-lg border-2 border-white"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="200" height="200"%3E%3Crect fill="%23f3f4f6" width="200" height="200"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%239ca3af" font-family="sans-serif"%3EInvalid Image%3C/text%3E%3C/svg%3E'
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                    Alt Text
+                  </label>
+                  <Input
+                    value={(editedModule.content as any).alt || ''}
+                    onChange={(e) => updateContent('alt', e.target.value)}
+                    placeholder="Description for accessibility"
+                    className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                  />
+                  <p className="text-xs text-gray-500 pl-1">Required for screen readers</p>
+                </div>
+
+                <div className="space-y-2">
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                    Caption <span className="text-xs text-gray-400 normal-case">(optional)</span>
+                  </label>
+                  <Input
+                    value={(editedModule.content as any).caption || ''}
+                    onChange={(e) => updateContent('caption', e.target.value)}
+                    placeholder="Photo caption"
+                    className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                  />
                 </div>
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Alt Text
-                </label>
-                <Input
-                  value={(editedModule.content as any).alt || ''}
-                  onChange={(e) => updateContent('alt', e.target.value)}
-                  placeholder="Description for screen readers"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Caption (optional)
-                </label>
-                <Input
-                  value={(editedModule.content as any).caption || ''}
-                  onChange={(e) => updateContent('caption', e.target.value)}
-                  placeholder="Optional caption below image"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Link (optional)
+
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <LinkIcon className="w-4 h-4 text-primary-500" />
+                  Link URL <span className="text-xs text-gray-400 normal-case">(optional)</span>
                 </label>
                 <Input
                   value={(editedModule.content as any).link || ''}
                   onChange={(e) => updateContent('link', e.target.value)}
-                  placeholder="https://... (image will be clickable)"
+                  placeholder="https://... (makes image clickable)"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
                 />
               </div>
             </>
           )}
 
           {module.type === 'video' && (
-            <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                <Video className="w-4 h-4 text-primary-500" />
                 Video URL
               </label>
               <Input
                 value={(editedModule.content as any).url || ''}
                 onChange={(e) => updateContent('url', e.target.value)}
-                placeholder="YouTube, Vimeo, TikTok, or Loom URL"
+                placeholder="Paste your video URL here..."
+                className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
               />
-              <p className="text-xs text-gray-500 mt-2">
-                Supports: YouTube, YouTube Shorts, Vimeo, TikTok, Loom
-              </p>
+              <div className="flex flex-wrap gap-2 pt-1">
+                <span className="text-xs px-2 py-1 bg-pastel-sky rounded-lg font-semibold text-gray-700">YouTube</span>
+                <span className="text-xs px-2 py-1 bg-pastel-lavender rounded-lg font-semibold text-gray-700">Vimeo</span>
+                <span className="text-xs px-2 py-1 bg-pastel-mint rounded-lg font-semibold text-gray-700">TikTok</span>
+                <span className="text-xs px-2 py-1 bg-pastel-rose rounded-lg font-semibold text-gray-700">Loom</span>
+              </div>
             </div>
           )}
 
           {module.type === 'music' && (
-            <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Music URL (Spotify or SoundCloud)
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                <Music className="w-4 h-4 text-primary-500" />
+                Music Embed URL
               </label>
               <Input
                 value={(editedModule.content as any).url || ''}
                 onChange={(e) => updateContent('url', e.target.value)}
-                placeholder="https://open.spotify.com/track/..."
+                placeholder="Spotify or SoundCloud URL..."
+                className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
               />
+              <div className="flex flex-wrap gap-2 pt-1">
+                <span className="text-xs px-2 py-1 bg-pastel-mint rounded-lg font-semibold text-gray-700">Spotify</span>
+                <span className="text-xs px-2 py-1 bg-pastel-peach rounded-lg font-semibold text-gray-700">SoundCloud</span>
+              </div>
             </div>
           )}
 
           {module.type === 'spacer' && (
-            <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Height (pixels)
+            <div className="space-y-2">
+              <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                <ArrowUp className="w-4 h-4 text-primary-500" />
+                Spacing Height
               </label>
-              <Input
-                type="number"
-                value={(editedModule.content as any).height || 32}
-                onChange={(e) => updateContent('height', parseInt(e.target.value))}
-                min="8"
-                max="200"
-              />
+              <div className="flex items-center gap-4">
+                <Input
+                  type="range"
+                  value={(editedModule.content as any).height || 32}
+                  onChange={(e) => updateContent('height', parseInt(e.target.value))}
+                  min="8"
+                  max="200"
+                  className="flex-1"
+                />
+                <div className="w-20 h-12 flex items-center justify-center bg-gray-100 rounded-xl border-2 border-gray-200 font-bold text-gray-900">
+                  {(editedModule.content as any).height || 32}px
+                </div>
+              </div>
+              <p className="text-xs text-gray-500 pl-1">Add vertical space between modules</p>
             </div>
           )}
 
           {module.type === 'button' && (
             <>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <MousePointerClick className="w-4 h-4 text-primary-500" />
                   Button Text
                 </label>
                 <Input
                   value={(editedModule.content as any).text || ''}
                   onChange={(e) => updateContent('text', e.target.value)}
                   placeholder="Click Here"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  URL
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <LinkIcon className="w-4 h-4 text-primary-500" />
+                  Destination URL
                 </label>
                 <Input
                   value={(editedModule.content as any).url || ''}
                   onChange={(e) => updateContent('url', e.target.value)}
                   placeholder="https://example.com"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
                   Button Style
                 </label>
-                <select
-                  value={(editedModule.content as any).style || 'primary'}
-                  onChange={(e) => updateContent('style', e.target.value)}
-                  className="w-full h-11 px-4 rounded-xl border border-gray-300 bg-white"
-                >
-                  <option value="primary">Primary (Gradient)</option>
-                  <option value="secondary">Secondary (Pastel)</option>
-                  <option value="outline">Outline</option>
-                </select>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: 'primary', label: 'Primary', class: 'bg-gradient-to-r from-primary-500 to-purple-500 text-white' },
+                    { value: 'secondary', label: 'Secondary', class: 'bg-gradient-to-r from-pastel-rose to-pastel-peach text-gray-900' },
+                    { value: 'outline', label: 'Outline', class: 'border-2 border-gray-900 bg-white text-gray-900' }
+                  ].map((style) => (
+                    <button
+                      key={style.value}
+                      type="button"
+                      onClick={() => updateContent('style', style.value)}
+                      className={`h-16 rounded-xl font-semibold transition-all ${
+                        (editedModule.content as any).style === style.value || (!((editedModule.content as any).style) && style.value === 'primary')
+                          ? 'ring-4 ring-primary-500 ring-offset-2 scale-105'
+                          : 'opacity-60 hover:opacity-100'
+                      } ${style.class}`}
+                    >
+                      {style.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </>
           )}
 
           {module.type === 'accordion' && (
             <>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <HelpCircle className="w-4 h-4 text-primary-500" />
                   Question
                 </label>
                 <Input
                   value={(editedModule.content as any).question || ''}
                   onChange={(e) => updateContent('question', e.target.value)}
                   placeholder="What is your question?"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
                   Answer
                 </label>
                 <Textarea
                   value={(editedModule.content as any).answer || ''}
                   onChange={(e) => updateContent('answer', e.target.value)}
                   placeholder="The answer goes here..."
-                  rows={4}
+                  rows={5}
+                  className="text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all resize-none"
                 />
               </div>
             </>
@@ -987,33 +1120,39 @@ function ModuleEditor({
 
           {module.type === 'countdown' && (
             <>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Title (optional)
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <Type className="w-4 h-4 text-primary-500" />
+                  Title <span className="text-xs text-gray-400 normal-case">(optional)</span>
                 </label>
                 <Input
                   value={(editedModule.content as any).title || ''}
                   onChange={(e) => updateContent('title', e.target.value)}
                   placeholder="Coming Soon"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <Clock className="w-4 h-4 text-primary-500" />
                   Target Date & Time
                 </label>
                 <Input
                   type="datetime-local"
                   value={(editedModule.content as any).targetDate?.slice(0, 16) || ''}
                   onChange={(e) => updateContent('targetDate', new Date(e.target.value).toISOString())}
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
                 />
+                <p className="text-xs text-gray-500 pl-1">Countdown will display days, hours, minutes, seconds</p>
               </div>
             </>
           )}
 
           {module.type === 'email' && (
             <>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <Mail className="w-4 h-4 text-primary-500" />
                   Email Address
                 </label>
                 <Input
@@ -1021,66 +1160,88 @@ function ModuleEditor({
                   value={(editedModule.content as any).email || ''}
                   onChange={(e) => updateContent('email', e.target.value)}
                   placeholder="your@email.com"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
                   Button Text
                 </label>
                 <Input
                   value={(editedModule.content as any).buttonText || ''}
                   onChange={(e) => updateContent('buttonText', e.target.value)}
                   placeholder="Get in Touch"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
                 />
               </div>
-              <div>
-                <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Email Subject (optional)
+              <div className="space-y-2">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  Email Subject <span className="text-xs text-gray-400 normal-case">(optional)</span>
                 </label>
                 <Input
                   value={(editedModule.content as any).subject || ''}
                   onChange={(e) => updateContent('subject', e.target.value)}
                   placeholder="Subject line"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
                 />
               </div>
             </>
           )}
 
           {module.type === 'divider' && (
-            <div>
-              <label className="block text-sm font-semibold text-gray-900 mb-2">Style</label>
-              <select
-                value={(editedModule.content as any).style || 'solid'}
-                onChange={(e) => updateContent('style', e.target.value)}
-                className="w-full h-11 px-4 rounded-xl border border-gray-300 bg-white"
-              >
-                <option value="solid">Solid</option>
-                <option value="dashed">Dashed</option>
-                <option value="dotted">Dotted</option>
-                <option value="double">Double</option>
-              </select>
+            <div className="space-y-3">
+              <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                <Minus className="w-4 h-4 text-primary-500" />
+                Divider Style
+              </label>
+              <div className="grid grid-cols-4 gap-3">
+                {[
+                  { value: 'solid', label: 'Solid' },
+                  { value: 'dashed', label: 'Dashed' },
+                  { value: 'dotted', label: 'Dotted' },
+                  { value: 'double', label: 'Double' }
+                ].map((style) => (
+                  <button
+                    key={style.value}
+                    type="button"
+                    onClick={() => updateContent('style', style.value)}
+                    className={`h-20 rounded-xl font-semibold transition-all flex flex-col items-center justify-center gap-2 ${
+                      (editedModule.content as any).style === style.value || (!((editedModule.content as any).style) && style.value === 'solid')
+                        ? 'bg-primary-500 text-white ring-4 ring-primary-300 scale-105'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                    }`}
+                  >
+                    <div className={`w-8 border-t-2 ${
+                      style.value === 'solid' ? 'border-solid' :
+                      style.value === 'dashed' ? 'border-dashed' :
+                      style.value === 'dotted' ? 'border-dotted' : 'border-double border-t-4'
+                    } ${(editedModule.content as any).style === style.value || (!((editedModule.content as any).style) && style.value === 'solid') ? 'border-white' : 'border-gray-900'}`}></div>
+                    <span className="text-xs">{style.label}</span>
+                  </button>
+                ))}
+              </div>
             </div>
           )}
+          </div>
+        </div>
 
-          {/* Footer Actions */}
-          <div className="flex gap-4 pt-8 border-t border-gray-200 sticky bottom-0 bg-white/95 backdrop-blur-sm -mx-8 px-8 -mb-8 pb-8 rounded-b-3xl">
+        {/* Footer Actions */}
+        <div className="border-t-2 border-gray-100 bg-gradient-to-r from-gray-50 to-gray-100/50 p-6">
+          <div className="flex gap-4">
             <Button
               onClick={() => onSave(editedModule)}
-              className="flex-1 h-12 text-base font-semibold shadow-soft-lg hover:shadow-soft-xl"
+              className="flex-1 h-14 text-base font-bold shadow-lg hover:shadow-xl bg-gradient-to-r from-primary-500 to-purple-500 hover:from-primary-600 hover:to-purple-600 transition-all hover:scale-105 active:scale-95"
               disabled={uploading}
             >
               {uploading ? (
                 <>
-                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
+                  <div className="w-5 h-5 border-3 border-white border-t-transparent rounded-full animate-spin mr-3"></div>
                   Uploading...
                 </>
               ) : (
                 <>
-                  <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2.5}>
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                   </svg>
                   Save Changes
                 </>
@@ -1089,7 +1250,7 @@ function ModuleEditor({
             <Button
               variant="outline"
               onClick={onCancel}
-              className="px-8 h-12 text-base font-semibold"
+              className="px-8 h-14 text-base font-bold border-2 hover:bg-gray-100 transition-all hover:scale-105 active:scale-95"
               disabled={uploading}
             >
               Cancel
