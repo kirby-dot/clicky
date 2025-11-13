@@ -93,17 +93,54 @@ export default function ProfileModulesView({ profile, modules }: ProfileModulesV
         </motion.div>
 
         {/* Modules */}
-        <div className="max-w-lg mx-auto space-y-4">
-          {modules.map((module, index) => (
-            <ModuleRenderer
-              key={module.id}
-              module={module}
-              profileId={profile.id}
-              index={index}
-              borderAnimation={borderAnimation}
-            />
-          ))}
-        </div>
+        {(() => {
+          const layout = pageStyle.layout || 'stack'
+          const moduleSpacing = pageStyle.moduleSpacing || 4
+
+          // Map spacing to Tailwind gap classes
+          const gapClass = ({
+            2: 'gap-2',
+            3: 'gap-3',
+            4: 'gap-4',
+            6: 'gap-6',
+            8: 'gap-8'
+          } as Record<number, string>)[moduleSpacing] || 'gap-4'
+
+          const spaceClass = ({
+            2: 'space-y-2',
+            3: 'space-y-3',
+            4: 'space-y-4',
+            6: 'space-y-6',
+            8: 'space-y-8'
+          } as Record<number, string>)[moduleSpacing] || 'space-y-4'
+
+          // Choose container class based on layout
+          const containerClasses = ({
+            'stack': `max-w-lg mx-auto ${spaceClass}`,
+            'grid': `max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 ${gapClass}`,
+            'masonry': `max-w-4xl mx-auto columns-1 md:columns-2 ${gapClass}`,
+            'centered': `max-w-md mx-auto ${spaceClass}`
+          } as Record<string, string>)[layout] || `max-w-lg mx-auto ${spaceClass}`
+
+          return (
+            <div className={containerClasses}>
+              {modules.map((module, index) => (
+                <div
+                  key={module.id}
+                  className={layout === 'masonry' ? 'break-inside-avoid mb-4' : ''}
+                >
+                  <ModuleRenderer
+                    module={module}
+                    profileId={profile.id}
+                    index={index}
+                    borderAnimation={borderAnimation}
+                  />
+                </div>
+              ))}
+            </div>
+          )
+        })()}
+
 
         {modules.length === 0 && (
           <motion.div variants={item} className="text-center text-gray-600 py-12">

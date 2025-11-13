@@ -113,6 +113,13 @@ export interface LinkModuleContent {
     backgroundColor?: string
     textColor?: string
     borderColor?: string
+    borderWidth?: number
+    borderRadius?: number
+    shadow?: 'none' | 'sm' | 'md' | 'lg'
+    fontSize?: number
+    fontWeight?: 'normal' | 'medium' | 'semibold' | 'bold'
+    align?: 'left' | 'center' | 'right'
+    fullWidth?: boolean
   }
 }
 
@@ -143,6 +150,10 @@ export interface ImageContent {
   caption?: string
   link?: string
   aspectRatio?: 'square' | 'video' | 'portrait' | 'auto'
+  width?: number // percentage 1-100
+  borderRadius?: number // pixels 0-50
+  align?: 'left' | 'center' | 'right'
+  shadow?: 'none' | 'sm' | 'md' | 'lg'
 }
 
 export interface DividerContent {
@@ -286,6 +297,16 @@ export type ModuleContent =
 
 export interface Module extends BaseModule {
   content: ModuleContent
+}
+
+export interface ProfileLayoutStyle {
+  layout?: 'stack' | 'grid' | 'masonry' | 'centered'
+  maxWidth?: number // pixels, default 680
+  gap?: number // spacing between modules in pixels
+  padding?: number // horizontal padding in pixels
+  backgroundColor?: string
+  backgroundImage?: string
+  backgroundGradient?: string
 }
 
 export type ProfileWithModules = Profile & {

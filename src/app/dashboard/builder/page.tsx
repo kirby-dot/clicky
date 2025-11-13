@@ -1115,6 +1115,10 @@ function PropertiesPanel({
   const renderEditor = () => {
     switch (editedModule.type) {
       case 'link':
+        const linkStyle = (editedModule.content as any).style || {}
+        const updateStyle = (key: string, value: any) => {
+          updateContent('style', { ...linkStyle, [key]: value })
+        }
         return (
           <>
             <div>
@@ -1131,6 +1135,114 @@ function PropertiesPanel({
                 value={(editedModule.content as any).url || ''}
                 onChange={(e) => updateContent('url', e.target.value)}
               />
+            </div>
+
+            {/* Styling Options */}
+            <div className="pt-4 border-t border-gray-200">
+              <h4 className="text-sm font-bold text-gray-900 mb-3">Styling</h4>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Background</label>
+                  <Input
+                    type="color"
+                    value={linkStyle.backgroundColor || '#6366f1'}
+                    onChange={(e) => updateStyle('backgroundColor', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
+                  <Input
+                    type="color"
+                    value={linkStyle.textColor || '#ffffff'}
+                    onChange={(e) => updateStyle('textColor', e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Border Radius (px)</label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="50"
+                    value={linkStyle.borderRadius || 12}
+                    onChange={(e) => updateStyle('borderRadius', parseInt(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Font Size (px)</label>
+                  <Input
+                    type="number"
+                    min="12"
+                    max="24"
+                    value={linkStyle.fontSize || 16}
+                    onChange={(e) => updateStyle('fontSize', parseInt(e.target.value))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Shadow</label>
+                  <select
+                    value={linkStyle.shadow || 'sm'}
+                    onChange={(e) => updateStyle('shadow', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  >
+                    <option value="none">None</option>
+                    <option value="sm">Small</option>
+                    <option value="md">Medium</option>
+                    <option value="lg">Large</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Font Weight</label>
+                  <select
+                    value={linkStyle.fontWeight || 'semibold'}
+                    onChange={(e) => updateStyle('fontWeight', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  >
+                    <option value="normal">Normal</option>
+                    <option value="medium">Medium</option>
+                    <option value="semibold">Semibold</option>
+                    <option value="bold">Bold</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={linkStyle.fullWidth !== false}
+                    onChange={(e) => updateStyle('fullWidth', e.target.checked)}
+                    className="rounded"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Full Width</span>
+                </label>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Border (Optional)</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="color"
+                    value={linkStyle.borderColor || '#000000'}
+                    onChange={(e) => updateStyle('borderColor', e.target.value)}
+                    placeholder="Border Color"
+                  />
+                  <Input
+                    type="number"
+                    min="0"
+                    max="5"
+                    value={linkStyle.borderWidth || 0}
+                    onChange={(e) => updateStyle('borderWidth', parseInt(e.target.value))}
+                    placeholder="Width (px)"
+                  />
+                </div>
+              </div>
             </div>
           </>
         )
@@ -1218,6 +1330,76 @@ function PropertiesPanel({
               <Input
                 value={(editedModule.content as any).alt || ''}
                 onChange={(e) => updateContent('alt', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Caption</label>
+              <Input
+                value={(editedModule.content as any).caption || ''}
+                onChange={(e) => updateContent('caption', e.target.value)}
+                placeholder="Optional caption"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Width (%)
+                </label>
+                <Input
+                  type="number"
+                  min="10"
+                  max="100"
+                  value={(editedModule.content as any).width || 100}
+                  onChange={(e) => updateContent('width', parseInt(e.target.value))}
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Roundness (px)
+                </label>
+                <Input
+                  type="number"
+                  min="0"
+                  max="50"
+                  value={(editedModule.content as any).borderRadius || 8}
+                  onChange={(e) => updateContent('borderRadius', parseInt(e.target.value))}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Alignment</label>
+                <select
+                  value={(editedModule.content as any).align || 'center'}
+                  onChange={(e) => updateContent('align', e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                >
+                  <option value="left">Left</option>
+                  <option value="center">Center</option>
+                  <option value="right">Right</option>
+                </select>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Shadow</label>
+                <select
+                  value={(editedModule.content as any).shadow || 'none'}
+                  onChange={(e) => updateContent('shadow', e.target.value)}
+                  className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                >
+                  <option value="none">None</option>
+                  <option value="sm">Small</option>
+                  <option value="md">Medium</option>
+                  <option value="lg">Large</option>
+                </select>
+              </div>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Link URL (Optional)</label>
+              <Input
+                type="url"
+                value={(editedModule.content as any).link || ''}
+                onChange={(e) => updateContent('link', e.target.value)}
+                placeholder="https://example.com"
               />
             </div>
           </>
@@ -2405,7 +2587,7 @@ function PageStyleEditor({
   onSave,
   onCancel,
 }: {
-  style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained"; animation?: 'none' | 'fade-in' | 'fade-up' | 'scale-in'; borderAnimation?: boolean; moduleSpacing?: 'tight' | 'normal' | 'relaxed'; borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'full'; shadowStyle?: 'none' | 'soft' | 'medium' | 'bold'; glassEffect?: boolean }
+  style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained"; animation?: 'none' | 'fade-in' | 'fade-up' | 'scale-in'; borderAnimation?: boolean; moduleSpacing?: 'tight' | 'normal' | 'relaxed'; borderRadius?: 'none' | 'sm' | 'md' | 'lg' | 'full'; shadowStyle?: 'none' | 'soft' | 'medium' | 'bold'; glassEffect?: boolean; layout?: 'stack' | 'grid' | 'masonry' | 'centered' }
   profile: Profile | null
   onSave: (style: any) => Promise<void>
   onCancel: () => void
@@ -2643,6 +2825,83 @@ function PageStyleEditor({
             <div className="space-y-6">
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-4">Layout Settings</h3>
+
+                {/* Layout Style */}
+                <div className="space-y-3 mb-6">
+                  <label className="font-semibold text-gray-900 block">Layout Style</label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      onClick={() => setEditedStyle({ ...editedStyle, layout: 'stack' })}
+                      className={`p-6 rounded-xl border-2 transition-all ${
+                        (!editedStyle.layout || editedStyle.layout === 'stack')
+                          ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-200'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="mb-2">📚</div>
+                      <p className="font-bold text-sm">Stack</p>
+                      <p className="text-xs text-gray-600 mt-1">Single column layout</p>
+                      <div className="mt-3 space-y-2">
+                        <div className="h-4 bg-gray-300 rounded w-full"></div>
+                        <div className="h-4 bg-gray-300 rounded w-full"></div>
+                        <div className="h-4 bg-gray-300 rounded w-full"></div>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setEditedStyle({ ...editedStyle, layout: 'centered' })}
+                      className={`p-6 rounded-xl border-2 transition-all ${
+                        editedStyle.layout === 'centered'
+                          ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-200'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="mb-2">🎯</div>
+                      <p className="font-bold text-sm">Centered</p>
+                      <p className="text-xs text-gray-600 mt-1">Hero-style layout</p>
+                      <div className="mt-3 space-y-2">
+                        <div className="h-4 bg-gray-300 rounded w-3/4 mx-auto"></div>
+                        <div className="h-4 bg-gray-300 rounded w-1/2 mx-auto"></div>
+                        <div className="h-4 bg-gray-300 rounded w-2/3 mx-auto"></div>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setEditedStyle({ ...editedStyle, layout: 'grid' })}
+                      className={`p-6 rounded-xl border-2 transition-all ${
+                        editedStyle.layout === 'grid'
+                          ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-200'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="mb-2">⊞</div>
+                      <p className="font-bold text-sm">Grid</p>
+                      <p className="text-xs text-gray-600 mt-1">Two columns</p>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <div className="h-6 bg-gray-300 rounded"></div>
+                        <div className="h-6 bg-gray-300 rounded"></div>
+                        <div className="h-6 bg-gray-300 rounded"></div>
+                        <div className="h-6 bg-gray-300 rounded"></div>
+                      </div>
+                    </button>
+                    <button
+                      onClick={() => setEditedStyle({ ...editedStyle, layout: 'masonry' })}
+                      className={`p-6 rounded-xl border-2 transition-all ${
+                        editedStyle.layout === 'masonry'
+                          ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-200'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="mb-2">🧱</div>
+                      <p className="font-bold text-sm">Masonry</p>
+                      <p className="text-xs text-gray-600 mt-1">Pinterest-style</p>
+                      <div className="mt-3 grid grid-cols-2 gap-2">
+                        <div className="h-8 bg-gray-300 rounded"></div>
+                        <div className="h-6 bg-gray-300 rounded"></div>
+                        <div className="h-6 bg-gray-300 rounded"></div>
+                        <div className="h-10 bg-gray-300 rounded"></div>
+                      </div>
+                    </button>
+                  </div>
+                </div>
 
                 {/* Container Width */}
                 <div className="space-y-3 mb-6">
