@@ -8,6 +8,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Link2, Mail } from 'lucide-react'
+import { motion } from 'framer-motion'
 
 export default function SignupPage() {
   const [email, setEmail] = useState('')
@@ -47,16 +48,33 @@ export default function SignupPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
-      <div className="w-full max-w-md">
-        <div className="text-center mb-8">
-          <Link href="/" className="inline-flex items-center space-x-2 mb-4">
-            <Link2 className="w-10 h-10 text-primary-600" />
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="w-full max-w-md"
+      >
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.1, duration: 0.4 }}
+          className="text-center mb-8"
+        >
+          <Link href="/" className="inline-flex items-center space-x-2 mb-4 group">
+            <motion.div whileHover={{ rotate: 360 }} transition={{ duration: 0.6 }}>
+              <Link2 className="w-10 h-10 text-primary-600" />
+            </motion.div>
             <span className="text-3xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
               Clicky
             </span>
           </Link>
-        </div>
+        </motion.div>
 
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2, duration: 0.5 }}
+        >
         <Card>
           <CardHeader>
             <CardTitle>Create your account</CardTitle>
@@ -115,7 +133,8 @@ export default function SignupPage() {
             </p>
           </CardContent>
         </Card>
-      </div>
+        </motion.div>
+      </motion.div>
     </div>
   )
 }
