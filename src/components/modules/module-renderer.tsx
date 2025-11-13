@@ -15,6 +15,7 @@ import { ButtonModule } from './button-module'
 import { AccordionModule } from './accordion-module'
 import { CountdownModule } from './countdown-module'
 import { EmailButtonModule } from './email-button-module'
+import { ButtonGridModule } from './button-grid-module'
 
 interface ModuleRendererProps {
   module: Module
@@ -59,6 +60,8 @@ export function ModuleRenderer({ module, profileId, index }: ModuleRendererProps
         return <CountdownModule module={module} />
       case 'email':
         return <EmailButtonModule module={module} />
+      case 'button-grid':
+        return <ButtonGridModule module={module} />
       default:
         return null
     }

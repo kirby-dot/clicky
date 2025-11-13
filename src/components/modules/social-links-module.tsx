@@ -21,6 +21,13 @@ const SOCIAL_ICONS = {
 export function SocialLinksModule({ module }: SocialLinksModuleProps) {
   const content = module.content as SocialLinksContent
   const layout = content.layout || 'horizontal'
+  const iconStyle = (content as any).iconStyle || 'rounded'
+
+  const styleClasses = {
+    rounded: 'rounded-2xl',
+    sharp: 'rounded-md',
+    minimal: 'rounded-full border-2 border-gray-300'
+  }
 
   return (
     <div className={`flex ${layout === 'grid' ? 'grid grid-cols-4' : 'flex-row justify-center'} gap-3`}>
@@ -35,7 +42,7 @@ export function SocialLinksModule({ module }: SocialLinksModuleProps) {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${bgColor} rounded-2xl shadow-soft hover:shadow-soft-lg transition-all hover:scale-110 active:scale-95 p-4 flex items-center justify-center border border-gray-200`}
+            className={`${iconStyle === 'minimal' ? 'bg-white' : bgColor} ${styleClasses[iconStyle as keyof typeof styleClasses]} shadow-soft hover:shadow-soft-lg transition-all hover:scale-110 active:scale-95 p-4 flex items-center justify-center`}
             title={link.platform}
           >
             <Icon className="w-6 h-6 text-gray-700" />

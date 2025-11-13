@@ -166,6 +166,14 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     defaultContent: { email: '', buttonText: 'Get in Touch' },
     color: 'bg-pastel-sage'
   },
+  {
+    type: 'button-grid',
+    icon: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM14 5a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1V5zM4 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1H5a1 1 0 01-1-1v-4zM14 15a1 1 0 011-1h4a1 1 0 011 1v4a1 1 0 01-1 1h-4a1 1 0 01-1-1v-4z" /></svg>,
+    label: 'Button Grid',
+    description: '2-3 columns',
+    defaultContent: { buttons: [{ title: 'Button 1', url: '' }, { title: 'Button 2', url: '' }], columns: 2 },
+    color: 'bg-pastel-butter'
+  },
 ]
 
 export default function BuilderPage() {
@@ -786,7 +794,7 @@ function ModuleEditor({
       onClick={onCancel}
     >
       <div
-        className="max-w-4xl w-full max-h-[92vh] overflow-hidden bg-white rounded-3xl shadow-2xl border-2 border-gray-100 animate-in slide-in-from-bottom-6 duration-300"
+        className="max-w-5xl w-full max-h-[92vh] overflow-hidden bg-white rounded-3xl shadow-2xl border-2 border-gray-100 animate-in slide-in-from-bottom-6 duration-300"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
@@ -1265,6 +1273,88 @@ function ModuleEditor({
             </div>
           )}
 
+          {module.type === 'button-grid' && (
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  Columns
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[2, 3, 4].map((cols) => (
+                    <button
+                      key={cols}
+                      type="button"
+                      onClick={() => updateContent('columns', cols)}
+                      className={`h-16 rounded-xl font-semibold transition-all ${
+                        ((editedModule.content as any).columns || 2) === cols
+                          ? 'bg-primary-500 text-white ring-4 ring-primary-300 scale-105'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {cols} Columns
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  Buttons
+                </label>
+                {((editedModule.content as any).buttons || []).map((button: any, index: number) => (
+                  <div key={index} className="p-4 bg-gray-50 rounded-xl space-y-3">
+                    <div className="flex items-center justify-between mb-2">
+                      <span className="font-semibold text-gray-700">Button {index + 1}</span>
+                      <button
+                        type="button"
+                        onClick={() => {
+                          const buttons = [...((editedModule.content as any).buttons || [])]
+                          buttons.splice(index, 1)
+                          updateContent('buttons', buttons)
+                        }}
+                        className="text-red-500 hover:text-red-700 text-sm"
+                      >
+                        Remove
+                      </button>
+                    </div>
+                    <Input
+                      value={button.title || ''}
+                      onChange={(e) => {
+                        const buttons = [...((editedModule.content as any).buttons || [])]
+                        buttons[index] = { ...buttons[index], title: e.target.value }
+                        updateContent('buttons', buttons)
+                      }}
+                      placeholder="Button title"
+                      className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                    />
+                    <Input
+                      value={button.url || ''}
+                      onChange={(e) => {
+                        const buttons = [...((editedModule.content as any).buttons || [])]
+                        buttons[index] = { ...buttons[index], url: e.target.value }
+                        updateContent('buttons', buttons)
+                      }}
+                      placeholder="https://example.com"
+                      className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                    />
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => {
+                    const buttons = [...((editedModule.content as any).buttons || []), { title: '', url: '' }]
+                    updateContent('buttons', buttons)
+                  }}
+                  className="w-full"
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Button
+                </Button>
+              </div>
+            </div>
+          )}
+
           {module.type === 'social-links' && (
             <div className="space-y-6">
               <div className="space-y-3">
@@ -1276,18 +1366,19 @@ function ModuleEditor({
 
                 <div className="grid grid-cols-3 gap-3">
                   {[
-                    { platform: 'instagram', label: 'Instagram', color: 'bg-gradient-to-br from-purple-500 to-pink-500' },
-                    { platform: 'twitter', label: 'Twitter', color: 'bg-sky-500' },
-                    { platform: 'youtube', label: 'YouTube', color: 'bg-red-500' },
-                    { platform: 'tiktok', label: 'TikTok', color: 'bg-gray-900' },
-                    { platform: 'linkedin', label: 'LinkedIn', color: 'bg-blue-600' },
-                    { platform: 'facebook', label: 'Facebook', color: 'bg-blue-500' },
-                    { platform: 'github', label: 'GitHub', color: 'bg-gray-800' },
-                    { platform: 'spotify', label: 'Spotify', color: 'bg-green-500' },
-                    { platform: 'twitch', label: 'Twitch', color: 'bg-purple-600' },
+                    { platform: 'instagram', label: 'Instagram', color: 'bg-gradient-to-br from-purple-500 to-pink-500', icon: Instagram },
+                    { platform: 'twitter', label: 'Twitter', color: 'bg-sky-500', icon: Twitter },
+                    { platform: 'youtube', label: 'YouTube', color: 'bg-red-500', icon: Youtube },
+                    { platform: 'tiktok', label: 'TikTok', color: 'bg-gray-900', icon: Music },
+                    { platform: 'linkedin', label: 'LinkedIn', color: 'bg-blue-600', icon: Linkedin },
+                    { platform: 'facebook', label: 'Facebook', color: 'bg-blue-500', icon: Facebook },
+                    { platform: 'github', label: 'GitHub', color: 'bg-gray-800', icon: Github },
+                    { platform: 'spotify', label: 'Spotify', color: 'bg-green-500', icon: Music },
+                    { platform: 'twitch', label: 'Twitch', color: 'bg-purple-600', icon: Music },
                   ].map((social) => {
                     const links = ((editedModule.content as any).links || []) as Array<{ platform: string; url: string }>
                     const isSelected = links.some(l => l.platform === social.platform)
+                    const Icon = social.icon
 
                     return (
                       <button
@@ -1305,7 +1396,7 @@ function ModuleEditor({
                           isSelected ? 'ring-4 ring-primary-500 ring-offset-2 scale-105 opacity-100' : 'opacity-60 hover:opacity-100'
                         }`}
                       >
-                        <div className="text-2xl">{social.label.charAt(0)}</div>
+                        <Icon className="w-6 h-6" />
                         <span className="text-xs">{social.label}</span>
                       </button>
                     )
@@ -1337,6 +1428,37 @@ function ModuleEditor({
                   ))}
                 </div>
               )}
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  Icon Style
+                </label>
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { value: 'rounded', label: 'Rounded', preview: 'rounded-2xl' },
+                    { value: 'sharp', label: 'Sharp', preview: 'rounded-md' },
+                    { value: 'minimal', label: 'Minimal', preview: 'rounded-full border-2' }
+                  ].map((style) => (
+                    <button
+                      key={style.value}
+                      type="button"
+                      onClick={() => updateContent('iconStyle', style.value)}
+                      className={`p-4 rounded-xl border-2 transition-all ${
+                        ((editedModule.content as any).iconStyle || 'rounded') === style.value
+                          ? 'border-primary-500 bg-primary-50 ring-4 ring-primary-300'
+                          : 'border-gray-200 hover:border-gray-300'
+                      }`}
+                    >
+                      <div className="flex items-center justify-center mb-2">
+                        <div className={`w-12 h-12 bg-gradient-to-br from-primary-500 to-purple-500 flex items-center justify-center ${style.preview}`}>
+                          <Instagram className="w-6 h-6 text-white" />
+                        </div>
+                      </div>
+                      <p className="font-bold text-sm">{style.label}</p>
+                    </button>
+                  ))}
+                </div>
+              </div>
 
               <div className="space-y-3">
                 <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
