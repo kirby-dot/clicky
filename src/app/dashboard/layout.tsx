@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@/lib/supabase'
-import { Link2, LayoutDashboard, Link as LinkIcon, Palette, BarChart3, Settings, LogOut, User, Layout, Zap, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Link2, LayoutDashboard, Link as LinkIcon, Palette, BarChart3, Settings, LogOut, User, Layout, Zap, ChevronLeft, ChevronRight, Users } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function DashboardLayout({
@@ -15,6 +15,7 @@ export default function DashboardLayout({
   const [user, setUser] = useState<any>(null)
   const [userPlan, setUserPlan] = useState<string>('free')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
+  const [profiles, setProfiles] = useState<any[]>([])
   const router = useRouter()
   const supabase = createBrowserClient()
 
@@ -38,6 +39,17 @@ export default function DashboardLayout({
 
         if (subData) {
           setUserPlan(subData.plan)
+        }
+
+        // Get user's profiles
+        const { data: profilesData } = await supabase
+          .from('profiles')
+          .select('id, title, slug, published')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+
+        if (profilesData) {
+          setProfiles(profilesData)
         }
       }
     }
@@ -112,6 +124,12 @@ export default function DashboardLayout({
                 collapsed={sidebarCollapsed}
               />
               <NavItem
+                href="/dashboard/profiles"
+                icon={<Users className="w-5 h-5" />}
+                label="Profiles"
+                collapsed={sidebarCollapsed}
+              />
+              <NavItem
                 href="/dashboard/links"
                 icon={<LinkIcon className="w-5 h-5" />}
                 label="Links (Legacy)"
@@ -180,6 +198,53 @@ export default function DashboardLayout({
                 <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-soft" title={user.email}>
                   <User className="w-5 h-5 text-primary-600" />
                 </div>
+              </div>
+            )}
+
+            {/* Profile Switcher */}
+            {!sidebarCollapsed && profiles.length > 0 && (
+              <div className="mt-6 bg-white rounded-2xl border border-gray-200 p-4 shadow-soft">
+                <div className="flex items-center justify-between mb-3">
+                  <h3 className="text-xs font-bold text-gray-600 uppercase tracking-wide">Your Profiles</h3>
+                  <button
+                    onClick={() => router.push('/dashboard/profiles')}
+                    className="text-xs text-purple-600 hover:text-purple-700 font-semibold"
+                  >
+                    Manage
+                  </button>
+                </div>
+                <div className="space-y-2 max-h-48 overflow-y-auto">
+                  {profiles.map((profile) => (
+                    <button
+                      key={profile.id}
+                      onClick={() => router.push(`/dashboard/builder?profile=${profile.id}`)}
+                      className="w-full flex items-center gap-3 p-2 rounded-lg hover:bg-gradient-to-r hover:from-pastel-sky hover:to-pastel-lavender transition-all group"
+                    >
+                      <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0 shadow-soft">
+                        <User className="w-4 h-4 text-white" />
+                      </div>
+                      <div className="flex-1 min-w-0 text-left">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{profile.title}</p>
+                        <p className="text-xs text-gray-600 truncate">{profile.slug}</p>
+                      </div>
+                      {profile.published && (
+                        <div className="w-2 h-2 bg-green-500 rounded-full flex-shrink-0" title="Published"></div>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {sidebarCollapsed && profiles.length > 0 && (
+              <div className="mt-6 relative group">
+                <button
+                  onClick={() => router.push('/dashboard/profiles')}
+                  className="w-full bg-white rounded-2xl border border-gray-200 p-3 shadow-soft flex items-center justify-center hover:bg-gray-50"
+                  title="Manage Profiles"
+                >
+                  <Users className="w-5 h-5 text-primary-600" />
+                </button>
               </div>
             )}
           </aside>
