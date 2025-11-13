@@ -16,6 +16,7 @@ import { AccordionModule } from './accordion-module'
 import { CountdownModule } from './countdown-module'
 import { EmailButtonModule } from './email-button-module'
 import { ButtonGridModule } from './button-grid-module'
+import { TwoColumnModule } from './two-column-module'
 
 interface ModuleRendererProps {
   module: Module
@@ -63,6 +64,8 @@ export function ModuleRenderer({ module, profileId, index, borderAnimation = fal
         return <EmailButtonModule module={module} />
       case 'button-grid':
         return <ButtonGridModule module={module} />
+      case 'two-column':
+        return <TwoColumnModule module={module} />
       default:
         return null
     }

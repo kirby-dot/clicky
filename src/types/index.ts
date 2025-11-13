@@ -250,14 +250,11 @@ export interface ButtonGridContent {
 }
 
 export interface TwoColumnContent {
-  left: {
-    type: 'text' | 'image'
-    content: string
-  }
-  right: {
-    type: 'text' | 'image'
-    content: string
-  }
+  leftType: 'video' | 'text' | 'image' | 'social-links'
+  leftContent: VideoContent | TextContent | ImageContent | SocialLinksContent
+  rightType: 'video' | 'text' | 'image' | 'social-links'
+  rightContent: VideoContent | TextContent | ImageContent | SocialLinksContent
+  ratio: '50-50' | '60-40' | '40-60'
 }
 
 export interface SpacerContent {
