@@ -49,6 +49,10 @@ export default async function ProfilePage({ params }: Props) {
     cookies: () => cookieStore
   })
 
+  // Get current user to check if they own this profile
+  const { data: { user } } = await supabase.auth.getUser()
+
+  // Fetch profile - allow unpublished if user owns it
   const { data: profile } = await supabase
     .from('profiles')
     .select(`
@@ -56,10 +60,15 @@ export default async function ProfilePage({ params }: Props) {
       theme:themes(*)
     `)
     .eq('slug', params.username)
-    .eq('published', true)
     .single()
 
   if (!profile) {
+    notFound()
+  }
+
+  // Check if profile is viewable (published OR owned by current user)
+  const isOwner = user && profile.user_id === user.id
+  if (!profile.published && !isOwner) {
     notFound()
   }
 

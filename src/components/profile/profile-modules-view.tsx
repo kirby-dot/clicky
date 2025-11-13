@@ -32,7 +32,7 @@ export default function ProfileModulesView({ profile, modules }: ProfileModulesV
   }
 
   return (
-    <div className="min-h-screen py-12 px-4 bg-white">
+    <div className="min-h-screen py-12 px-4 bg-gradient-to-br from-pastel-sky/20 to-pastel-lavender/20">
       <motion.div
         className="max-w-2xl mx-auto"
         variants={container}
@@ -46,17 +46,17 @@ export default function ProfileModulesView({ profile, modules }: ProfileModulesV
               <img
                 src={profile.avatar_url}
                 alt={profile.title}
-                className="w-32 h-32 mx-auto object-cover border-4 border-black shadow-brutal"
+                className="w-32 h-32 mx-auto object-cover rounded-full border-2 border-gray-200 shadow-soft-lg"
               />
             </div>
           )}
 
-          <h1 className="text-4xl md:text-5xl font-black mb-4 text-black">
+          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
             {profile.title}
           </h1>
 
           {profile.bio && (
-            <p className="text-lg text-gray-700 max-w-lg mx-auto font-medium">{profile.bio}</p>
+            <p className="text-lg text-gray-600 max-w-lg mx-auto">{profile.bio}</p>
           )}
         </motion.div>
 
@@ -73,7 +73,7 @@ export default function ProfileModulesView({ profile, modules }: ProfileModulesV
         </div>
 
         {modules.length === 0 && (
-          <motion.div variants={item} className="text-center text-gray-700 py-12 font-medium">
+          <motion.div variants={item} className="text-center text-gray-600 py-12">
             <p>No content yet</p>
           </motion.div>
         )}
@@ -82,7 +82,7 @@ export default function ProfileModulesView({ profile, modules }: ProfileModulesV
         <motion.div variants={item} className="text-center mt-16">
           <a
             href="/"
-            className="inline-block text-sm text-black font-bold hover:underline bg-neo-yellow border-3 border-black px-6 py-3 shadow-brutal hover:shadow-brutal-lg transition-all"
+            className="inline-block text-sm bg-gradient-to-r from-primary-500 to-purple-500 text-white font-semibold px-6 py-3 rounded-xl shadow-soft-lg hover:shadow-soft-xl hover:scale-105 active:scale-95 transition-all"
           >
             Create your own Clicky
           </a>
