@@ -23,6 +23,12 @@ export function SocialLinksModule({ module }: SocialLinksModuleProps) {
   const layout = content.layout || 'horizontal'
   const iconStyle = (content as any).iconStyle || 'rounded'
 
+  // Get custom styling properties
+  const iconSize = (content as any).iconSize || 32
+  const iconColor = (content as any).iconColor
+  const customBgColor = (content as any).backgroundColor
+  const customBorderRadius = (content as any).borderRadius
+
   const styleClasses = {
     rounded: 'rounded-2xl',
     sharp: 'rounded-md',
@@ -36,16 +42,33 @@ export function SocialLinksModule({ module }: SocialLinksModuleProps) {
         const colors = ['bg-pastel-sky', 'bg-pastel-lavender', 'bg-pastel-mint', 'bg-pastel-rose', 'bg-pastel-peach', 'bg-pastel-butter']
         const bgColor = colors[index % colors.length]
 
+        // Use custom border radius if provided, otherwise use style class
+        const borderRadiusClass = customBorderRadius === undefined ? styleClasses[iconStyle as keyof typeof styleClasses] : ''
+        const bgClass = customBgColor ? '' : (iconStyle === 'minimal' ? 'bg-white' : bgColor)
+
+        const iconStyles: React.CSSProperties = {
+          ...(customBgColor && { backgroundColor: customBgColor }),
+          ...(customBorderRadius !== undefined && { borderRadius: `${customBorderRadius}px` }),
+        }
+
         return (
           <a
             key={index}
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${iconStyle === 'minimal' ? 'bg-white' : bgColor} ${styleClasses[iconStyle as keyof typeof styleClasses]} shadow-soft hover:shadow-soft-lg transition-all hover:scale-110 active:scale-95 p-4 flex items-center justify-center`}
+            className={`${bgClass} ${borderRadiusClass} shadow-soft hover:shadow-soft-lg transition-all hover:scale-110 active:scale-95 p-4 flex items-center justify-center`}
+            style={iconStyles}
             title={link.platform}
           >
-            <Icon className="w-6 h-6 text-gray-700" />
+            <Icon
+              className="text-gray-700"
+              style={{
+                width: `${iconSize}px`,
+                height: `${iconSize}px`,
+                ...(iconColor && { color: iconColor })
+              }}
+            />
           </a>
         )
       })}

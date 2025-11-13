@@ -8,14 +8,29 @@ export function TextModule({ module }: TextModuleProps) {
   const content = module.content as TextContent
   const align = content.align || 'center'
 
-  const className = `text-gray-700 font-medium ${
+  // Font weight mapping
+  const fontWeightClass = content.fontWeight
+    ? content.fontWeight === 'normal' ? 'font-normal' :
+      content.fontWeight === 'medium' ? 'font-medium' :
+      content.fontWeight === 'semibold' ? 'font-semibold' :
+      content.fontWeight === 'bold' ? 'font-bold' :
+      'font-medium'
+    : 'font-medium'
+
+  const className = `${fontWeightClass} ${
     align === 'left' ? 'text-left' :
     align === 'right' ? 'text-right' :
     'text-center'
   }`
 
+  const inlineStyles: React.CSSProperties = {
+    whiteSpace: 'pre-wrap',
+    ...(content.color && { color: content.color }),
+    ...(content.fontSize && { fontSize: `${content.fontSize}px` }),
+  }
+
   return (
-    <p className={className} style={{ whiteSpace: 'pre-wrap' }}>
+    <p className={className} style={inlineStyles}>
       {content.text}
     </p>
   )

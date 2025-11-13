@@ -1281,6 +1281,47 @@ function PropertiesPanel({
                 <option value="right">Right</option>
               </select>
             </div>
+
+            {/* Styling Options */}
+            <div className="pt-4 border-t border-gray-200">
+              <h4 className="text-sm font-bold text-gray-900 mb-3">Styling</h4>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
+                <Input
+                  type="color"
+                  value={(editedModule.content as any).color || '#111827'}
+                  onChange={(e) => updateContent('color', e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Font Size (px)</label>
+                  <Input
+                    type="number"
+                    min="16"
+                    max="72"
+                    value={(editedModule.content as any).fontSize || ''}
+                    onChange={(e) => updateContent('fontSize', e.target.value ? parseInt(e.target.value) : undefined)}
+                    placeholder="Auto"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Font Weight</label>
+                  <select
+                    value={(editedModule.content as any).fontWeight || 'bold'}
+                    onChange={(e) => updateContent('fontWeight', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  >
+                    <option value="normal">Normal</option>
+                    <option value="medium">Medium</option>
+                    <option value="semibold">Semibold</option>
+                    <option value="bold">Bold</option>
+                  </select>
+                </div>
+              </div>
+            </div>
           </>
         )
 
@@ -1306,6 +1347,47 @@ function PropertiesPanel({
                 <option value="center">Center</option>
                 <option value="right">Right</option>
               </select>
+            </div>
+
+            {/* Styling Options */}
+            <div className="pt-4 border-t border-gray-200">
+              <h4 className="text-sm font-bold text-gray-900 mb-3">Styling</h4>
+
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
+                <Input
+                  type="color"
+                  value={(editedModule.content as any).color || '#374151'}
+                  onChange={(e) => updateContent('color', e.target.value)}
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Font Size (px)</label>
+                  <Input
+                    type="number"
+                    min="12"
+                    max="32"
+                    value={(editedModule.content as any).fontSize || ''}
+                    onChange={(e) => updateContent('fontSize', e.target.value ? parseInt(e.target.value) : undefined)}
+                    placeholder="Auto"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Font Weight</label>
+                  <select
+                    value={(editedModule.content as any).fontWeight || 'normal'}
+                    onChange={(e) => updateContent('fontWeight', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  >
+                    <option value="normal">Normal</option>
+                    <option value="medium">Medium</option>
+                    <option value="semibold">Semibold</option>
+                    <option value="bold">Bold</option>
+                  </select>
+                </div>
+              </div>
             </div>
           </>
         )
@@ -1406,6 +1488,10 @@ function PropertiesPanel({
         )
 
       case 'button':
+        const buttonStyle = (editedModule.content as any).style || {}
+        const updateButtonStyle = (key: string, value: any) => {
+          updateContent('style', { ...buttonStyle, [key]: value })
+        }
         return (
           <>
             <div>
@@ -1423,17 +1509,113 @@ function PropertiesPanel({
                 onChange={(e) => updateContent('url', e.target.value)}
               />
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700 mb-2">Style</label>
-              <select
-                value={(editedModule.content as any).style || 'primary'}
-                onChange={(e) => updateContent('style', e.target.value)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2"
-              >
-                <option value="primary">Primary</option>
-                <option value="secondary">Secondary</option>
-                <option value="outline">Outline</option>
-              </select>
+
+            {/* Styling Options */}
+            <div className="pt-4 border-t border-gray-200">
+              <h4 className="text-sm font-bold text-gray-900 mb-3">Styling</h4>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Background</label>
+                  <Input
+                    type="color"
+                    value={buttonStyle.backgroundColor || '#6366f1'}
+                    onChange={(e) => updateButtonStyle('backgroundColor', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Text Color</label>
+                  <Input
+                    type="color"
+                    value={buttonStyle.textColor || '#ffffff'}
+                    onChange={(e) => updateButtonStyle('textColor', e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Border Radius (px)</label>
+                  <Input
+                    type="number"
+                    min="0"
+                    max="50"
+                    value={buttonStyle.borderRadius || 12}
+                    onChange={(e) => updateButtonStyle('borderRadius', parseInt(e.target.value))}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Font Size (px)</label>
+                  <Input
+                    type="number"
+                    min="12"
+                    max="24"
+                    value={buttonStyle.fontSize || 16}
+                    onChange={(e) => updateButtonStyle('fontSize', parseInt(e.target.value))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Shadow</label>
+                  <select
+                    value={buttonStyle.shadow || 'sm'}
+                    onChange={(e) => updateButtonStyle('shadow', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  >
+                    <option value="none">None</option>
+                    <option value="sm">Small</option>
+                    <option value="md">Medium</option>
+                    <option value="lg">Large</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Font Weight</label>
+                  <select
+                    value={buttonStyle.fontWeight || 'semibold'}
+                    onChange={(e) => updateButtonStyle('fontWeight', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  >
+                    <option value="normal">Normal</option>
+                    <option value="medium">Medium</option>
+                    <option value="semibold">Semibold</option>
+                    <option value="bold">Bold</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="mb-4">
+                <label className="flex items-center space-x-2">
+                  <input
+                    type="checkbox"
+                    checked={buttonStyle.fullWidth !== false}
+                    onChange={(e) => updateButtonStyle('fullWidth', e.target.checked)}
+                    className="rounded"
+                  />
+                  <span className="text-sm font-medium text-gray-700">Full Width</span>
+                </label>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Border (Optional)</label>
+                <div className="grid grid-cols-2 gap-2">
+                  <Input
+                    type="color"
+                    value={buttonStyle.borderColor || '#000000'}
+                    onChange={(e) => updateButtonStyle('borderColor', e.target.value)}
+                    placeholder="Border Color"
+                  />
+                  <Input
+                    type="number"
+                    min="0"
+                    max="5"
+                    value={buttonStyle.borderWidth || 0}
+                    onChange={(e) => updateButtonStyle('borderWidth', parseInt(e.target.value))}
+                    placeholder="Width (px)"
+                  />
+                </div>
+              </div>
             </div>
           </>
         )

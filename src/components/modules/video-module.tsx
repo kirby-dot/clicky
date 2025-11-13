@@ -42,8 +42,25 @@ export function VideoModule({ module }: VideoModuleProps) {
     return url
   }
 
+  // Shadow mapping
+  const shadowClass = content.shadow
+    ? content.shadow === 'none' ? '' :
+      content.shadow === 'sm' ? 'shadow-sm' :
+      content.shadow === 'md' ? 'shadow-md' :
+      'shadow-lg'
+    : 'shadow-soft'
+
+  const containerStyles: React.CSSProperties = {
+    paddingBottom: '56.25%',
+    width: content.width ? `${content.width}%` : '100%',
+    borderRadius: content.borderRadius ? `${content.borderRadius}px` : '16px',
+  }
+
   return (
-    <div className="relative w-full rounded-2xl shadow-soft overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+    <div
+      className={`relative ${shadowClass} overflow-hidden mx-auto`}
+      style={containerStyles}
+    >
       <iframe
         src={getEmbedUrl(content.url)}
         className="absolute top-0 left-0 w-full h-full"

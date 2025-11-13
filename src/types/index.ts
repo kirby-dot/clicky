@@ -130,18 +130,28 @@ export interface SocialLinksContent {
     username?: string
   }>
   layout?: 'horizontal' | 'grid'
+  iconSize?: number // 24-64px
+  iconColor?: string
+  backgroundColor?: string
+  borderRadius?: number
 }
 
 export interface HeaderContent {
   text: string
   level?: 'h1' | 'h2' | 'h3'
   align?: 'left' | 'center' | 'right'
+  color?: string
+  fontSize?: number
+  fontWeight?: 'normal' | 'medium' | 'semibold' | 'bold'
 }
 
 export interface TextContent {
   text: string
   align?: 'left' | 'center' | 'right'
   markdown?: boolean
+  color?: string
+  fontSize?: number
+  fontWeight?: 'normal' | 'medium' | 'semibold' | 'bold'
 }
 
 export interface ImageContent {
@@ -165,11 +175,17 @@ export interface VideoContent {
   url: string
   platform?: 'youtube' | 'vimeo' | 'tiktok' | 'loom'
   thumbnail?: string
+  width?: number
+  borderRadius?: number
+  shadow?: 'none' | 'sm' | 'md' | 'lg'
 }
 
 export interface MusicContent {
   url: string
   platform?: 'spotify' | 'apple-music' | 'soundcloud'
+  width?: number
+  borderRadius?: number
+  shadow?: 'none' | 'sm' | 'md' | 'lg'
 }
 
 export interface ContactFormContent {
