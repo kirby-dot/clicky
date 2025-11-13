@@ -68,7 +68,7 @@ export default function DashboardLayout({
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       {/* Header */}
       <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-soft">
-        <div className="container mx-auto px-6">
+        <div className="max-w-[1600px] mx-auto px-6">
           <div className="flex items-center justify-between h-20">
             <Link href="/dashboard" className="flex items-center space-x-3">
               <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-soft">

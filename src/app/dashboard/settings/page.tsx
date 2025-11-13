@@ -5,6 +5,7 @@ import { createBrowserClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { Checkbox } from '@/components/ui/checkbox'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { User, Link2, CreditCard, Bell, Shield, Palette, Zap, Crown, Check, Sparkles } from 'lucide-react'
 import type { Profile } from '@/types'
@@ -82,6 +83,12 @@ export default function SettingsPage() {
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
   const [activeTab, setActiveTab] = useState<TabType>('profile')
+  const [notifications, setNotifications] = useState({
+    marketing: false,
+    analytics: true,
+    security: true,
+    billing: true,
+  })
 
   const supabase = createBrowserClient()
 
@@ -362,18 +369,12 @@ export default function SettingsPage() {
                     />
                   </div>
 
-                  <div className="flex items-center gap-3">
-                    <input
-                      type="checkbox"
-                      checked={profile.published}
-                      onChange={(e) => setProfile({ ...profile, published: e.target.checked })}
-                      className="w-5 h-5 rounded border-2 border-gray-300 text-primary-500 focus:ring-2 focus:ring-primary-500"
-                      id="published"
-                    />
-                    <label htmlFor="published" className="font-semibold">
-                      Make profile public
-                    </label>
-                  </div>
+                  <Checkbox
+                    checked={profile.published}
+                    onChange={(checked) => setProfile({ ...profile, published: checked })}
+                    label="Make profile public"
+                    id="published"
+                  />
 
                   <div className="flex gap-3 pt-4 border-t border-gray-200">
                     <Button type="submit" disabled={saving}>
@@ -595,40 +596,46 @@ export default function SettingsPage() {
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-6 space-y-4">
-                <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                  <div>
-                    <p className="font-semibold">Marketing emails</p>
-                    <p className="text-sm text-gray-600">Receive emails about new features and updates</p>
-                  </div>
-                  <input type="checkbox" className="w-5 h-5 rounded border-2 border-gray-300 text-primary-500" />
+                <div className="py-3 border-b border-gray-200">
+                  <Checkbox
+                    checked={notifications.marketing}
+                    onChange={(checked) => setNotifications({ ...notifications, marketing: checked })}
+                    label="Marketing emails"
+                    description="Receive emails about new features and updates"
+                  />
                 </div>
 
-                <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                  <div>
-                    <p className="font-semibold">Analytics reports</p>
-                    <p className="text-sm text-gray-600">Weekly summary of your profile performance</p>
-                  </div>
-                  <input type="checkbox" className="w-5 h-5 rounded border-2 border-gray-300 text-primary-500" defaultChecked />
+                <div className="py-3 border-b border-gray-200">
+                  <Checkbox
+                    checked={notifications.analytics}
+                    onChange={(checked) => setNotifications({ ...notifications, analytics: checked })}
+                    label="Analytics reports"
+                    description="Weekly summary of your profile performance"
+                  />
                 </div>
 
-                <div className="flex items-center justify-between py-3 border-b border-gray-200">
-                  <div>
-                    <p className="font-semibold">Security alerts</p>
-                    <p className="text-sm text-gray-600">Get notified about account security</p>
-                  </div>
-                  <input type="checkbox" className="w-5 h-5 rounded border-2 border-gray-300 text-primary-500" defaultChecked />
+                <div className="py-3 border-b border-gray-200">
+                  <Checkbox
+                    checked={notifications.security}
+                    onChange={(checked) => setNotifications({ ...notifications, security: checked })}
+                    label="Security alerts"
+                    description="Get notified about account security"
+                  />
                 </div>
 
-                <div className="flex items-center justify-between py-3">
-                  <div>
-                    <p className="font-semibold">Billing notifications</p>
-                    <p className="text-sm text-gray-600">Receipts and billing updates</p>
-                  </div>
-                  <input type="checkbox" className="w-5 h-5 rounded border-2 border-gray-300 text-primary-500" defaultChecked />
+                <div className="py-3">
+                  <Checkbox
+                    checked={notifications.billing}
+                    onChange={(checked) => setNotifications({ ...notifications, billing: checked })}
+                    label="Billing notifications"
+                    description="Receipts and billing updates"
+                  />
                 </div>
 
                 <div className="pt-4 border-t border-gray-200">
-                  <Button>Save Preferences</Button>
+                  <Button onClick={() => setMessage('Notification preferences saved!')}>
+                    Save Preferences
+                  </Button>
                 </div>
               </CardContent>
             </Card>
