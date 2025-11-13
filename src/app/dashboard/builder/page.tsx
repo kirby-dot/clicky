@@ -709,16 +709,38 @@ function ModuleEditor({
     }
   }
 
+  const template = MODULE_TEMPLATES.find((t) => t.type === module.type)
+
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4 backdrop-blur-sm">
-      <Card className="max-w-2xl w-full max-h-[90vh] overflow-y-auto">
-        <CardHeader className="bg-gradient-to-r from-pastel-lavender to-pastel-sky">
-          <CardTitle className="text-gray-900">Edit Module</CardTitle>
-          <CardDescription className="text-gray-700">
-            Configure your module settings
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="p-6 space-y-6">
+    <div className="fixed inset-0 bg-black/60 flex items-center justify-center z-50 p-4 backdrop-blur-md animate-in fade-in duration-200">
+      <div
+        className="max-w-2xl w-full max-h-[90vh] overflow-y-auto bg-white rounded-3xl shadow-soft-xl border border-gray-200 animate-in slide-in-from-bottom-4 duration-300"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className={`sticky top-0 z-10 bg-gradient-to-r from-pastel-lavender via-pastel-sky to-pastel-mint p-6 rounded-t-3xl border-b border-gray-200/50 backdrop-blur-sm`}>
+          <div className="flex items-center gap-4">
+            <div className={`p-3 ${template?.color || 'bg-white'} rounded-2xl shadow-soft border border-gray-200`}>
+              {template?.icon}
+            </div>
+            <div className="flex-1">
+              <h2 className="text-2xl font-bold text-gray-900">Edit {template?.label}</h2>
+              <p className="text-sm text-gray-600 mt-1">{template?.description}</p>
+            </div>
+            <button
+              onClick={onCancel}
+              className="p-2 hover:bg-white/50 rounded-xl transition-colors"
+              aria-label="Close"
+            >
+              <svg className="w-6 h-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="p-8 space-y-6">
           <div>
             <label className="block text-sm font-semibold text-gray-900 mb-2">Title</label>
             <Input
@@ -1040,16 +1062,41 @@ function ModuleEditor({
             </div>
           )}
 
-          <div className="flex gap-3 pt-6 border-t">
-            <Button onClick={() => onSave(editedModule)} className="flex-1">
-              Save Changes
+          {/* Footer Actions */}
+          <div className="flex gap-4 pt-8 border-t border-gray-200 sticky bottom-0 bg-white/95 backdrop-blur-sm -mx-8 px-8 -mb-8 pb-8 rounded-b-3xl">
+            <Button
+              onClick={() => onSave(editedModule)}
+              className="flex-1 h-12 text-base font-semibold shadow-soft-lg hover:shadow-soft-xl"
+              disabled={uploading}
+            >
+              {uploading ? (
+                <>
+                  <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                    <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                  Uploading...
+                </>
+              ) : (
+                <>
+                  <svg className="w-5 h-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                  </svg>
+                  Save Changes
+                </>
+              )}
             </Button>
-            <Button variant="outline" onClick={onCancel}>
+            <Button
+              variant="outline"
+              onClick={onCancel}
+              className="px-8 h-12 text-base font-semibold"
+              disabled={uploading}
+            >
               Cancel
             </Button>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </div>
   )
 }
