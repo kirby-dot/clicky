@@ -26,6 +26,7 @@ CREATE TABLE profiles (
   avatar_url TEXT,
   custom_css TEXT,
   meta_tags JSONB,
+  style JSONB,
   analytics_enabled BOOLEAN DEFAULT true,
   published BOOLEAN DEFAULT true,
   created_at TIMESTAMPTZ DEFAULT NOW(),

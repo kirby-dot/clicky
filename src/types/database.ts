@@ -49,6 +49,7 @@ export interface Database {
           avatar_url: string | null
           custom_css: string | null
           meta_tags: Json | null
+          style: Json | null
           analytics_enabled: boolean
           published: boolean
           created_at: string
@@ -64,6 +65,7 @@ export interface Database {
           avatar_url?: string | null
           custom_css?: string | null
           meta_tags?: Json | null
+          style?: Json | null
           analytics_enabled?: boolean
           published?: boolean
           created_at?: string
@@ -79,6 +81,7 @@ export interface Database {
           avatar_url?: string | null
           custom_css?: string | null
           meta_tags?: Json | null
+          style?: Json | null
           analytics_enabled?: boolean
           published?: boolean
           created_at?: string

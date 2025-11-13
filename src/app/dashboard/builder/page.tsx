@@ -27,7 +27,14 @@ import {
   MousePointerClick,
   HelpCircle,
   Clock,
-  Mail
+  Mail,
+  Instagram,
+  Twitter,
+  Youtube,
+  Linkedin,
+  Facebook,
+  Github,
+  MessageCircle
 } from 'lucide-react'
 import type { Module, ModuleType, Profile } from '@/types'
 import {
@@ -190,10 +197,12 @@ export default function BuilderPage() {
     backgroundImage?: string
     containerWidth?: 'full' | 'contained'
     animation?: 'none' | 'fade-in' | 'fade-up' | 'scale-in'
+    borderAnimation?: boolean
   }>({
-    backgroundColor: profile?.bg_color || '#f9fafb',
+    backgroundColor: '#f9fafb',
     containerWidth: 'contained',
-    animation: 'fade-up'
+    animation: 'fade-up',
+    borderAnimation: false
   })
 
   const supabase = createBrowserClient()
@@ -1555,9 +1564,9 @@ function PageStyleEditor({
   onSave,
   onCancel,
 }: {
-  style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained"; animation?: 'none' | 'fade-in' | 'fade-up' | 'scale-in' }
+  style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained"; animation?: 'none' | 'fade-in' | 'fade-up' | 'scale-in'; borderAnimation?: boolean }
   profile: Profile | null
-  onSave: (style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained"; animation?: 'none' | 'fade-in' | 'fade-up' | 'scale-in' }) => Promise<void>
+  onSave: (style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained"; animation?: 'none' | 'fade-in' | 'fade-up' | 'scale-in'; borderAnimation?: boolean }) => Promise<void>
   onCancel: () => void
 }) {
   const [editedStyle, setEditedStyle] = useState(style)
@@ -1653,6 +1662,35 @@ function PageStyleEditor({
                   <p className="text-xs text-gray-600 mt-1">{anim.desc}</p>
                 </button>
               ))}
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label className="font-bold text-gray-900">Animated Borders (Beams)</label>
+            <p className="text-sm text-gray-600">Add moving gradient borders to your modules</p>
+            <div className="grid grid-cols-2 gap-3">
+              <button
+                onClick={() => setEditedStyle({ ...editedStyle, borderAnimation: false })}
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  !editedStyle.borderAnimation
+                    ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-300'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <p className="font-bold text-sm">Disabled</p>
+                <p className="text-xs text-gray-600 mt-1">No border effects</p>
+              </button>
+              <button
+                onClick={() => setEditedStyle({ ...editedStyle, borderAnimation: true })}
+                className={`p-4 rounded-xl border-2 transition-all ${
+                  editedStyle.borderAnimation
+                    ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-300'
+                    : 'border-gray-200 hover:border-gray-300'
+                }`}
+              >
+                <p className="font-bold text-sm">Enabled</p>
+                <p className="text-xs text-gray-600 mt-1">Animated gradient borders</p>
+              </button>
             </div>
           </div>
         </div>

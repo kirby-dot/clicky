@@ -35,6 +35,7 @@ export default function ProfileModulesView({ profile, modules }: ProfileModulesV
   const pageStyle = (profile.style as any) || {}
   const containerWidth = pageStyle.containerWidth || 'contained'
   const animation = pageStyle.animation || 'fade-up'
+  const borderAnimation = pageStyle.borderAnimation || false
 
   // Different animation variants
   const getItemVariant = () => {
@@ -99,6 +100,7 @@ export default function ProfileModulesView({ profile, modules }: ProfileModulesV
               module={module}
               profileId={profile.id}
               index={index}
+              borderAnimation={borderAnimation}
             />
           ))}
         </div>

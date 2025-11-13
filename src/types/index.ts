@@ -89,6 +89,9 @@ export type ModuleType =
   | 'button-grid'
   | 'two-column'
   | 'spacer'
+  | 'button'
+  | 'accordion'
+  | 'email'
 
 export interface BaseModule {
   id: string

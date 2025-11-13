@@ -21,9 +21,10 @@ interface ModuleRendererProps {
   module: Module
   profileId: string
   index: number
+  borderAnimation?: boolean
 }
 
-export function ModuleRenderer({ module, profileId, index }: ModuleRendererProps) {
+export function ModuleRenderer({ module, profileId, index, borderAnimation = false }: ModuleRendererProps) {
   const colors = ['bg-pastel-sky', 'bg-pastel-lavender', 'bg-pastel-mint', 'bg-pastel-rose', 'bg-pastel-peach', 'bg-pastel-butter']
   const bgColor = colors[index % colors.length]
 
@@ -68,8 +69,19 @@ export function ModuleRenderer({ module, profileId, index }: ModuleRendererProps
   }
 
   return (
-    <motion.div variants={item}>
-      {renderModule()}
+    <motion.div
+      variants={item}
+      style={borderAnimation ? {
+        padding: '3px',
+        background: 'linear-gradient(90deg, #a855f7, #ec4899, #3b82f6, #10b981, #a855f7)',
+        backgroundSize: '300% 300%',
+        animation: 'beam-border 3s linear infinite',
+        borderRadius: '1rem',
+      } : {}}
+    >
+      <div className={borderAnimation ? 'bg-white rounded-xl' : ''}>
+        {renderModule()}
+      </div>
     </motion.div>
   )
 }
