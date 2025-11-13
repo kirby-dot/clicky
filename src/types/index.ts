@@ -292,3 +292,113 @@ export type ProfileWithModules = Profile & {
   modules: Module[]
   theme?: Theme | null
 }
+
+// A/B Testing Types
+export type ABTestStatus = 'draft' | 'running' | 'paused' | 'completed'
+
+export interface ABTest {
+  id: string
+  profile_id: string
+  module_id: string
+  name: string
+  description?: string
+  status: ABTestStatus
+  winner_variant_id?: string
+  started_at?: string
+  ended_at?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface ABTestVariant {
+  id: string
+  test_id: string
+  name: string
+  is_control: boolean
+  traffic_percentage: number
+  content: ModuleContent
+  views: number
+  clicks: number
+  created_at: string
+  updated_at: string
+}
+
+export interface ABTestResults {
+  variant_id: string
+  variant_name: string
+  views: number
+  clicks: number
+  ctr: number
+  is_winner: boolean
+  confidence: number
+}
+
+export type ABTestWithVariants = ABTest & {
+  variants: ABTestVariant[]
+}
+
+// Integrations Types
+export type IntegrationProvider =
+  | 'mailchimp'
+  | 'convertkit'
+  | 'klaviyo'
+  | 'zapier'
+  | 'make'
+  | 'google_analytics'
+  | 'facebook_pixel'
+  | 'tiktok_pixel'
+  | 'stripe'
+  | 'paypal'
+  | 'calendly'
+  | 'cal_com'
+  | 'discord'
+  | 'slack'
+  | 'twitter_api'
+  | 'instagram_api'
+  | 'custom_webhook'
+
+export type IntegrationSyncStatus = 'idle' | 'syncing' | 'success' | 'error'
+
+export interface Integration {
+  id: string
+  profile_id: string
+  provider: IntegrationProvider
+  name: string
+  is_active: boolean
+  config: Record<string, any>
+  credentials?: Record<string, any>
+  last_sync_at?: string
+  sync_status: IntegrationSyncStatus
+  error_message?: string
+  created_at: string
+  updated_at: string
+}
+
+export interface IntegrationEvent {
+  id: string
+  integration_id: string
+  event_type: string
+  payload?: Record<string, any>
+  response?: Record<string, any>
+  status: 'pending' | 'success' | 'failed'
+  error_message?: string
+  created_at: string
+}
+
+export interface IntegrationConfig {
+  provider: IntegrationProvider
+  displayName: string
+  description: string
+  icon: string
+  category: 'email' | 'automation' | 'analytics' | 'payment' | 'calendar' | 'social' | 'other'
+  requiresAuth: boolean
+  configFields: Array<{
+    key: string
+    label: string
+    type: 'text' | 'password' | 'url' | 'select' | 'boolean'
+    placeholder?: string
+    required?: boolean
+    options?: Array<{ label: string; value: string }>
+  }>
+  features: string[]
+}
