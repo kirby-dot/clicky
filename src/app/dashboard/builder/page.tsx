@@ -435,28 +435,47 @@ export default function BuilderPage() {
               <CardHeader className="bg-gradient-to-r from-pastel-sky to-pastel-lavender">
                 <CardTitle className="flex items-center justify-between">
                   <span className="text-gray-900">Live Preview</span>
-                  <a
-                    href={`/${profile.slug}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="text-sm font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-1"
-                  >
-                    View Page
-                    <ExternalLink className="w-4 h-4" />
-                  </a>
+                  {profile.slug && (
+                    <a
+                      href={`/${profile.slug}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-1"
+                    >
+                      View Page
+                      <ExternalLink className="w-4 h-4" />
+                    </a>
+                  )}
                 </CardTitle>
                 <CardDescription className="text-gray-700">
-                  Updates automatically after changes
+                  {profile.slug ? 'Updates automatically after changes' : 'Set your username in Settings to see preview'}
                 </CardDescription>
               </CardHeader>
               <CardContent className="p-0">
                 <div className="relative w-full bg-gray-50" style={{ height: '600px' }}>
-                  <iframe
-                    key={previewKey}
-                    src={`/${profile.slug}?preview=${Date.now()}`}
-                    className="w-full h-full border-0"
-                    title="Profile Preview"
-                  />
+                  {profile.slug ? (
+                    <iframe
+                      key={previewKey}
+                      src={`/${profile.slug}?preview=${Date.now()}`}
+                      className="w-full h-full border-0"
+                      title="Profile Preview"
+                    />
+                  ) : (
+                    <div className="flex items-center justify-center h-full">
+                      <div className="text-center p-8">
+                        <p className="text-gray-900 font-semibold text-lg mb-2">No username set</p>
+                        <p className="text-gray-600 mb-6">
+                          Go to Settings to set your username before viewing your page
+                        </p>
+                        <a
+                          href="/dashboard/settings"
+                          className="inline-flex items-center px-6 py-3 bg-primary-500 text-white font-semibold rounded-xl hover:bg-primary-600 transition-all shadow-soft hover:scale-105"
+                        >
+                          Go to Settings
+                        </a>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </CardContent>
             </Card>
