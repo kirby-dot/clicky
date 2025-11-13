@@ -318,6 +318,7 @@ function BuilderPageContent() {
 
       if (!profileData) {
         // No profile found - redirect to profiles page to create one
+        // Keep loading true while redirecting to avoid showing error message
         router.push('/dashboard/profiles')
         return
       }
@@ -336,9 +337,9 @@ function BuilderPageContent() {
         .order('position')
 
       setModules((modulesData as Module[]) || [])
+      setLoading(false)
     } catch (error) {
       console.error('Error loading data:', error)
-    } finally {
       setLoading(false)
     }
   }
