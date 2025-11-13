@@ -1,4 +1,4 @@
-import { Instagram, Twitter, Youtube, Linkedin, Facebook, Github, Music as TwitchIcon, MessageCircle } from 'lucide-react'
+import { Instagram, Twitter, Youtube, Linkedin, Facebook, Github, Music, MessageCircle } from 'lucide-react'
 import type { Module, SocialLinksContent } from '@/types'
 
 interface SocialLinksModuleProps {
@@ -8,13 +8,13 @@ interface SocialLinksModuleProps {
 const SOCIAL_ICONS = {
   instagram: Instagram,
   twitter: Twitter,
-  tiktok: Music as TwitchIcon,
+  tiktok: Music,
   youtube: Youtube,
   linkedin: Linkedin,
   facebook: Facebook,
   github: Github,
   discord: MessageCircle,
-  twitch: TwitchIcon,
+  twitch: Music,
   spotify: Music,
 }
 
