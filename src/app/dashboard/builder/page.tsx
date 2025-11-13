@@ -34,7 +34,18 @@ import {
   Linkedin,
   Facebook,
   Github,
-  MessageCircle
+  MessageCircle,
+  Search,
+  ChevronLeft,
+  ChevronRight,
+  Copy,
+  Smartphone,
+  Tablet,
+  Monitor,
+  Settings,
+  Save,
+  X,
+  Check,
 } from 'lucide-react'
 import type { Module, ModuleType, Profile } from '@/types'
 import {
@@ -66,6 +77,7 @@ interface ModuleTemplate {
   description: string
   defaultContent: any
   color: string
+  category: 'links' | 'text' | 'media' | 'social' | 'utility'
 }
 
 const MODULE_TEMPLATES: ModuleTemplate[] = [
@@ -75,7 +87,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Link Button',
     description: 'Clickable link',
     defaultContent: { url: 'https://example.com' },
-    color: 'bg-pastel-sky'
+    color: 'bg-pastel-sky',
+    category: 'links'
   },
   {
     type: 'header',
@@ -83,7 +96,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Header',
     description: 'Section title',
     defaultContent: { text: 'New Heading', level: 'h2', align: 'center' },
-    color: 'bg-pastel-lavender'
+    color: 'bg-pastel-lavender',
+    category: 'text'
   },
   {
     type: 'text',
@@ -91,7 +105,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Text Block',
     description: 'Paragraph',
     defaultContent: { text: 'Add your text...', align: 'center' },
-    color: 'bg-pastel-peach'
+    color: 'bg-pastel-peach',
+    category: 'text'
   },
   {
     type: 'image',
@@ -99,7 +114,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Image',
     description: 'Photo/graphic',
     defaultContent: { url: '', alt: '' },
-    color: 'bg-pastel-mint'
+    color: 'bg-pastel-mint',
+    category: 'media'
   },
   {
     type: 'divider',
@@ -107,7 +123,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Divider',
     description: 'Separator line',
     defaultContent: { style: 'solid' },
-    color: 'bg-pastel-sage'
+    color: 'bg-pastel-sage',
+    category: 'utility'
   },
   {
     type: 'video',
@@ -115,7 +132,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Video',
     description: 'YouTube/Vimeo',
     defaultContent: { url: '' },
-    color: 'bg-pastel-rose'
+    color: 'bg-pastel-rose',
+    category: 'media'
   },
   {
     type: 'music',
@@ -123,7 +141,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Music',
     description: 'Spotify/etc',
     defaultContent: { url: '' },
-    color: 'bg-pastel-butter'
+    color: 'bg-pastel-butter',
+    category: 'media'
   },
   {
     type: 'social-links',
@@ -131,7 +150,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Social Links',
     description: 'Social icons',
     defaultContent: { links: [], layout: 'horizontal' },
-    color: 'bg-pastel-lilac'
+    color: 'bg-pastel-lilac',
+    category: 'social'
   },
   {
     type: 'spacer',
@@ -139,7 +159,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Spacer',
     description: 'Empty space',
     defaultContent: { height: 32 },
-    color: 'bg-gray-100'
+    color: 'bg-gray-100',
+    category: 'utility'
   },
   {
     type: 'button',
@@ -147,7 +168,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Button/CTA',
     description: 'Call-to-action',
     defaultContent: { url: '', text: 'Click Here', style: 'primary' },
-    color: 'bg-pastel-rose'
+    color: 'bg-pastel-rose',
+    category: 'links'
   },
   {
     type: 'accordion',
@@ -155,7 +177,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Accordion/FAQ',
     description: 'Expandable Q&A',
     defaultContent: { question: 'Question?', answer: 'Answer here...' },
-    color: 'bg-pastel-mint'
+    color: 'bg-pastel-mint',
+    category: 'utility'
   },
   {
     type: 'countdown',
@@ -163,7 +186,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Countdown',
     description: 'Timer/Launch',
     defaultContent: { targetDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), title: 'Coming Soon' },
-    color: 'bg-pastel-lavender'
+    color: 'bg-pastel-lavender',
+    category: 'utility'
   },
   {
     type: 'email',
@@ -171,7 +195,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Email Button',
     description: 'Contact button',
     defaultContent: { email: '', buttonText: 'Get in Touch' },
-    color: 'bg-pastel-sage'
+    color: 'bg-pastel-sage',
+    category: 'links'
   },
   {
     type: 'button-grid',
@@ -179,7 +204,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     label: 'Button Grid',
     description: '2-3 columns',
     defaultContent: { buttons: [{ title: 'Button 1', url: '' }, { title: 'Button 2', url: '' }], columns: 2 },
-    color: 'bg-pastel-butter'
+    color: 'bg-pastel-butter',
+    category: 'links'
   },
   {
     type: 'two-column',
@@ -191,7 +217,8 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
       rightModuleId: null,
       ratio: '50-50'
     },
-    color: 'bg-pastel-sky'
+    color: 'bg-pastel-sky',
+    category: 'utility'
   },
 ]
 
@@ -200,10 +227,16 @@ export default function BuilderPage() {
   const [modules, setModules] = useState<Module[]>([])
   const [loading, setLoading] = useState(true)
   const [editingModule, setEditingModule] = useState<Module | null>(null)
+  const [selectedModule, setSelectedModule] = useState<Module | null>(null)
   const [previewKey, setPreviewKey] = useState(0)
   const [saving, setSaving] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [showStyleEditor, setShowStyleEditor] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
+  const [activeCategory, setActiveCategory] = useState<string>('all')
+  const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(false)
+  const [rightPanelCollapsed, setRightPanelCollapsed] = useState(true)
+  const [deviceMode, setDeviceMode] = useState<'mobile' | 'tablet' | 'desktop'>('mobile')
   const [pageStyle, setPageStyle] = useState<{
     backgroundColor?: string
     backgroundImage?: string
@@ -414,154 +447,321 @@ export default function BuilderPage() {
 
   const activeModule = activeId ? modules.find(m => m.id === activeId) : null
 
+  // Filter modules by search and category
+  const filteredTemplates = MODULE_TEMPLATES.filter(template => {
+    const matchesSearch = template.label.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                         template.description.toLowerCase().includes(searchQuery.toLowerCase())
+    const matchesCategory = activeCategory === 'all' || template.category === activeCategory
+    return matchesSearch && matchesCategory
+  })
+
+  // Get device width for preview
+  const deviceWidths = {
+    mobile: '375px',
+    tablet: '768px',
+    desktop: '100%'
+  }
+
+  // Category config
+  const categories = [
+    { id: 'all', label: 'All Modules', icon: <Type className="w-4 h-4" /> },
+    { id: 'links', label: 'Links & Buttons', icon: <LinkIcon className="w-4 h-4" /> },
+    { id: 'text', label: 'Text', icon: <Type className="w-4 h-4" /> },
+    { id: 'media', label: 'Media', icon: <ImageIcon className="w-4 h-4" /> },
+    { id: 'social', label: 'Social', icon: <Share2 className="w-4 h-4" /> },
+    { id: 'utility', label: 'Utility', icon: <Settings className="w-4 h-4" /> },
+  ]
+
   return (
-    <div className="space-y-8">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Page Builder</h1>
-          <p className="text-gray-500 mt-2">Drag modules to reorder, click to edit</p>
+    <div className="flex flex-col h-screen bg-gray-50">
+      {/* Top Bar */}
+      <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
+        <div className="flex items-center gap-4">
+          <h1 className="text-xl font-bold text-gray-900">Page Builder</h1>
+          {profile?.slug && (
+            <a
+              href={`/${profile.slug}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
+            >
+              <ExternalLink className="w-4 h-4" />
+              View Live
+            </a>
+          )}
         </div>
+
         <div className="flex items-center gap-3">
+          {/* Device Toggle */}
+          <div className="flex items-center gap-1 bg-gray-100 rounded-lg p-1">
+            <button
+              onClick={() => setDeviceMode('mobile')}
+              className={`p-2 rounded ${deviceMode === 'mobile' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+              title="Mobile view"
+            >
+              <Smartphone className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setDeviceMode('tablet')}
+              className={`p-2 rounded ${deviceMode === 'tablet' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+              title="Tablet view"
+            >
+              <Tablet className="w-4 h-4" />
+            </button>
+            <button
+              onClick={() => setDeviceMode('desktop')}
+              className={`p-2 rounded ${deviceMode === 'desktop' ? 'bg-white shadow-sm' : 'hover:bg-gray-200'}`}
+              title="Desktop view"
+            >
+              <Monitor className="w-4 h-4" />
+            </button>
+          </div>
+
           <Button
             onClick={() => setShowStyleEditor(true)}
-            className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+            variant="outline"
+            size="sm"
+            className="flex items-center gap-2"
           >
-            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
-            </svg>
-            Page Styling
+            <Settings className="w-4 h-4" />
+            Page Style
           </Button>
+
           <Button
             onClick={refreshPreview}
             variant="outline"
+            size="sm"
             className="flex items-center gap-2"
           >
             <RefreshCw className="w-4 h-4" />
-            Refresh
           </Button>
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-        {/* Left Sidebar - Module Templates */}
-        <div className="lg:col-span-2 space-y-4">
-          <div>
-            <h2 className="text-lg font-semibold mb-3 text-gray-900">Add Modules</h2>
-            <p className="text-sm text-gray-500 mb-4">Click to add to your page</p>
-          </div>
-          <div className="space-y-2 max-h-[calc(100vh-250px)] overflow-y-auto pr-2">
-            {MODULE_TEMPLATES.map((template) => (
-              <button
-                key={template.type}
-                onClick={() => handleAddModule(template)}
-                disabled={saving}
-                className={`w-full p-3 ${template.color} rounded-xl text-left shadow-soft hover:shadow-soft-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200`}
-              >
-                <div className="flex items-center gap-3">
-                  <div className="p-2 bg-white rounded-lg shadow-sm">
-                    {template.icon}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm text-gray-900">{template.label}</div>
-                    <div className="text-xs text-gray-600">{template.description}</div>
-                  </div>
-                  <Plus className="w-4 h-4 text-gray-400" />
-                </div>
-              </button>
-            ))}
-          </div>
-        </div>
+      {/* Three-Panel Layout */}
+      <div className="flex flex-1 overflow-hidden">
+        {/* Left Sidebar - Module Library */}
+        {!leftSidebarCollapsed && (
+          <div className="w-80 bg-white border-r border-gray-200 flex flex-col">
+            {/* Search & Categories */}
+            <div className="p-4 border-b border-gray-200 space-y-4">
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+                <Input
+                  type="text"
+                  placeholder="Search modules..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
 
-        {/* Center - Builder Canvas */}
-        <div className="lg:col-span-5 space-y-6">
-          <div>
-            <h2 className="text-lg font-semibold mb-3 text-gray-900">Your Modules</h2>
-            <p className="text-sm text-gray-500 mb-4">Drag to reorder, click to edit</p>
-          </div>
-          <div className="max-h-[calc(100vh-250px)] overflow-y-auto pr-2">
-          {modules.length === 0 ? (
-            <Card className="py-16">
-              <CardContent className="text-center">
-                <div className="max-w-sm mx-auto">
-                  <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                    <Plus className="w-8 h-8 text-gray-400" />
-                  </div>
-                  <p className="text-lg font-semibold text-gray-900 mb-2">No modules yet</p>
-                  <p className="text-sm text-gray-500">
-                    Click any module from the left sidebar to add it to your page
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
-          ) : (
-            <DndContext
-              sensors={sensors}
-              collisionDetection={closestCenter}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-            >
-              <SortableContext
-                items={modules.map((m) => m.id)}
-                strategy={verticalListSortingStrategy}
-              >
-                <div className="space-y-4">
-                  {modules.map((module) => (
-                    <SortableModule
-                      key={module.id}
-                      module={module}
-                      onDelete={handleDeleteModule}
-                      onToggleActive={handleToggleActive}
-                      onEdit={setEditingModule}
-                    />
-                  ))}
-                </div>
-              </SortableContext>
-              <DragOverlay>
-                {activeModule ? (
-                  <div className="opacity-90">
-                    <ModuleCard module={activeModule} isDragging={true} />
-                  </div>
-                ) : null}
-              </DragOverlay>
-            </DndContext>
-          )}
-          </div>
-        </div>
-
-        {/* Right - Live Preview */}
-        <div className="lg:col-span-5">
-          {profile && (
-            <div className="sticky top-8">
-              <Card>
-                <CardHeader className="bg-gradient-to-r from-pastel-sky to-pastel-lavender">
-                  <CardTitle className="flex items-center justify-between">
-                    <span className="text-gray-900">Live Preview</span>
-                    {profile.slug && (
-                      <a
-                        href={`/${profile.slug}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-sm font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-1"
-                      >
-                        View Page
-                        <ExternalLink className="w-4 h-4" />
-                      </a>
-                    )}
-                  </CardTitle>
-                  <CardDescription className="text-gray-700">
-                    Real-time preview - updates instantly
-                  </CardDescription>
-                </CardHeader>
-                <CardContent className="p-0">
-                  <div className="relative w-full overflow-y-auto rounded-b-2xl" style={{ height: 'calc(100vh - 280px)', background: pageStyle.backgroundColor || 'linear-gradient(to-br, #f0f9ff, #faf5ff)', backgroundImage: pageStyle.backgroundImage ? `url(${pageStyle.backgroundImage})` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }}>
-                    <LivePreview profile={profile} modules={modules.filter(m => m.active)} containerWidth={pageStyle.containerWidth} />
-                  </div>
-                </CardContent>
-              </Card>
+              <div className="flex flex-wrap gap-2">
+                {categories.map((cat) => (
+                  <button
+                    key={cat.id}
+                    onClick={() => setActiveCategory(cat.id)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+                      activeCategory === cat.id
+                        ? 'bg-purple-100 text-purple-700'
+                        : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                    }`}
+                  >
+                    {cat.label}
+                  </button>
+                ))}
+              </div>
             </div>
-          )}
+
+            {/* Module Templates */}
+            <div className="flex-1 overflow-y-auto p-4 space-y-2">
+              {filteredTemplates.length === 0 ? (
+                <div className="text-center py-8 text-gray-500 text-sm">
+                  No modules found
+                </div>
+              ) : (
+                filteredTemplates.map((template) => (
+                  <button
+                    key={template.type}
+                    onClick={() => handleAddModule(template)}
+                    disabled={saving}
+                    className={`w-full p-3 ${template.color} rounded-xl text-left hover:shadow-md transition-all hover:scale-[1.02] active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border border-gray-200`}
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="p-2 bg-white rounded-lg shadow-sm">
+                        {template.icon}
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <div className="font-semibold text-sm text-gray-900">{template.label}</div>
+                        <div className="text-xs text-gray-600 truncate">{template.description}</div>
+                      </div>
+                      <Plus className="w-4 h-4 text-gray-400 flex-shrink-0" />
+                    </div>
+                  </button>
+                ))
+              )}
+            </div>
+
+            {/* Collapse Button */}
+            <button
+              onClick={() => setLeftSidebarCollapsed(true)}
+              className="p-2 border-t border-gray-200 hover:bg-gray-50 flex items-center justify-center"
+            >
+              <ChevronLeft className="w-5 h-5 text-gray-400" />
+            </button>
+          </div>
+        )}
+
+        {/* Collapsed Left Sidebar */}
+        {leftSidebarCollapsed && (
+          <button
+            onClick={() => setLeftSidebarCollapsed(false)}
+            className="w-12 bg-white border-r border-gray-200 hover:bg-gray-50 flex items-center justify-center"
+          >
+            <ChevronRight className="w-5 h-5 text-gray-400" />
+          </button>
+        )}
+
+        {/* Center - Canvas/Preview */}
+        <div className="flex-1 flex flex-col bg-gray-100 overflow-hidden">
+          <div className="flex-1 overflow-y-auto p-8 flex justify-center">
+            {profile && (
+              <div
+                className="transition-all duration-300 bg-white shadow-2xl rounded-2xl overflow-hidden"
+                style={{
+                  width: deviceWidths[deviceMode],
+                  maxWidth: '100%',
+                  height: 'fit-content',
+                  minHeight: deviceMode === 'mobile' ? '667px' : '600px'
+                }}
+              >
+                <div
+                  className="relative w-full"
+                  style={{
+                    background: pageStyle.backgroundColor || 'linear-gradient(to-br, #f0f9ff, #faf5ff)',
+                    backgroundImage: pageStyle.backgroundImage ? `url(${pageStyle.backgroundImage})` : undefined,
+                    backgroundSize: 'cover',
+                    backgroundPosition: 'center',
+                    minHeight: 'inherit'
+                  }}
+                >
+                  {modules.length === 0 ? (
+                    <div className="flex items-center justify-center py-24 px-4">
+                      <div className="text-center">
+                        <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                          <Plus className="w-8 h-8 text-gray-400" />
+                        </div>
+                        <p className="text-lg font-semibold text-gray-900 mb-2">Start building</p>
+                        <p className="text-sm text-gray-500">
+                          Add modules from the left sidebar
+                        </p>
+                      </div>
+                    </div>
+                  ) : (
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragStart={handleDragStart}
+                      onDragEnd={handleDragEnd}
+                    >
+                      <SortableContext
+                        items={modules.map((m) => m.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <div className="space-y-4 p-4">
+                          {modules.map((module, index) => (
+                            <InCanvasModule
+                              key={module.id}
+                              module={module}
+                              profileId={profile.id}
+                              index={index}
+                              isSelected={selectedModule?.id === module.id}
+                              onSelect={() => {
+                                setSelectedModule(module)
+                                setRightPanelCollapsed(false)
+                              }}
+                              onDelete={handleDeleteModule}
+                              onToggleActive={handleToggleActive}
+                              onDuplicate={async (m) => {
+                                if (!profile) return
+                                const { data } = await supabase
+                                  .from('modules')
+                                  .insert({
+                                    profile_id: profile.id,
+                                    type: m.type,
+                                    title: m.title + ' (Copy)',
+                                    content: m.content,
+                                    position: modules.length,
+                                  })
+                                  .select()
+                                  .single()
+                                if (data) {
+                                  setModules([...modules, data as Module])
+                                  setTimeout(refreshPreview, 100)
+                                }
+                              }}
+                            />
+                          ))}
+                        </div>
+                      </SortableContext>
+                      <DragOverlay>
+                        {activeModule ? (
+                          <div className="opacity-90">
+                            <InCanvasModuleCard
+                              module={activeModule}
+                              profileId={profile.id}
+                              index={modules.findIndex(m => m.id === activeModule.id)}
+                              isDragging={true}
+                            />
+                          </div>
+                        ) : null}
+                      </DragOverlay>
+                    </DndContext>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
+
+        {/* Right Panel - Properties */}
+        {!rightPanelCollapsed && selectedModule && (
+          <div className="w-96 bg-white border-l border-gray-200 flex flex-col">
+            <div className="p-4 border-b border-gray-200 flex items-center justify-between">
+              <h3 className="font-semibold text-gray-900">Module Settings</h3>
+              <button
+                onClick={() => {
+                  setRightPanelCollapsed(true)
+                  setSelectedModule(null)
+                }}
+                className="p-1 hover:bg-gray-100 rounded"
+              >
+                <X className="w-5 h-5 text-gray-400" />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4">
+              <PropertiesPanel
+                module={selectedModule}
+                modules={modules}
+                onUpdate={async (updatedModule) => {
+                  await handleUpdateModule(updatedModule)
+                  setSelectedModule(updatedModule)
+                }}
+              />
+            </div>
+          </div>
+        )}
+
+        {/* Collapsed Right Panel Indicator */}
+        {rightPanelCollapsed && selectedModule && (
+          <button
+            onClick={() => setRightPanelCollapsed(false)}
+            className="w-12 bg-white border-l border-gray-200 hover:bg-gray-50 flex items-center justify-center"
+          >
+            <ChevronLeft className="w-5 h-5 text-gray-400" />
+          </button>
+        )}
       </div>
 
       {/* Edit Module Modal */}
@@ -603,6 +803,363 @@ export default function BuilderPage() {
           onCancel={() => setShowStyleEditor(false)}
         />
       )}
+    </div>
+  )
+}
+
+// In-Canvas Module with hover actions
+function InCanvasModule({
+  module,
+  profileId,
+  index,
+  isSelected,
+  onSelect,
+  onDelete,
+  onToggleActive,
+  onDuplicate,
+}: {
+  module: Module
+  profileId: string
+  index: number
+  isSelected: boolean
+  onSelect: () => void
+  onDelete: (id: string) => void
+  onToggleActive: (module: Module) => void
+  onDuplicate: (module: Module) => void
+}) {
+  const [isHovered, setIsHovered] = useState(false)
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: module.id })
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
+  const template = MODULE_TEMPLATES.find((t) => t.type === module.type)
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={onSelect}
+      className={`relative group cursor-pointer transition-all ${
+        isSelected
+          ? 'ring-2 ring-purple-500 ring-offset-2'
+          : 'hover:ring-2 hover:ring-gray-300'
+      } ${!module.active ? 'opacity-60' : ''} rounded-lg`}
+    >
+      {/* Module Preview */}
+      <div className="pointer-events-none">
+        <ModuleRenderer module={module} profileId={profileId} index={index} />
+      </div>
+
+      {/* Hover Overlay with Actions */}
+      {(isHovered || isSelected) && (
+        <div className="absolute inset-0 bg-black/5 rounded-lg flex items-center justify-center gap-2 pointer-events-auto">
+          <button
+            {...attributes}
+            {...listeners}
+            className="p-2 bg-white rounded-lg shadow-md hover:bg-gray-50 cursor-grab active:cursor-grabbing"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <GripVertical className="w-4 h-4 text-gray-600" />
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onToggleActive(module)
+            }}
+            className="p-2 bg-white rounded-lg shadow-md hover:bg-gray-50"
+            title={module.active ? 'Hide module' : 'Show module'}
+          >
+            {module.active ? (
+              <Eye className="w-4 h-4 text-gray-600" />
+            ) : (
+              <EyeOff className="w-4 h-4 text-gray-600" />
+            )}
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onDuplicate(module)
+            }}
+            className="p-2 bg-white rounded-lg shadow-md hover:bg-gray-50"
+            title="Duplicate"
+          >
+            <Copy className="w-4 h-4 text-gray-600" />
+          </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              if (confirm('Delete this module?')) {
+                onDelete(module.id)
+              }
+            }}
+            className="p-2 bg-white rounded-lg shadow-md hover:bg-red-50"
+            title="Delete"
+          >
+            <Trash2 className="w-4 h-4 text-red-600" />
+          </button>
+        </div>
+      )}
+
+      {/* Module Type Badge */}
+      {(isHovered || isSelected) && (
+        <div className="absolute top-2 left-2 px-2 py-1 bg-white rounded-md shadow-sm flex items-center gap-1.5">
+          {template?.icon}
+          <span className="text-xs font-medium text-gray-700">{template?.label}</span>
+        </div>
+      )}
+    </div>
+  )
+}
+
+// Drag overlay card
+function InCanvasModuleCard({ module, profileId, index, isDragging = false }: { module: Module; profileId: string; index: number; isDragging?: boolean }) {
+  return (
+    <div className={`p-4 bg-white rounded-lg border-2 border-gray-300 ${isDragging ? 'shadow-2xl' : ''}`}>
+      <ModuleRenderer module={module} profileId={profileId} index={index} />
+    </div>
+  )
+}
+
+// Properties Panel for editing selected module
+function PropertiesPanel({
+  module,
+  modules,
+  onUpdate,
+}: {
+  module: Module
+  modules: Module[]
+  onUpdate: (module: Module) => void
+}) {
+  const [editedModule, setEditedModule] = useState<Module>(module)
+  const [uploading, setUploading] = useState(false)
+  const supabase = createBrowserClient()
+
+  // Update local state when module prop changes
+  useEffect(() => {
+    setEditedModule(module)
+  }, [module])
+
+  const updateContent = (key: string, value: any) => {
+    setEditedModule({
+      ...editedModule,
+      content: {
+        ...editedModule.content,
+        [key]: value,
+      },
+    })
+  }
+
+  const handleSave = () => {
+    onUpdate(editedModule)
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>, key: string) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    setUploading(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Math.random()}.${fileExt}`
+      const { error: uploadError } = await supabase.storage
+        .from('images')
+        .upload(fileName, file)
+
+      if (uploadError) throw uploadError
+
+      const { data } = supabase.storage.from('images').getPublicUrl(fileName)
+      updateContent(key, data.publicUrl)
+    } catch (error: any) {
+      alert('Error uploading image: ' + error.message)
+    } finally {
+      setUploading(false)
+    }
+  }
+
+  // Render different editors based on module type
+  const renderEditor = () => {
+    switch (editedModule.type) {
+      case 'link':
+        return (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
+              <Input
+                value={editedModule.title || ''}
+                onChange={(e) => setEditedModule({ ...editedModule, title: e.target.value })}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">URL</label>
+              <Input
+                type="url"
+                value={(editedModule.content as any).url || ''}
+                onChange={(e) => updateContent('url', e.target.value)}
+              />
+            </div>
+          </>
+        )
+
+      case 'header':
+        return (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Text</label>
+              <Input
+                value={(editedModule.content as any).text || ''}
+                onChange={(e) => updateContent('text', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Level</label>
+              <select
+                value={(editedModule.content as any).level || 'h2'}
+                onChange={(e) => updateContent('level', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              >
+                <option value="h1">H1 - Largest</option>
+                <option value="h2">H2 - Large</option>
+                <option value="h3">H3 - Medium</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Alignment</label>
+              <select
+                value={(editedModule.content as any).align || 'center'}
+                onChange={(e) => updateContent('align', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              >
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+          </>
+        )
+
+      case 'text':
+        return (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Text</label>
+              <Textarea
+                value={(editedModule.content as any).text || ''}
+                onChange={(e) => updateContent('text', e.target.value)}
+                rows={4}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Alignment</label>
+              <select
+                value={(editedModule.content as any).align || 'center'}
+                onChange={(e) => updateContent('align', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              >
+                <option value="left">Left</option>
+                <option value="center">Center</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+          </>
+        )
+
+      case 'image':
+        return (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Image</label>
+              <Input
+                type="file"
+                accept="image/*"
+                onChange={(e) => handleImageUpload(e, 'url')}
+                disabled={uploading}
+              />
+              {(editedModule.content as any).url && (
+                <img src={(editedModule.content as any).url} alt="" className="mt-2 rounded-lg max-h-40" />
+              )}
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Alt Text</label>
+              <Input
+                value={(editedModule.content as any).alt || ''}
+                onChange={(e) => updateContent('alt', e.target.value)}
+              />
+            </div>
+          </>
+        )
+
+      case 'button':
+        return (
+          <>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Button Text</label>
+              <Input
+                value={(editedModule.content as any).text || ''}
+                onChange={(e) => updateContent('text', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">URL</label>
+              <Input
+                type="url"
+                value={(editedModule.content as any).url || ''}
+                onChange={(e) => updateContent('url', e.target.value)}
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-2">Style</label>
+              <select
+                value={(editedModule.content as any).style || 'primary'}
+                onChange={(e) => updateContent('style', e.target.value)}
+                className="w-full border border-gray-300 rounded-lg px-3 py-2"
+              >
+                <option value="primary">Primary</option>
+                <option value="secondary">Secondary</option>
+                <option value="outline">Outline</option>
+              </select>
+            </div>
+          </>
+        )
+
+      default:
+        return (
+          <div className="text-sm text-gray-500">
+            <p>Module type: {editedModule.type}</p>
+            <p className="mt-2">Advanced editing for this module type is coming soon.</p>
+          </div>
+        )
+    }
+  }
+
+  return (
+    <div className="space-y-4">
+      {renderEditor()}
+
+      <div className="pt-4 border-t border-gray-200">
+        <Button
+          onClick={handleSave}
+          className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+        >
+          <Check className="w-4 h-4 mr-2" />
+          Save Changes
+        </Button>
+      </div>
     </div>
   )
 }
