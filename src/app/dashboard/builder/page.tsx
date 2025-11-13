@@ -189,9 +189,11 @@ export default function BuilderPage() {
     backgroundColor?: string
     backgroundImage?: string
     containerWidth?: 'full' | 'contained'
+    animation?: 'none' | 'fade-in' | 'fade-up' | 'scale-in'
   }>({
     backgroundColor: profile?.bg_color || '#f9fafb',
-    containerWidth: 'contained'
+    containerWidth: 'contained',
+    animation: 'fade-up'
   })
 
   const supabase = createBrowserClient()
@@ -235,6 +237,11 @@ export default function BuilderPage() {
       if (!profileData) return
 
       setProfile(profileData)
+
+      // Load page style from profile
+      if (profileData.style) {
+        setPageStyle(profileData.style as any)
+      }
 
       const { data: modulesData } = await supabase
         .from('modules')
@@ -549,9 +556,24 @@ export default function BuilderPage() {
       {showStyleEditor && (
         <PageStyleEditor
           style={pageStyle}
-          onSave={(newStyle) => {
-            setPageStyle(newStyle)
-            setShowStyleEditor(false)
+          profile={profile}
+          onSave={async (newStyle) => {
+            if (!profile) return
+            try {
+              const { error } = await supabase
+                .from('profiles')
+                .update({ style: newStyle })
+                .eq('id', profile.id)
+
+              if (error) throw error
+
+              setPageStyle(newStyle)
+              setShowStyleEditor(false)
+              setTimeout(refreshPreview, 100)
+            } catch (error) {
+              console.error('Error saving page style:', error)
+              alert('Error saving page style')
+            }
           }}
           onCancel={() => setShowStyleEditor(false)}
         />
@@ -1529,11 +1551,13 @@ function ModuleEditor({
 // Page Style Editor Component
 function PageStyleEditor({
   style,
+  profile,
   onSave,
   onCancel,
 }: {
-  style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained" }
-  onSave: (style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained" }) => void
+  style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained"; animation?: 'none' | 'fade-in' | 'fade-up' | 'scale-in' }
+  profile: Profile | null
+  onSave: (style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained"; animation?: 'none' | 'fade-in' | 'fade-up' | 'scale-in' }) => Promise<void>
   onCancel: () => void
 }) {
   const [editedStyle, setEditedStyle] = useState(style)
@@ -1551,7 +1575,7 @@ function PageStyleEditor({
       <div className="max-w-3xl w-full bg-white rounded-3xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
         <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-8 rounded-t-3xl">
           <h2 className="text-3xl font-bold text-white">Page Styling</h2>
-          <p className="text-white/90 mt-1">Customize your page appearance</p>
+          <p className="text-white/90 mt-1">Customize your page appearance and animations</p>
         </div>
 
         <div className="p-8 space-y-6 max-h-[60vh] overflow-y-auto">
@@ -1603,6 +1627,32 @@ function PageStyleEditor({
                 <p className="font-bold">Full Width</p>
                 <p className="text-sm text-gray-600">Edge to edge content</p>
               </button>
+            </div>
+          </div>
+
+          <div className="space-y-3">
+            <label className="font-bold text-gray-900">Module Animations</label>
+            <p className="text-sm text-gray-600">Choose how modules appear on your page</p>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { value: 'fade-up', label: 'Fade Up', desc: 'Slide up with fade' },
+                { value: 'fade-in', label: 'Fade In', desc: 'Simple fade effect' },
+                { value: 'scale-in', label: 'Scale In', desc: 'Zoom in effect' },
+                { value: 'none', label: 'None', desc: 'No animation' },
+              ].map((anim) => (
+                <button
+                  key={anim.value}
+                  onClick={() => setEditedStyle({ ...editedStyle, animation: anim.value as any })}
+                  className={`p-4 rounded-xl border-2 transition-all ${
+                    (editedStyle.animation || 'fade-up') === anim.value
+                      ? 'border-purple-500 bg-purple-50 ring-4 ring-purple-300'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                >
+                  <p className="font-bold text-sm">{anim.label}</p>
+                  <p className="text-xs text-gray-600 mt-1">{anim.desc}</p>
+                </button>
+              ))}
             </div>
           </div>
         </div>

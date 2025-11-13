@@ -31,16 +31,47 @@ export default function ProfileModulesView({ profile, modules }: ProfileModulesV
     show: { y: 0, opacity: 1 },
   }
 
+  // Get page style from profile
+  const pageStyle = (profile.style as any) || {}
+  const containerWidth = pageStyle.containerWidth || 'contained'
+  const animation = pageStyle.animation || 'fade-up'
+
+  // Different animation variants
+  const getItemVariant = () => {
+    switch (animation) {
+      case 'fade-in':
+        return { hidden: { opacity: 0 }, show: { opacity: 1 } }
+      case 'fade-up':
+        return { hidden: { y: 20, opacity: 0 }, show: { y: 0, opacity: 1 } }
+      case 'scale-in':
+        return { hidden: { scale: 0.8, opacity: 0 }, show: { scale: 1, opacity: 1 } }
+      case 'none':
+        return { hidden: {}, show: {} }
+      default:
+        return { hidden: { y: 20, opacity: 0 }, show: { y: 0, opacity: 1 } }
+    }
+  }
+
+  const itemVariant = getItemVariant()
+
   return (
-    <div className="min-h-screen py-12 px-4 bg-gradient-to-br from-pastel-sky/20 to-pastel-lavender/20">
+    <div
+      className="min-h-screen py-12 px-4"
+      style={{
+        background: pageStyle.backgroundColor || 'linear-gradient(to-br, #f0f9ff, #faf5ff)',
+        backgroundImage: pageStyle.backgroundImage ? `url(${pageStyle.backgroundImage})` : undefined,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      }}
+    >
       <motion.div
-        className="max-w-2xl mx-auto"
+        className={containerWidth === 'full' ? 'w-full' : 'max-w-2xl mx-auto'}
         variants={container}
         initial="hidden"
         animate="show"
       >
         {/* Profile Header */}
-        <motion.div variants={item} className="text-center mb-12">
+        <motion.div variants={itemVariant} className="text-center mb-12">
           {profile.avatar_url && (
             <div className="mb-6">
               <img
