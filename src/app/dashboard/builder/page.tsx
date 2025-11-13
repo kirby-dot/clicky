@@ -387,14 +387,14 @@ export default function BuilderPage() {
         </Button>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
         {/* Left Sidebar - Module Templates */}
-        <div className="lg:col-span-1 space-y-4">
+        <div className="lg:col-span-2 space-y-4">
           <div>
             <h2 className="text-lg font-semibold mb-3 text-gray-900">Add Modules</h2>
             <p className="text-sm text-gray-500 mb-4">Click to add to your page</p>
           </div>
-          <div className="space-y-2">
+          <div className="space-y-2 max-h-[calc(100vh-250px)] overflow-y-auto pr-2">
             {MODULE_TEMPLATES.map((template) => (
               <button
                 key={template.type}
@@ -418,7 +418,12 @@ export default function BuilderPage() {
         </div>
 
         {/* Center - Builder Canvas */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="lg:col-span-5 space-y-6">
+          <div>
+            <h2 className="text-lg font-semibold mb-3 text-gray-900">Your Modules</h2>
+            <p className="text-sm text-gray-500 mb-4">Drag to reorder, click to edit</p>
+          </div>
+          <div className="max-h-[calc(100vh-250px)] overflow-y-auto pr-2">
           {modules.length === 0 ? (
             <Card className="py-16">
               <CardContent className="text-center">
@@ -465,35 +470,40 @@ export default function BuilderPage() {
               </DragOverlay>
             </DndContext>
           )}
+          </div>
+        </div>
 
-          {/* Live Preview */}
+        {/* Right - Live Preview */}
+        <div className="lg:col-span-5">
           {profile && (
-            <Card className="mt-8">
-              <CardHeader className="bg-gradient-to-r from-pastel-sky to-pastel-lavender">
-                <CardTitle className="flex items-center justify-between">
-                  <span className="text-gray-900">Live Preview</span>
-                  {profile.slug && (
-                    <a
-                      href={`/${profile.slug}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-sm font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-1"
-                    >
-                      View Page
-                      <ExternalLink className="w-4 h-4" />
-                    </a>
-                  )}
-                </CardTitle>
-                <CardDescription className="text-gray-700">
-                  Real-time preview - updates instantly as you build
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-0">
-                <div className="relative w-full bg-gradient-to-br from-pastel-sky/20 to-pastel-lavender/20 overflow-y-auto" style={{ height: '600px' }}>
-                  <LivePreview profile={profile} modules={modules.filter(m => m.active)} />
-                </div>
-              </CardContent>
-            </Card>
+            <div className="sticky top-8">
+              <Card>
+                <CardHeader className="bg-gradient-to-r from-pastel-sky to-pastel-lavender">
+                  <CardTitle className="flex items-center justify-between">
+                    <span className="text-gray-900">Live Preview</span>
+                    {profile.slug && (
+                      <a
+                        href={`/${profile.slug}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-semibold text-primary-600 hover:text-primary-700 flex items-center gap-1"
+                      >
+                        View Page
+                        <ExternalLink className="w-4 h-4" />
+                      </a>
+                    )}
+                  </CardTitle>
+                  <CardDescription className="text-gray-700">
+                    Real-time preview - updates instantly
+                  </CardDescription>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <div className="relative w-full bg-gradient-to-br from-pastel-sky/20 to-pastel-lavender/20 overflow-y-auto rounded-b-2xl" style={{ height: 'calc(100vh - 280px)' }}>
+                    <LivePreview profile={profile} modules={modules.filter(m => m.active)} />
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           )}
         </div>
       </div>
@@ -1219,6 +1229,106 @@ function ModuleEditor({
                     <span className="text-xs">{style.label}</span>
                   </button>
                 ))}
+              </div>
+            </div>
+          )}
+
+          {module.type === 'social-links' && (
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <Share2 className="w-4 h-4 text-primary-500" />
+                  Select Platforms
+                </label>
+                <p className="text-xs text-gray-500 pl-1">Choose which social platforms to display</p>
+
+                <div className="grid grid-cols-3 gap-3">
+                  {[
+                    { platform: 'instagram', label: 'Instagram', color: 'bg-gradient-to-br from-purple-500 to-pink-500' },
+                    { platform: 'twitter', label: 'Twitter', color: 'bg-sky-500' },
+                    { platform: 'youtube', label: 'YouTube', color: 'bg-red-500' },
+                    { platform: 'tiktok', label: 'TikTok', color: 'bg-gray-900' },
+                    { platform: 'linkedin', label: 'LinkedIn', color: 'bg-blue-600' },
+                    { platform: 'facebook', label: 'Facebook', color: 'bg-blue-500' },
+                    { platform: 'github', label: 'GitHub', color: 'bg-gray-800' },
+                    { platform: 'spotify', label: 'Spotify', color: 'bg-green-500' },
+                    { platform: 'twitch', label: 'Twitch', color: 'bg-purple-600' },
+                  ].map((social) => {
+                    const links = ((editedModule.content as any).links || []) as Array<{ platform: string; url: string }>
+                    const isSelected = links.some(l => l.platform === social.platform)
+
+                    return (
+                      <button
+                        key={social.platform}
+                        type="button"
+                        onClick={() => {
+                          const currentLinks = ((editedModule.content as any).links || []) as Array<{ platform: string; url: string }>
+                          if (isSelected) {
+                            updateContent('links', currentLinks.filter(l => l.platform !== social.platform))
+                          } else {
+                            updateContent('links', [...currentLinks, { platform: social.platform, url: '' }])
+                          }
+                        }}
+                        className={`h-24 rounded-xl font-semibold transition-all flex flex-col items-center justify-center gap-2 text-white ${social.color} ${
+                          isSelected ? 'ring-4 ring-primary-500 ring-offset-2 scale-105 opacity-100' : 'opacity-60 hover:opacity-100'
+                        }`}
+                      >
+                        <div className="text-2xl">{social.label.charAt(0)}</div>
+                        <span className="text-xs">{social.label}</span>
+                      </button>
+                    )
+                  })}
+                </div>
+              </div>
+
+              {/* URL inputs for selected platforms */}
+              {((editedModule.content as any).links || []).length > 0 && (
+                <div className="space-y-4">
+                  <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                    <LinkIcon className="w-4 h-4 text-primary-500" />
+                    Social Links
+                  </label>
+                  {((editedModule.content as any).links || []).map((link: any, index: number) => (
+                    <div key={index} className="space-y-2">
+                      <label className="text-sm font-semibold text-gray-700 capitalize">{link.platform}</label>
+                      <Input
+                        value={link.url || ''}
+                        onChange={(e) => {
+                          const newLinks = [...((editedModule.content as any).links || [])]
+                          newLinks[index] = { ...newLinks[index], url: e.target.value }
+                          updateContent('links', newLinks)
+                        }}
+                        placeholder={`https://${link.platform}.com/yourprofile`}
+                        className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                      />
+                    </div>
+                  ))}
+                </div>
+              )}
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  Layout Style
+                </label>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { value: 'horizontal', label: 'Horizontal Row' },
+                    { value: 'grid', label: 'Grid (4 columns)' }
+                  ].map((layout) => (
+                    <button
+                      key={layout.value}
+                      type="button"
+                      onClick={() => updateContent('layout', layout.value)}
+                      className={`h-16 rounded-xl font-semibold transition-all ${
+                        ((editedModule.content as any).layout || 'horizontal') === layout.value
+                          ? 'bg-primary-500 text-white ring-4 ring-primary-300 scale-105'
+                          : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                      }`}
+                    >
+                      {layout.label}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           )}
