@@ -176,6 +176,15 @@ export default function BuilderPage() {
   const [previewKey, setPreviewKey] = useState(0)
   const [saving, setSaving] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [showStyleEditor, setShowStyleEditor] = useState(false)
+  const [pageStyle, setPageStyle] = useState<{
+    backgroundColor?: string
+    backgroundImage?: string
+    containerWidth?: 'full' | 'contained'
+  }>({
+    backgroundColor: profile?.bg_color || '#f9fafb',
+    containerWidth: 'contained'
+  })
 
   const supabase = createBrowserClient()
 
@@ -377,14 +386,25 @@ export default function BuilderPage() {
           <h1 className="text-3xl font-bold text-gray-900">Page Builder</h1>
           <p className="text-gray-500 mt-2">Drag modules to reorder, click to edit</p>
         </div>
-        <Button
-          onClick={refreshPreview}
-          variant="outline"
-          className="flex items-center gap-2"
-        >
-          <RefreshCw className="w-4 h-4" />
-          Refresh Preview
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button
+            onClick={() => setShowStyleEditor(true)}
+            className="flex items-center gap-2 bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+          >
+            <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+            </svg>
+            Page Styling
+          </Button>
+          <Button
+            onClick={refreshPreview}
+            variant="outline"
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="w-4 h-4" />
+            Refresh
+          </Button>
+        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
@@ -498,8 +518,8 @@ export default function BuilderPage() {
                   </CardDescription>
                 </CardHeader>
                 <CardContent className="p-0">
-                  <div className="relative w-full bg-gradient-to-br from-pastel-sky/20 to-pastel-lavender/20 overflow-y-auto rounded-b-2xl" style={{ height: 'calc(100vh - 280px)' }}>
-                    <LivePreview profile={profile} modules={modules.filter(m => m.active)} />
+                  <div className="relative w-full overflow-y-auto rounded-b-2xl" style={{ height: 'calc(100vh - 280px)', background: pageStyle.backgroundColor || 'linear-gradient(to-br, #f0f9ff, #faf5ff)', backgroundImage: pageStyle.backgroundImage ? `url(${pageStyle.backgroundImage})` : undefined, backgroundSize: 'cover', backgroundPosition: 'center' }}>
+                    <LivePreview profile={profile} modules={modules.filter(m => m.active)} containerWidth={pageStyle.containerWidth} />
                   </div>
                 </CardContent>
               </Card>
@@ -514,6 +534,18 @@ export default function BuilderPage() {
           module={editingModule}
           onSave={handleUpdateModule}
           onCancel={() => setEditingModule(null)}
+        />
+      )}
+
+      {/* Page Style Editor Modal */}
+      {showStyleEditor && (
+        <PageStyleEditor
+          style={pageStyle}
+          onSave={(newStyle) => {
+            setPageStyle(newStyle)
+            setShowStyleEditor(false)
+          }}
+          onCancel={() => setShowStyleEditor(false)}
         />
       )}
     </div>
@@ -630,10 +662,10 @@ function SortableModule({
 }
 
 // Live Preview Component
-function LivePreview({ profile, modules }: { profile: Profile; modules: Module[] }) {
+function LivePreview({ profile, modules, containerWidth }: { profile: Profile; modules: Module[]; containerWidth?: 'full' | 'contained' }) {
   return (
     <div className="min-h-full py-12 px-4">
-      <div className="max-w-2xl mx-auto">
+      <div className={containerWidth === 'full' ? 'w-full' : 'max-w-2xl mx-auto'}>
         {/* Profile Header */}
         <div className="text-center mb-12">
           {profile.avatar_url && (
@@ -1366,6 +1398,98 @@ function ModuleEditor({
               Cancel
             </Button>
           </div>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// Page Style Editor Component
+function PageStyleEditor({
+  style,
+  onSave,
+  onCancel,
+}: {
+  style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained" }
+  onSave: (style: { backgroundColor?: string; backgroundImage?: string; containerWidth?: "full" | "contained" }) => void
+  onCancel: () => void
+}) {
+  const [editedStyle, setEditedStyle] = useState(style)
+
+  const backgroundPresets = [
+    { name: 'Light Gray', value: '#f9fafb' },
+    { name: 'White', value: '#ffffff' },
+    { name: 'Sky', value: 'linear-gradient(to-br, #f0f9ff, #e0f2fe)' },
+    { name: 'Sunset', value: 'linear-gradient(to-br, #fef3c7, #fecaca)' },
+    { name: 'Ocean', value: 'linear-gradient(to-br, #dbeafe, #e0e7ff)' },
+  ]
+
+  return (
+    <div className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4 backdrop-blur-lg" onClick={onCancel}>
+      <div className="max-w-3xl w-full bg-white rounded-3xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
+        <div className="bg-gradient-to-r from-purple-500 to-pink-500 p-8 rounded-t-3xl">
+          <h2 className="text-3xl font-bold text-white">Page Styling</h2>
+          <p className="text-white/90 mt-1">Customize your page appearance</p>
+        </div>
+
+        <div className="p-8 space-y-6 max-h-[60vh] overflow-y-auto">
+          <div className="space-y-3">
+            <label className="font-bold text-gray-900">Background</label>
+            <div className="grid grid-cols-5 gap-3">
+              {backgroundPresets.map((preset) => (
+                <button
+                  key={preset.name}
+                  onClick={() => setEditedStyle({ ...editedStyle, backgroundColor: preset.value })}
+                  className={`h-20 rounded-xl border-2 ${editedStyle.backgroundColor === preset.value ? 'ring-4 ring-purple-500' : 'border-gray-200'}`}
+                  style={{ background: preset.value }}
+                >
+                  <span className="text-xs font-bold bg-white/90 px-2 py-1 rounded">{preset.name}</span>
+                </button>
+              ))}
+            </div>
+            <Input
+              value={editedStyle.backgroundColor || ''}
+              onChange={(e) => setEditedStyle({ ...editedStyle, backgroundColor: e.target.value })}
+              placeholder="Custom color or gradient"
+              className="mt-2"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <label className="font-bold text-gray-900">Background Image URL (optional)</label>
+            <Input
+              value={editedStyle.backgroundImage || ''}
+              onChange={(e) => setEditedStyle({ ...editedStyle, backgroundImage: e.target.value })}
+              placeholder="https://example.com/bg.jpg"
+            />
+          </div>
+
+          <div className="space-y-3">
+            <label className="font-bold text-gray-900">Container Width</label>
+            <div className="grid grid-cols-2 gap-4">
+              <button
+                onClick={() => setEditedStyle({ ...editedStyle, containerWidth: 'contained' })}
+                className={`p-4 rounded-xl border-2 ${editedStyle.containerWidth === 'contained' ? 'border-purple-500 bg-purple-50' : 'border-gray-200'}`}
+              >
+                <p className="font-bold">Contained</p>
+                <p className="text-sm text-gray-600">Max width with margins</p>
+              </button>
+              <button
+                onClick={() => setEditedStyle({ ...editedStyle, containerWidth: 'full' })}
+                className={`p-4 rounded-xl border-2 ${editedStyle.containerWidth === 'full' ? 'border-purple-500 bg-purple-50' : 'border-gray-200'}`}
+              >
+                <p className="font-bold">Full Width</p>
+                <p className="text-sm text-gray-600">Edge to edge content</p>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div className="border-t p-6 flex gap-4">
+          <Button onClick={() => onSave(editedStyle)} className="flex-1 bg-gradient-to-r from-purple-500 to-pink-500">
+            Apply Styling
+          </Button>
+          <Button onClick={onCancel} variant="outline">Cancel</Button>
         </div>
       </div>
     </div>
