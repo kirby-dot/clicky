@@ -22,7 +22,11 @@ import {
   ArrowUp,
   Edit2,
   RefreshCw,
-  Plus
+  Plus,
+  MousePointerClick,
+  HelpCircle,
+  Clock,
+  Mail
 } from 'lucide-react'
 import type { Module, ModuleType, Profile } from '@/types'
 import {
@@ -128,6 +132,38 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     description: 'Empty space',
     defaultContent: { height: 32 },
     color: 'bg-gray-100'
+  },
+  {
+    type: 'button',
+    icon: <MousePointerClick className="w-4 h-4" />,
+    label: 'Button/CTA',
+    description: 'Call-to-action',
+    defaultContent: { url: '', text: 'Click Here', style: 'primary' },
+    color: 'bg-pastel-rose'
+  },
+  {
+    type: 'accordion',
+    icon: <HelpCircle className="w-4 h-4" />,
+    label: 'Accordion/FAQ',
+    description: 'Expandable Q&A',
+    defaultContent: { question: 'Question?', answer: 'Answer here...' },
+    color: 'bg-pastel-mint'
+  },
+  {
+    type: 'countdown',
+    icon: <Clock className="w-4 h-4" />,
+    label: 'Countdown',
+    description: 'Timer/Launch',
+    defaultContent: { targetDate: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(), title: 'Coming Soon' },
+    color: 'bg-pastel-lavender'
+  },
+  {
+    type: 'email',
+    icon: <Mail className="w-4 h-4" />,
+    label: 'Email Button',
+    description: 'Contact button',
+    defaultContent: { email: '', buttonText: 'Get in Touch' },
+    color: 'bg-pastel-sage'
   },
 ]
 
@@ -614,6 +650,8 @@ function ModuleEditor({
   onCancel: () => void
 }) {
   const [editedModule, setEditedModule] = useState<Module>(module)
+  const [uploading, setUploading] = useState(false)
+  const supabase = createBrowserClient()
 
   const updateContent = (key: string, value: any) => {
     setEditedModule({
@@ -623,6 +661,52 @@ function ModuleEditor({
         [key]: value,
       },
     })
+  }
+
+  const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    // Validate file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('File size must be less than 5MB')
+      return
+    }
+
+    // Validate file type
+    if (!file.type.startsWith('image/')) {
+      alert('Please upload an image file')
+      return
+    }
+
+    setUploading(true)
+    try {
+      const fileExt = file.name.split('.').pop()
+      const fileName = `${Math.random().toString(36).substring(2)}-${Date.now()}.${fileExt}`
+      const filePath = `${fileName}`
+
+      const { data, error } = await supabase.storage
+        .from('clicky-images')
+        .upload(filePath, file, {
+          cacheControl: '3600',
+          upsert: false
+        })
+
+      if (error) throw error
+
+      // Get public URL
+      const { data: { publicUrl } } = supabase.storage
+        .from('clicky-images')
+        .getPublicUrl(filePath)
+
+      updateContent('url', publicUrl)
+      alert('Image uploaded successfully!')
+    } catch (error: any) {
+      console.error('Upload error:', error)
+      alert('Error uploading image: ' + (error.message || 'Please create a "clicky-images" storage bucket in Supabase'))
+    } finally {
+      setUploading(false)
+    }
   }
 
   return (
@@ -696,13 +780,46 @@ function ModuleEditor({
             <>
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
-                  Image URL
+                  Image
                 </label>
-                <Input
-                  value={(editedModule.content as any).url || ''}
-                  onChange={(e) => updateContent('url', e.target.value)}
-                  placeholder="https://example.com/image.jpg"
-                />
+                <div className="space-y-3">
+                  <div className="flex gap-3">
+                    <label className="flex-1">
+                      <input
+                        type="file"
+                        accept="image/*"
+                        onChange={handleImageUpload}
+                        disabled={uploading}
+                        className="hidden"
+                        id="image-upload"
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="w-full"
+                        onClick={() => document.getElementById('image-upload')?.click()}
+                        disabled={uploading}
+                      >
+                        {uploading ? 'Uploading...' : 'Upload Image'}
+                      </Button>
+                    </label>
+                  </div>
+                  <div className="text-center text-sm text-gray-500">or</div>
+                  <Input
+                    value={(editedModule.content as any).url || ''}
+                    onChange={(e) => updateContent('url', e.target.value)}
+                    placeholder="https://example.com/image.jpg"
+                  />
+                  {(editedModule.content as any).url && (
+                    <div className="mt-3">
+                      <img
+                        src={(editedModule.content as any).url}
+                        alt="Preview"
+                        className="max-h-48 mx-auto rounded-xl border border-gray-200"
+                      />
+                    </div>
+                  )}
+                </div>
               </div>
               <div>
                 <label className="block text-sm font-semibold text-gray-900 mb-2">
@@ -711,6 +828,7 @@ function ModuleEditor({
                 <Input
                   value={(editedModule.content as any).alt || ''}
                   onChange={(e) => updateContent('alt', e.target.value)}
+                  placeholder="Description for screen readers"
                 />
               </div>
               <div>
@@ -720,6 +838,17 @@ function ModuleEditor({
                 <Input
                   value={(editedModule.content as any).caption || ''}
                   onChange={(e) => updateContent('caption', e.target.value)}
+                  placeholder="Optional caption below image"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Link (optional)
+                </label>
+                <Input
+                  value={(editedModule.content as any).link || ''}
+                  onChange={(e) => updateContent('link', e.target.value)}
+                  placeholder="https://... (image will be clickable)"
                 />
               </div>
             </>
@@ -728,13 +857,16 @@ function ModuleEditor({
           {module.type === 'video' && (
             <div>
               <label className="block text-sm font-semibold text-gray-900 mb-2">
-                Video URL (YouTube or Vimeo)
+                Video URL
               </label>
               <Input
                 value={(editedModule.content as any).url || ''}
                 onChange={(e) => updateContent('url', e.target.value)}
-                placeholder="https://youtube.com/watch?v=..."
+                placeholder="YouTube, Vimeo, TikTok, or Loom URL"
               />
+              <p className="text-xs text-gray-500 mt-2">
+                Supports: YouTube, YouTube Shorts, Vimeo, TikTok, Loom
+              </p>
             </div>
           )}
 
@@ -764,6 +896,132 @@ function ModuleEditor({
                 max="200"
               />
             </div>
+          )}
+
+          {module.type === 'button' && (
+            <>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Button Text
+                </label>
+                <Input
+                  value={(editedModule.content as any).text || ''}
+                  onChange={(e) => updateContent('text', e.target.value)}
+                  placeholder="Click Here"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  URL
+                </label>
+                <Input
+                  value={(editedModule.content as any).url || ''}
+                  onChange={(e) => updateContent('url', e.target.value)}
+                  placeholder="https://example.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Button Style
+                </label>
+                <select
+                  value={(editedModule.content as any).style || 'primary'}
+                  onChange={(e) => updateContent('style', e.target.value)}
+                  className="w-full h-11 px-4 rounded-xl border border-gray-300 bg-white"
+                >
+                  <option value="primary">Primary (Gradient)</option>
+                  <option value="secondary">Secondary (Pastel)</option>
+                  <option value="outline">Outline</option>
+                </select>
+              </div>
+            </>
+          )}
+
+          {module.type === 'accordion' && (
+            <>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Question
+                </label>
+                <Input
+                  value={(editedModule.content as any).question || ''}
+                  onChange={(e) => updateContent('question', e.target.value)}
+                  placeholder="What is your question?"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Answer
+                </label>
+                <Textarea
+                  value={(editedModule.content as any).answer || ''}
+                  onChange={(e) => updateContent('answer', e.target.value)}
+                  placeholder="The answer goes here..."
+                  rows={4}
+                />
+              </div>
+            </>
+          )}
+
+          {module.type === 'countdown' && (
+            <>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Title (optional)
+                </label>
+                <Input
+                  value={(editedModule.content as any).title || ''}
+                  onChange={(e) => updateContent('title', e.target.value)}
+                  placeholder="Coming Soon"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Target Date & Time
+                </label>
+                <Input
+                  type="datetime-local"
+                  value={(editedModule.content as any).targetDate?.slice(0, 16) || ''}
+                  onChange={(e) => updateContent('targetDate', new Date(e.target.value).toISOString())}
+                />
+              </div>
+            </>
+          )}
+
+          {module.type === 'email' && (
+            <>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Email Address
+                </label>
+                <Input
+                  type="email"
+                  value={(editedModule.content as any).email || ''}
+                  onChange={(e) => updateContent('email', e.target.value)}
+                  placeholder="your@email.com"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Button Text
+                </label>
+                <Input
+                  value={(editedModule.content as any).buttonText || ''}
+                  onChange={(e) => updateContent('buttonText', e.target.value)}
+                  placeholder="Get in Touch"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-semibold text-gray-900 mb-2">
+                  Email Subject (optional)
+                </label>
+                <Input
+                  value={(editedModule.content as any).subject || ''}
+                  onChange={(e) => updateContent('subject', e.target.value)}
+                  placeholder="Subject line"
+                />
+              </div>
+            </>
           )}
 
           {module.type === 'divider' && (

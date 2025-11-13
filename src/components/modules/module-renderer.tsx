@@ -11,6 +11,10 @@ import { DividerModule } from './divider-module'
 import { VideoModule } from './video-module'
 import { MusicModule } from './music-module'
 import { SpacerModule } from './spacer-module'
+import { ButtonModule } from './button-module'
+import { AccordionModule } from './accordion-module'
+import { CountdownModule } from './countdown-module'
+import { EmailButtonModule } from './email-button-module'
 
 interface ModuleRendererProps {
   module: Module
@@ -47,6 +51,14 @@ export function ModuleRenderer({ module, profileId, index }: ModuleRendererProps
         return <MusicModule module={module} />
       case 'spacer':
         return <SpacerModule module={module} />
+      case 'button':
+        return <ButtonModule module={module} />
+      case 'accordion':
+        return <AccordionModule module={module} />
+      case 'countdown':
+        return <CountdownModule module={module} />
+      case 'email':
+        return <EmailButtonModule module={module} />
       default:
         return null
     }
