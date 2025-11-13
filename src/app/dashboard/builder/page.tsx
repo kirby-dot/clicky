@@ -1,6 +1,7 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
+import { useSearchParams, useRouter } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -46,6 +47,7 @@ import {
   Save,
   X,
   Check,
+  User,
 } from 'lucide-react'
 import type { Module, ModuleType, Profile } from '@/types'
 import {
@@ -222,8 +224,9 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
   },
 ]
 
-export default function BuilderPage() {
+function BuilderPageContent() {
   const [profile, setProfile] = useState<Profile | null>(null)
+  const [profiles, setProfiles] = useState<Profile[]>([])
   const [modules, setModules] = useState<Module[]>([])
   const [loading, setLoading] = useState(true)
   const [editingModule, setEditingModule] = useState<Module | null>(null)
@@ -237,6 +240,8 @@ export default function BuilderPage() {
   const [leftSidebarCollapsed, setLeftSidebarCollapsed] = useState(false)
   const [rightPanelCollapsed, setRightPanelCollapsed] = useState(true)
   const [deviceMode, setDeviceMode] = useState<'mobile' | 'tablet' | 'desktop'>('mobile')
+  const [showProfileSwitcher, setShowProfileSwitcher] = useState(false)
+  const [copiedUrl, setCopiedUrl] = useState(false)
   const [pageStyle, setPageStyle] = useState<{
     backgroundColor?: string
     backgroundImage?: string
@@ -251,6 +256,9 @@ export default function BuilderPage() {
   })
 
   const supabase = createBrowserClient()
+  const searchParams = useSearchParams()
+  const router = useRouter()
+  const profileIdFromUrl = searchParams.get('profile')
 
   // Separate sensors for mouse/touch and keyboard
   const mouseSensor = useSensor(MouseSensor, {
@@ -272,7 +280,7 @@ export default function BuilderPage() {
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [profileIdFromUrl])
 
   const loadData = async () => {
     try {
@@ -282,13 +290,37 @@ export default function BuilderPage() {
 
       if (!user) return
 
-      const { data: profileData } = await supabase
+      // Load all user profiles for the profile switcher
+      const { data: allProfiles } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single()
+        .order('created_at', { ascending: true })
 
-      if (!profileData) return
+      setProfiles(allProfiles || [])
+
+      let profileData
+
+      // If a specific profile ID is provided in the URL, load that profile
+      if (profileIdFromUrl) {
+        const { data } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', profileIdFromUrl)
+          .eq('user_id', user.id) // Security: ensure the profile belongs to the user
+          .maybeSingle()
+
+        profileData = data
+      } else {
+        // Otherwise, load the user's first profile
+        profileData = allProfiles && allProfiles.length > 0 ? allProfiles[0] : null
+      }
+
+      if (!profileData) {
+        // No profile found - redirect to profiles page to create one
+        router.push('/dashboard/profiles')
+        return
+      }
 
       setProfile(profileData)
 
@@ -478,16 +510,103 @@ export default function BuilderPage() {
       <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center justify-between">
         <div className="flex items-center gap-4">
           <h1 className="text-xl font-bold text-gray-900">Page Builder</h1>
+
+          {/* Profile Indicator & Switcher */}
+          {profile && (
+            <div className="relative">
+              <button
+                onClick={() => setShowProfileSwitcher(!showProfileSwitcher)}
+                className="flex items-center gap-2 px-3 py-1.5 bg-gradient-to-r from-pastel-sky to-pastel-lavender rounded-lg hover:shadow-soft transition-all"
+              >
+                <div className="w-6 h-6 bg-gradient-to-br from-primary-500 to-purple-500 rounded-md flex items-center justify-center">
+                  <User className="w-3.5 h-3.5 text-white" />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-semibold text-gray-900">{profile.title}</p>
+                  <p className="text-xs text-gray-600">clicky.com/{profile.slug}</p>
+                </div>
+                <ChevronRight className={`w-4 h-4 text-gray-400 transition-transform ${showProfileSwitcher ? 'rotate-90' : ''}`} />
+              </button>
+
+              {/* Profile Switcher Dropdown */}
+              {showProfileSwitcher && profiles.length > 1 && (
+                <div className="absolute top-full left-0 mt-2 w-64 bg-white rounded-xl border border-gray-200 shadow-lg z-50">
+                  <div className="p-2 max-h-80 overflow-y-auto">
+                    {profiles.map((p) => (
+                      <button
+                        key={p.id}
+                        onClick={() => {
+                          router.push(`/dashboard/builder?profile=${p.id}`)
+                          setShowProfileSwitcher(false)
+                        }}
+                        className={`w-full flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50 transition-colors ${
+                          p.id === profile.id ? 'bg-purple-50' : ''
+                        }`}
+                      >
+                        <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                          <User className="w-4 h-4 text-white" />
+                        </div>
+                        <div className="flex-1 min-w-0 text-left">
+                          <p className="text-sm font-semibold text-gray-900 truncate">{p.title}</p>
+                          <p className="text-xs text-gray-600 truncate">{p.slug}</p>
+                        </div>
+                        {p.id === profile.id && (
+                          <Check className="w-4 h-4 text-purple-600 flex-shrink-0" />
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                  <div className="p-2 border-t border-gray-200">
+                    <button
+                      onClick={() => {
+                        router.push('/dashboard/profiles')
+                        setShowProfileSwitcher(false)
+                      }}
+                      className="w-full flex items-center justify-center gap-2 p-2 text-sm font-semibold text-purple-600 hover:bg-purple-50 rounded-lg transition-colors"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Manage Profiles
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Copy URL & View Live */}
           {profile?.slug && (
-            <a
-              href={`/${profile.slug}`}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-gray-600 hover:text-gray-900 flex items-center gap-1"
-            >
-              <ExternalLink className="w-4 h-4" />
-              View Live
-            </a>
+            <div className="flex items-center gap-2">
+              <button
+                onClick={() => {
+                  navigator.clipboard.writeText(`${window.location.origin}/${profile.slug}`)
+                  setCopiedUrl(true)
+                  setTimeout(() => setCopiedUrl(false), 2000)
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+                title="Copy profile URL"
+              >
+                {copiedUrl ? (
+                  <>
+                    <Check className="w-4 h-4 text-green-600" />
+                    <span className="text-green-600 font-medium">Copied!</span>
+                  </>
+                ) : (
+                  <>
+                    <Copy className="w-4 h-4" />
+                    Copy URL
+                  </>
+                )}
+              </button>
+              <a
+                href={`/${profile.slug}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm text-gray-600 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-colors"
+              >
+                <ExternalLink className="w-4 h-4" />
+                View Live
+              </a>
+            </div>
           )}
         </div>
 
@@ -2729,5 +2848,17 @@ function PageStyleEditor({
         </div>
       </div>
     </div>
+  )
+}
+
+export default function BuilderPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-screen">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+      </div>
+    }>
+      <BuilderPageContent />
+    </Suspense>
   )
 }

@@ -1,7 +1,11 @@
 'use client'
 
 import Link from 'next/link'
-import { ArrowRight, Link2, Zap, BarChart3, Palette, Sparkles } from 'lucide-react'
+import {
+  ArrowRight, Link2, Zap, BarChart3, Palette, Sparkles, Check,
+  Layout, Users, Crown, Globe, Code, TrendingUp, Shield, Layers,
+  Smartphone, Image as ImageIcon, Type, Video, Music, Mail
+} from 'lucide-react'
 import { motion, useScroll, useTransform } from 'framer-motion'
 import { useRef } from 'react'
 
@@ -74,7 +78,7 @@ export default function HomePage() {
                 href="/signup"
                 className="bg-primary-500 text-white px-6 py-3 rounded-xl hover:bg-primary-600 transition-all font-semibold shadow-soft hover:shadow-soft-lg relative overflow-hidden group"
               >
-                <span className="relative z-10">Get Started</span>
+                <span className="relative z-10">Get Started Free</span>
                 <span className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
               </Link>
             </motion.div>
@@ -107,7 +111,7 @@ export default function HomePage() {
             >
               <Sparkles className="w-5 h-5" />
             </motion.div>
-            <span className="text-base">Launch your link page in 60 seconds</span>
+            <span className="text-base">The most powerful link-in-bio builder</span>
           </motion.div>
 
           <motion.h1
@@ -116,7 +120,7 @@ export default function HomePage() {
             transition={{ duration: 0.8, delay: 0.3 }}
             className="text-5xl md:text-7xl font-bold mb-6 text-gray-900 leading-tight"
           >
-            Your Links,
+            One Link,
             <br />
             <motion.span
               initial={{ opacity: 0, scale: 0.5 }}
@@ -124,9 +128,9 @@ export default function HomePage() {
               transition={{ duration: 0.8, delay: 0.5, type: "spring" }}
               className="bg-gradient-to-r from-primary-500 to-purple-500 bg-clip-text text-transparent inline-block"
             >
-              Beautifully
+              Infinite
             </motion.span>{' '}
-            Organized
+            Possibilities
           </motion.h1>
 
           <motion.p
@@ -135,8 +139,8 @@ export default function HomePage() {
             transition={{ duration: 0.6, delay: 0.6 }}
             className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto"
           >
-            Create a stunning link-in-bio page in minutes. Share all your important links
-            in one beautiful, clickable place.
+            Build stunning link-in-bio pages with our visual drag-and-drop builder.
+            15+ module types, team collaboration, analytics, and more — all in one platform.
           </motion.p>
 
           <motion.div
@@ -150,7 +154,7 @@ export default function HomePage() {
                 href="/signup"
                 className="bg-primary-500 text-white px-8 py-4 rounded-xl hover:bg-primary-600 transition-all shadow-soft-lg hover:shadow-soft-xl flex items-center justify-center space-x-2 text-lg font-semibold relative overflow-hidden group"
               >
-                <span className="relative z-10">Create Your Clicky</span>
+                <span className="relative z-10">Start Building Free</span>
                 <motion.div
                   className="relative z-10"
                   animate={{ x: [0, 5, 0] }}
@@ -163,10 +167,10 @@ export default function HomePage() {
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
-                href="/examples"
+                href="#features"
                 className="bg-white text-gray-700 px-8 py-4 rounded-xl border border-gray-300 hover:bg-gray-50 transition-all shadow-soft hover:shadow-soft-lg flex items-center justify-center space-x-2 text-lg font-semibold"
               >
-                <span>View Examples</span>
+                <span>See Features</span>
               </Link>
             </motion.div>
           </motion.div>
@@ -253,25 +257,61 @@ export default function HomePage() {
             </p>
           </motion.div>
 
-          <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto mb-16">
             {[
               {
-                icon: <Zap className="w-8 h-8" />,
-                title: "Lightning Fast",
-                description: "Optimized for speed. Your page loads instantly, keeping your audience engaged.",
+                icon: <Layout className="w-8 h-8" />,
+                title: "Visual Page Builder",
+                description: "Drag-and-drop builder with live preview. Three-panel interface for effortless customization.",
                 color: "bg-pastel-butter"
               },
               {
-                icon: <Palette className="w-8 h-8" />,
-                title: "Beautiful Themes",
-                description: "Choose from dozens of stunning themes or customize your own unique style.",
+                icon: <Layers className="w-8 h-8" />,
+                title: "15+ Module Types",
+                description: "Links, headers, images, videos, music players, social icons, countdowns, FAQs, and more.",
                 color: "bg-pastel-rose"
               },
               {
-                icon: <BarChart3 className="w-8 h-8" />,
-                title: "Smart Analytics",
-                description: "See which links perform best with real-time click tracking and insights.",
+                icon: <Users className="w-8 h-8" />,
+                title: "Multi-Profile Support",
+                description: "Create unlimited profiles on Business plan. Perfect for managing multiple brands or clients.",
                 color: "bg-pastel-sky"
+              },
+              {
+                icon: <Palette className="w-8 h-8" />,
+                title: "Custom Styling",
+                description: "Full design control with backgrounds, animations, colors, and fonts. Make it uniquely yours.",
+                color: "bg-pastel-lavender"
+              },
+              {
+                icon: <BarChart3 className="w-8 h-8" />,
+                title: "Advanced Analytics",
+                description: "Track clicks, views, and engagement. Understand your audience with real-time insights.",
+                color: "bg-pastel-peach"
+              },
+              {
+                icon: <Zap className="w-8 h-8" />,
+                title: "15+ Integrations",
+                description: "Connect with Stripe, Mailchimp, Google Analytics, Facebook Pixel, Zapier, and more.",
+                color: "bg-pastel-mint"
+              },
+              {
+                icon: <Users className="w-8 h-8" />,
+                title: "Team Collaboration",
+                description: "Invite team members with role-based permissions. Work together seamlessly.",
+                color: "bg-pastel-sage"
+              },
+              {
+                icon: <Smartphone className="w-8 h-8" />,
+                title: "Mobile Optimized",
+                description: "Perfect on every device. Preview in mobile, tablet, and desktop modes.",
+                color: "bg-pastel-lilac"
+              },
+              {
+                icon: <Shield className="w-8 h-8" />,
+                title: "Secure & Fast",
+                description: "Enterprise-grade security with lightning-fast page loads. Your data is safe with us.",
+                color: "bg-pastel-butter"
               }
             ].map((feature, i) => (
               <FeatureCard
@@ -284,6 +324,121 @@ export default function HomePage() {
               />
             ))}
           </div>
+
+          {/* Module Types Showcase */}
+          <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.6 }}
+            className="bg-white rounded-3xl border border-gray-200 p-8 md:p-12 shadow-soft-xl max-w-5xl mx-auto"
+          >
+            <h3 className="text-3xl font-bold text-center mb-8 text-gray-900">15+ Powerful Module Types</h3>
+            <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
+              {[
+                { icon: <Link2 className="w-6 h-6" />, label: "Links", color: "bg-pastel-sky" },
+                { icon: <Type className="w-6 h-6" />, label: "Headers", color: "bg-pastel-lavender" },
+                { icon: <ImageIcon className="w-6 h-6" />, label: "Images", color: "bg-pastel-rose" },
+                { icon: <Video className="w-6 h-6" />, label: "Videos", color: "bg-pastel-peach" },
+                { icon: <Music className="w-6 h-6" />, label: "Music", color: "bg-pastel-mint" },
+                { icon: <Users className="w-6 h-6" />, label: "Social", color: "bg-pastel-butter" },
+                { icon: <Mail className="w-6 h-6" />, label: "Email", color: "bg-pastel-sage" },
+                { icon: <Globe className="w-6 h-6" />, label: "Buttons", color: "bg-pastel-lilac" },
+                { icon: <Type className="w-6 h-6" />, label: "Text", color: "bg-pastel-sky" },
+                { icon: <Layout className="w-6 h-6" />, label: "Dividers", color: "bg-pastel-rose" }
+              ].map((module, i) => (
+                <motion.div
+                  key={i}
+                  initial={{ opacity: 0, scale: 0.8 }}
+                  whileInView={{ opacity: 1, scale: 1 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.05, duration: 0.3 }}
+                  whileHover={{ scale: 1.1, rotate: 5 }}
+                  className={`${module.color} border border-gray-200 rounded-2xl p-4 flex flex-col items-center justify-center shadow-soft hover:shadow-soft-lg transition-all`}
+                >
+                  <div className="text-gray-900 mb-2">{module.icon}</div>
+                  <span className="text-xs font-semibold text-gray-900">{module.label}</span>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </div>
+      </section>
+
+      {/* Pricing Section */}
+      <section id="pricing" className="container mx-auto px-6 py-20">
+        <motion.div
+          initial={{ opacity: 0, y: 30 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ duration: 0.6 }}
+          className="text-center mb-16"
+        >
+          <h2 className="text-5xl font-bold mb-4 text-gray-900">Simple, transparent pricing</h2>
+          <p className="text-xl text-gray-600">
+            Choose the perfect plan for your needs
+          </p>
+        </motion.div>
+
+        <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          {/* Free Plan */}
+          <PricingCard
+            name="Free"
+            price="$0"
+            period="forever"
+            description="Perfect for getting started"
+            features={[
+              "1 profile",
+              "Unlimited links",
+              "5 module types",
+              "Basic analytics",
+              "Clicky branding"
+            ]}
+            buttonText="Get Started"
+            buttonVariant="outline"
+            index={0}
+          />
+
+          {/* Pro Plan */}
+          <PricingCard
+            name="Pro"
+            price="$9"
+            period="per month"
+            description="For growing creators"
+            features={[
+              "3 profiles",
+              "All 15+ modules",
+              "Remove branding",
+              "Advanced analytics",
+              "1 team member + $3/mo per extra",
+              "Priority support",
+              "Custom domains"
+            ]}
+            buttonText="Upgrade to Pro"
+            buttonVariant="primary"
+            popular={true}
+            index={1}
+          />
+
+          {/* Business Plan */}
+          <PricingCard
+            name="Business"
+            price="$29"
+            period="per month"
+            description="For teams and agencies"
+            features={[
+              "Unlimited profiles",
+              "Everything in Pro",
+              "White-label",
+              "3 team members + $3/mo per extra",
+              "Team collaboration",
+              "API access",
+              "Dedicated support"
+            ]}
+            buttonText="Go Business"
+            buttonVariant="outline"
+            index={2}
+          />
         </div>
       </section>
 
@@ -383,7 +538,7 @@ function FeatureCard({
       initial={{ opacity: 0, y: 50 }}
       whileInView={{ opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
+      transition={{ duration: 0.5, delay: index * 0.05 }}
       whileHover={{ y: -8, scale: 1.02 }}
       className="p-6 border border-gray-200 rounded-2xl bg-white transition-all hover:shadow-soft-lg group"
     >
@@ -394,8 +549,75 @@ function FeatureCard({
       >
         {icon}
       </motion.div>
-      <h3 className="text-2xl font-bold mb-2">{title}</h3>
-      <p className="text-gray-600">{description}</p>
+      <h3 className="text-xl font-bold mb-2">{title}</h3>
+      <p className="text-gray-600 text-sm">{description}</p>
+    </motion.div>
+  )
+}
+
+function PricingCard({
+  name,
+  price,
+  period,
+  description,
+  features,
+  buttonText,
+  buttonVariant,
+  popular = false,
+  index
+}: {
+  name: string
+  price: string
+  period: string
+  description: string
+  features: string[]
+  buttonText: string
+  buttonVariant: 'primary' | 'outline'
+  popular?: boolean
+  index: number
+}) {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 50 }}
+      whileInView={{ opacity: 1, y: 0 }}
+      viewport={{ once: true }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
+      whileHover={{ y: -8 }}
+      className={`relative p-8 border-2 rounded-3xl bg-white transition-all hover:shadow-soft-xl ${
+        popular ? 'border-primary-500 shadow-soft-lg' : 'border-gray-200'
+      }`}
+    >
+      {popular && (
+        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-primary-500 to-purple-500 text-white px-6 py-1.5 rounded-full text-sm font-bold shadow-soft">
+          MOST POPULAR
+        </div>
+      )}
+      <div className="text-center mb-6">
+        <h3 className="text-2xl font-bold text-gray-900 mb-2">{name}</h3>
+        <div className="mb-2">
+          <span className="text-5xl font-bold text-gray-900">{price}</span>
+          <span className="text-gray-600 ml-2">/ {period}</span>
+        </div>
+        <p className="text-gray-600">{description}</p>
+      </div>
+      <ul className="space-y-3 mb-8">
+        {features.map((feature, i) => (
+          <li key={i} className="flex items-start gap-3">
+            <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
+            <span className="text-gray-700">{feature}</span>
+          </li>
+        ))}
+      </ul>
+      <Link
+        href="/signup"
+        className={`block text-center px-6 py-3 rounded-xl font-semibold transition-all ${
+          buttonVariant === 'primary'
+            ? 'bg-primary-500 text-white hover:bg-primary-600 shadow-soft hover:shadow-soft-lg'
+            : 'bg-white text-gray-900 border-2 border-gray-300 hover:border-gray-400'
+        }`}
+      >
+        {buttonText}
+      </Link>
     </motion.div>
   )
 }
