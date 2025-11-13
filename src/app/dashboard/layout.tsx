@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@/lib/supabase'
-import { Link2, LayoutDashboard, Link as LinkIcon, Palette, BarChart3, Settings, LogOut, User, Layout, Zap } from 'lucide-react'
+import { Link2, LayoutDashboard, Link as LinkIcon, Palette, BarChart3, Settings, LogOut, User, Layout, Zap, ChevronLeft, ChevronRight } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function DashboardLayout({
@@ -13,6 +13,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [user, setUser] = useState<any>(null)
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const router = useRouter()
   const supabase = createBrowserClient()
 
@@ -25,6 +26,21 @@ export default function DashboardLayout({
     }
     getUser()
   }, [supabase])
+
+  // Load collapsed state from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('sidebarCollapsed')
+    if (saved !== null) {
+      setSidebarCollapsed(saved === 'true')
+    }
+  }, [])
+
+  // Save collapsed state to localStorage
+  const toggleSidebar = () => {
+    const newState = !sidebarCollapsed
+    setSidebarCollapsed(newState)
+    localStorage.setItem('sidebarCollapsed', String(newState))
+  }
 
   const handleSignOut = async () => {
     await supabase.auth.signOut()
@@ -61,49 +77,72 @@ export default function DashboardLayout({
         </div>
       </header>
 
-      <div className="container mx-auto px-6 py-10">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
+      <div className="max-w-[1600px] mx-auto px-6 py-10">
+        <div className="flex gap-6">
           {/* Sidebar */}
-          <aside className="lg:col-span-3">
+          <aside className={`flex-shrink-0 transition-all duration-300 ${sidebarCollapsed ? 'w-20' : 'w-64'}`}>
             <nav className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200 p-3 space-y-2 sticky top-28 shadow-soft">
               <NavItem
                 href="/dashboard"
                 icon={<LayoutDashboard className="w-5 h-5" />}
                 label="Dashboard"
+                collapsed={sidebarCollapsed}
               />
               <NavItem
                 href="/dashboard/builder"
                 icon={<Layout className="w-5 h-5" />}
                 label="Page Builder"
+                collapsed={sidebarCollapsed}
               />
               <NavItem
                 href="/dashboard/links"
                 icon={<LinkIcon className="w-5 h-5" />}
                 label="Links (Legacy)"
+                collapsed={sidebarCollapsed}
               />
               <NavItem
                 href="/dashboard/appearance"
                 icon={<Palette className="w-5 h-5" />}
                 label="Appearance"
+                collapsed={sidebarCollapsed}
               />
               <NavItem
                 href="/dashboard/analytics"
                 icon={<BarChart3 className="w-5 h-5" />}
                 label="Analytics"
+                collapsed={sidebarCollapsed}
               />
               <NavItem
                 href="/dashboard/integrations"
                 icon={<Zap className="w-5 h-5" />}
                 label="Integrations"
+                collapsed={sidebarCollapsed}
               />
               <NavItem
                 href="/dashboard/settings"
                 icon={<Settings className="w-5 h-5" />}
                 label="Settings"
+                collapsed={sidebarCollapsed}
               />
+
+              {/* Collapse/Expand Button */}
+              <button
+                onClick={toggleSidebar}
+                className="w-full flex items-center justify-center px-4 py-3 rounded-xl hover:bg-gray-100 transition-all text-gray-600 hover:text-gray-900 mt-2"
+                title={sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+              >
+                {sidebarCollapsed ? (
+                  <ChevronRight className="w-5 h-5" />
+                ) : (
+                  <>
+                    <ChevronLeft className="w-5 h-5 mr-2" />
+                    <span className="font-semibold text-sm">Collapse</span>
+                  </>
+                )}
+              </button>
             </nav>
 
-            {user && (
+            {user && !sidebarCollapsed && (
               <div className="mt-6 bg-gradient-to-br from-pastel-sky to-pastel-lavender rounded-2xl border border-gray-200 p-5 shadow-soft">
                 <div className="flex items-center space-x-4">
                   <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-soft">
@@ -118,10 +157,18 @@ export default function DashboardLayout({
                 </div>
               </div>
             )}
+
+            {user && sidebarCollapsed && (
+              <div className="mt-6 bg-gradient-to-br from-pastel-sky to-pastel-lavender rounded-2xl border border-gray-200 p-3 shadow-soft flex items-center justify-center">
+                <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center shadow-soft" title={user.email}>
+                  <User className="w-5 h-5 text-primary-600" />
+                </div>
+              </div>
+            )}
           </aside>
 
           {/* Main content */}
-          <main className="lg:col-span-9">{children}</main>
+          <main className="flex-1 min-w-0">{children}</main>
         </div>
       </div>
     </div>
@@ -132,11 +179,32 @@ function NavItem({
   href,
   icon,
   label,
+  collapsed,
 }: {
   href: string
   icon: React.ReactNode
   label: string
+  collapsed: boolean
 }) {
+  if (collapsed) {
+    return (
+      <div className="relative group">
+        <Link
+          href={href}
+          className="flex items-center justify-center px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-pastel-sky hover:to-pastel-lavender transition-all text-gray-700 hover:text-gray-900 hover:shadow-soft"
+        >
+          <span className="group-hover:scale-110 transition-transform">{icon}</span>
+        </Link>
+
+        {/* Tooltip */}
+        <div className="absolute left-full ml-2 top-1/2 -translate-y-1/2 px-3 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all whitespace-nowrap z-50 shadow-lg">
+          {label}
+          <div className="absolute right-full top-1/2 -translate-y-1/2 border-4 border-transparent border-r-gray-900"></div>
+        </div>
+      </div>
+    )
+  }
+
   return (
     <Link
       href={href}
