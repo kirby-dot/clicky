@@ -13,6 +13,7 @@ export default function DashboardLayout({
   children: React.ReactNode
 }) {
   const [user, setUser] = useState<any>(null)
+  const [userPlan, setUserPlan] = useState<string>('free')
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const router = useRouter()
   const supabase = createBrowserClient()
@@ -23,6 +24,22 @@ export default function DashboardLayout({
         data: { user },
       } = await supabase.auth.getUser()
       setUser(user)
+
+      if (user) {
+        // Get user's subscription/plan
+        const { data: subData } = await supabase
+          .from('subscriptions')
+          .select('plan')
+          .eq('user_id', user.id)
+          .eq('status', 'active')
+          .order('started_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        if (subData) {
+          setUserPlan(subData.plan)
+        }
+      }
     }
     getUser()
   }, [supabase])
@@ -152,7 +169,7 @@ export default function DashboardLayout({
                     <p className="text-sm font-semibold text-gray-900 truncate">
                       {user.email}
                     </p>
-                    <p className="text-xs text-gray-600 mt-1 font-medium">Free Plan</p>
+                    <p className="text-xs text-gray-600 mt-1 font-medium capitalize">{userPlan} Plan</p>
                   </div>
                 </div>
               </div>
