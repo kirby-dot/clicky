@@ -26,7 +26,7 @@ export function SocialLinksModule({ module }: SocialLinksModuleProps) {
     <div className={`flex ${layout === 'grid' ? 'grid grid-cols-4' : 'flex-row justify-center'} gap-3`}>
       {content.links.map((link, index) => {
         const Icon = SOCIAL_ICONS[link.platform] || MessageCircle
-        const colors = ['bg-neo-yellow', 'bg-neo-pink', 'bg-neo-blue', 'bg-neo-green', 'bg-neo-purple', 'bg-neo-orange']
+        const colors = ['bg-pastel-sky', 'bg-pastel-lavender', 'bg-pastel-mint', 'bg-pastel-rose', 'bg-pastel-peach', 'bg-pastel-butter']
         const bgColor = colors[index % colors.length]
 
         return (
@@ -35,10 +35,10 @@ export function SocialLinksModule({ module }: SocialLinksModuleProps) {
             href={link.url}
             target="_blank"
             rel="noopener noreferrer"
-            className={`${bgColor} border-4 border-black shadow-brutal hover:shadow-brutal-lg transition-all p-4 flex items-center justify-center active:translate-x-1 active:translate-y-1 active:shadow-none`}
+            className={`${bgColor} rounded-2xl shadow-soft hover:shadow-soft-lg transition-all hover:scale-110 active:scale-95 p-4 flex items-center justify-center border border-gray-200`}
             title={link.platform}
           >
-            <Icon className="w-6 h-6 text-black" />
+            <Icon className="w-6 h-6 text-gray-700" />
           </a>
         )
       })}

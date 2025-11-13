@@ -104,7 +104,7 @@ export default function SettingsPage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-4 border-black"></div>
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
       </div>
     )
   }
@@ -128,21 +128,21 @@ export default function SettingsPage() {
       </div>
 
       {message && (
-        <div className={`p-4 border-4 border-black shadow-brutal ${
-          message.includes('Error') ? 'bg-red-100' : 'bg-neo-green'
-        }`}>
-          <p className="font-bold">{message}</p>
+        <div className={`p-4 rounded-xl border ${
+          message.includes('Error') ? 'bg-red-50 border-red-200 text-red-800' : 'bg-green-50 border-green-200 text-green-800'
+        } shadow-soft`}>
+          <p className="font-semibold">{message}</p>
         </div>
       )}
 
       {/* Profile Settings */}
       <Card>
-        <CardHeader className="bg-neo-yellow border-b-4 border-black">
+        <CardHeader className="bg-gradient-to-r from-pastel-peach to-pastel-butter border-b border-gray-200">
           <div className="flex items-center gap-2">
             <User className="w-5 h-5" />
             <CardTitle>Profile Settings</CardTitle>
           </div>
-          <CardDescription className="text-gray-700 font-medium">
+          <CardDescription className="text-gray-600">
             Update your public profile information
           </CardDescription>
         </CardHeader>
@@ -189,15 +189,15 @@ export default function SettingsPage() {
                 type="checkbox"
                 checked={profile.published}
                 onChange={(e) => setProfile({ ...profile, published: e.target.checked })}
-                className="w-5 h-5 border-3 border-black"
+                className="w-5 h-5 rounded border-2 border-gray-300 text-primary-500 focus:ring-2 focus:ring-primary-500"
                 id="published"
               />
-              <label htmlFor="published" className="font-bold">
+              <label htmlFor="published" className="font-semibold">
                 Make profile public
               </label>
             </div>
 
-            <div className="flex gap-3 pt-4 border-t-4 border-black">
+            <div className="flex gap-3 pt-4 border-t border-gray-200">
               <Button type="submit" disabled={saving}>
                 {saving ? 'Saving...' : 'Save Changes'}
               </Button>
@@ -208,20 +208,20 @@ export default function SettingsPage() {
 
       {/* URL Settings */}
       <Card>
-        <CardHeader className="bg-neo-blue border-b-4 border-black">
+        <CardHeader className="bg-gradient-to-r from-pastel-sky to-pastel-lavender border-b border-gray-200">
           <div className="flex items-center gap-2">
             <Link2 className="w-5 h-5" />
             <CardTitle>Your Clicky URL</CardTitle>
           </div>
-          <CardDescription className="text-gray-700 font-medium">
+          <CardDescription className="text-gray-600">
             Customize your profile link
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="flex items-center gap-4">
             <div className="flex-1">
-              <p className="text-sm font-bold text-gray-700 mb-2">Current URL:</p>
-              <div className="bg-gray-50 border-3 border-black p-4 font-mono">
+              <p className="text-sm font-semibold text-gray-700 mb-2">Current URL:</p>
+              <div className="bg-gray-50 border border-gray-300 rounded-xl p-4 font-mono">
                 clicky.com/{profile.slug}
               </div>
             </div>
@@ -234,22 +234,22 @@ export default function SettingsPage() {
 
       {/* Account Settings */}
       <Card>
-        <CardHeader className="bg-neo-pink border-b-4 border-black">
+        <CardHeader className="bg-gradient-to-r from-pastel-rose to-pastel-peach border-b border-gray-200">
           <div className="flex items-center gap-2">
             <Shield className="w-5 h-5" />
             <CardTitle>Account Settings</CardTitle>
           </div>
-          <CardDescription className="text-gray-700 font-medium">
+          <CardDescription className="text-gray-600">
             Manage your account security
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6 space-y-4">
           <div>
-            <p className="text-sm font-bold text-gray-700 mb-2">Email:</p>
+            <p className="text-sm font-semibold text-gray-700 mb-2">Email:</p>
             <p className="font-medium">{user.email}</p>
           </div>
 
-          <div className="pt-4 border-t-4 border-black">
+          <div className="pt-4 border-t border-gray-200">
             <Button variant="outline" onClick={() => alert('Password reset email sent!')}>
               Change Password
             </Button>
@@ -259,39 +259,39 @@ export default function SettingsPage() {
 
       {/* Pricing Plans */}
       <Card>
-        <CardHeader className="bg-neo-purple border-b-4 border-black">
+        <CardHeader className="bg-gradient-to-r from-pastel-lavender to-pastel-lilac border-b border-gray-200">
           <div className="flex items-center gap-2">
             <Crown className="w-5 h-5" />
             <CardTitle>Your Plan</CardTitle>
           </div>
-          <CardDescription className="text-gray-700 font-medium">
+          <CardDescription className="text-gray-600">
             Upgrade to unlock more features
           </CardDescription>
         </CardHeader>
         <CardContent className="p-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {/* Free Plan */}
-            <div className="border-4 border-black p-6 bg-white shadow-brutal">
+            <div className="border-2 border-gray-200 rounded-2xl p-6 bg-white shadow-soft">
               <div className="text-center mb-4">
-                <h3 className="text-2xl font-black">Free</h3>
-                <div className="text-4xl font-black my-4">$0</div>
-                <p className="text-sm text-gray-600 font-medium">Forever free</p>
+                <h3 className="text-2xl font-bold">Free</h3>
+                <div className="text-4xl font-bold my-4">$0</div>
+                <p className="text-sm text-gray-600">Forever free</p>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                   <span className="text-sm">1 profile</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                   <span className="text-sm">Unlimited links</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                   <span className="text-sm">5 module types</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                   <span className="text-sm">Basic analytics</span>
                 </li>
               </ul>
@@ -301,34 +301,34 @@ export default function SettingsPage() {
             </div>
 
             {/* Pro Plan */}
-            <div className="border-4 border-black p-6 bg-neo-yellow shadow-brutal-lg relative">
-              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-black text-white px-4 py-1 font-black text-xs">
+            <div className="border-2 border-primary-300 rounded-2xl p-6 bg-gradient-to-br from-pastel-butter to-pastel-peach shadow-soft-lg relative">
+              <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary-500 text-white px-4 py-1 rounded-full font-bold text-xs shadow-soft">
                 POPULAR
               </div>
               <div className="text-center mb-4">
-                <h3 className="text-2xl font-black">Pro</h3>
-                <div className="text-4xl font-black my-4">$9</div>
-                <p className="text-sm text-gray-700 font-medium">per month</p>
+                <h3 className="text-2xl font-bold">Pro</h3>
+                <div className="text-4xl font-bold my-4">$9</div>
+                <p className="text-sm text-gray-700">per month</p>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
-                  <span className="text-sm font-bold">Everything in Free</span>
+                  <Check className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm font-semibold">Everything in Free</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
                   <span className="text-sm">3 profiles</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
                   <span className="text-sm">All 17+ modules</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
                   <span className="text-sm">Remove branding</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
                   <span className="text-sm">Advanced analytics</span>
                 </li>
               </ul>
@@ -338,31 +338,31 @@ export default function SettingsPage() {
             </div>
 
             {/* Business Plan */}
-            <div className="border-4 border-black p-6 bg-white shadow-brutal">
+            <div className="border-2 border-gray-200 rounded-2xl p-6 bg-white shadow-soft">
               <div className="text-center mb-4">
-                <h3 className="text-2xl font-black">Business</h3>
-                <div className="text-4xl font-black my-4">$29</div>
-                <p className="text-sm text-gray-600 font-medium">per month</p>
+                <h3 className="text-2xl font-bold">Business</h3>
+                <div className="text-4xl font-bold my-4">$29</div>
+                <p className="text-sm text-gray-600">per month</p>
               </div>
               <ul className="space-y-2 mb-6">
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
-                  <span className="text-sm font-bold">Everything in Pro</span>
+                  <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
+                  <span className="text-sm font-semibold">Everything in Pro</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                   <span className="text-sm">Unlimited profiles</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                   <span className="text-sm">Custom domain</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                   <span className="text-sm">White-label</span>
                 </li>
                 <li className="flex items-start gap-2">
-                  <Check className="w-5 h-5 text-black flex-shrink-0 mt-0.5" />
+                  <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
                   <span className="text-sm">Team collaboration</span>
                 </li>
               </ul>
@@ -376,9 +376,9 @@ export default function SettingsPage() {
 
       {/* Danger Zone */}
       <Card>
-        <CardHeader className="bg-red-100 border-b-4 border-black">
+        <CardHeader className="bg-red-50 border-b border-red-200">
           <CardTitle className="text-red-800">Danger Zone</CardTitle>
-          <CardDescription className="text-red-700 font-medium">
+          <CardDescription className="text-red-700">
             Irreversible actions
           </CardDescription>
         </CardHeader>

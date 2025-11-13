@@ -22,7 +22,7 @@ export function VideoModule({ module }: VideoModuleProps) {
   }
 
   return (
-    <div className="relative w-full border-4 border-black shadow-brutal overflow-hidden" style={{ paddingBottom: '56.25%' }}>
+    <div className="relative w-full rounded-2xl shadow-soft overflow-hidden" style={{ paddingBottom: '56.25%' }}>
       <iframe
         src={getEmbedUrl(content.url)}
         className="absolute top-0 left-0 w-full h-full"

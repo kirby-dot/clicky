@@ -31,11 +31,11 @@ export function LinkModule({ module, profileId, bgColor }: LinkModuleProps) {
       target="_blank"
       rel="noopener noreferrer"
       onClick={handleClick}
-      className={`block w-full px-6 py-4 text-center font-bold transition-all ${bgColor} border-4 border-black shadow-brutal hover:shadow-brutal-lg hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none flex items-center justify-center space-x-2 text-black text-lg`}
-      whileTap={{ scale: 0.98 }}
+      className={`block w-full px-6 py-4 text-center font-semibold transition-all ${bgColor} rounded-2xl shadow-soft hover:shadow-soft-lg hover:scale-105 active:scale-95 flex items-center justify-center space-x-2 text-gray-900 text-lg border border-gray-200`}
+      whileTap={{ scale: 0.95 }}
     >
       <span>{module.title}</span>
-      <ExternalLink className="w-5 h-5" />
+      <ExternalLink className="w-4 h-4" />
     </motion.a>
   )
 }

@@ -12,18 +12,18 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     return (
       <button
         className={cn(
-          'inline-flex items-center justify-center whitespace-nowrap font-bold border-3 border-black transition-all active:translate-x-1 active:translate-y-1 active:shadow-none disabled:pointer-events-none disabled:opacity-50',
+          'inline-flex items-center justify-center whitespace-nowrap font-semibold rounded-xl transition-all hover:scale-105 active:scale-95 disabled:pointer-events-none disabled:opacity-50',
           {
-            'bg-neo-yellow shadow-brutal hover:shadow-brutal-lg': variant === 'default',
-            'border-4 border-black bg-white hover:bg-gray-50 shadow-brutal': variant === 'outline',
-            'border-2 hover:bg-gray-100 shadow-brutal-sm': variant === 'ghost',
-            'bg-neo-pink shadow-brutal hover:shadow-brutal-lg': variant === 'destructive',
+            'bg-primary-500 text-white shadow-soft hover:shadow-soft-lg hover:bg-primary-600': variant === 'default',
+            'border-2 border-gray-300 bg-white hover:bg-gray-50 text-gray-700': variant === 'outline',
+            'hover:bg-gray-100 text-gray-700': variant === 'ghost',
+            'bg-red-500 text-white shadow-soft hover:shadow-soft-lg hover:bg-red-600': variant === 'destructive',
           },
           {
             'h-11 px-6 py-2 text-base': size === 'default',
             'h-9 px-4 text-sm': size === 'sm',
-            'h-13 px-8 text-lg': size === 'lg',
-            'h-11 w-11': size === 'icon',
+            'h-12 px-8 text-lg': size === 'lg',
+            'h-10 w-10 rounded-lg': size === 'icon',
           },
           className
         )}

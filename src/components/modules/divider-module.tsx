@@ -17,8 +17,8 @@ export function DividerModule({ module }: DividerModuleProps) {
 
   return (
     <hr
-      className={`border-t-4 border-black ${borderStyle} my-6`}
-      style={{ borderColor: content.color || '#000' }}
+      className={`border-t-2 border-gray-300 ${borderStyle} my-8`}
+      style={{ borderColor: content.color || '#E5E7EB' }}
     />
   )
 }

@@ -19,7 +19,7 @@ interface ModuleRendererProps {
 }
 
 export function ModuleRenderer({ module, profileId, index }: ModuleRendererProps) {
-  const colors = ['bg-neo-yellow', 'bg-neo-pink', 'bg-neo-blue', 'bg-neo-green', 'bg-neo-purple', 'bg-neo-orange']
+  const colors = ['bg-pastel-sky', 'bg-pastel-lavender', 'bg-pastel-mint', 'bg-pastel-rose', 'bg-pastel-peach', 'bg-pastel-butter']
   const bgColor = colors[index % colors.length]
 
   const item = {

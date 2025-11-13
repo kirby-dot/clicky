@@ -32,14 +32,16 @@ export default function DashboardLayout({
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 via-white to-gray-50">
       {/* Header */}
-      <header className="bg-white border-b sticky top-0 z-50">
-        <div className="container mx-auto px-4">
-          <div className="flex items-center justify-between h-16">
-            <Link href="/dashboard" className="flex items-center space-x-2">
-              <Link2 className="w-8 h-8 text-primary-600" />
-              <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
+      <header className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50 shadow-soft">
+        <div className="container mx-auto px-6">
+          <div className="flex items-center justify-between h-20">
+            <Link href="/dashboard" className="flex items-center space-x-3">
+              <div className="w-10 h-10 bg-gradient-to-br from-primary-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-soft">
+                <Link2 className="w-6 h-6 text-white" />
+              </div>
+              <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
                 Clicky
               </span>
             </Link>
@@ -49,8 +51,9 @@ export default function DashboardLayout({
                 variant="outline"
                 size="sm"
                 onClick={handleSignOut}
+                className="gap-2"
               >
-                <LogOut className="w-4 h-4 mr-2" />
+                <LogOut className="w-4 h-4" />
                 Sign out
               </Button>
             </div>
@@ -58,11 +61,11 @@ export default function DashboardLayout({
         </div>
       </header>
 
-      <div className="container mx-auto px-4 py-8">
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+      <div className="container mx-auto px-6 py-10">
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-10">
           {/* Sidebar */}
           <aside className="lg:col-span-3">
-            <nav className="bg-white rounded-lg border p-4 space-y-1 sticky top-24">
+            <nav className="bg-white/80 backdrop-blur-sm rounded-2xl border border-gray-200 p-3 space-y-2 sticky top-28 shadow-soft">
               <NavItem
                 href="/dashboard"
                 icon={<LayoutDashboard className="w-5 h-5" />}
@@ -96,16 +99,16 @@ export default function DashboardLayout({
             </nav>
 
             {user && (
-              <div className="mt-4 bg-white rounded-lg border p-4">
-                <div className="flex items-center space-x-3">
-                  <div className="w-10 h-10 bg-primary-100 rounded-full flex items-center justify-center">
-                    <User className="w-5 h-5 text-primary-600" />
+              <div className="mt-6 bg-gradient-to-br from-pastel-sky to-pastel-lavender rounded-2xl border border-gray-200 p-5 shadow-soft">
+                <div className="flex items-center space-x-4">
+                  <div className="w-12 h-12 bg-white rounded-xl flex items-center justify-center shadow-soft">
+                    <User className="w-6 h-6 text-primary-600" />
                   </div>
                   <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900 truncate">
+                    <p className="text-sm font-semibold text-gray-900 truncate">
                       {user.email}
                     </p>
-                    <p className="text-xs text-gray-500">Free plan</p>
+                    <p className="text-xs text-gray-600 mt-1 font-medium">Free Plan</p>
                   </div>
                 </div>
               </div>
@@ -132,10 +135,10 @@ function NavItem({
   return (
     <Link
       href={href}
-      className="flex items-center space-x-3 px-3 py-2 rounded-md hover:bg-gray-100 transition-colors text-gray-700 hover:text-gray-900"
+      className="flex items-center space-x-3 px-4 py-3 rounded-xl hover:bg-gradient-to-r hover:from-pastel-sky hover:to-pastel-lavender transition-all text-gray-700 hover:text-gray-900 hover:shadow-soft group"
     >
-      {icon}
-      <span className="font-medium">{label}</span>
+      <span className="group-hover:scale-110 transition-transform">{icon}</span>
+      <span className="font-semibold text-sm">{label}</span>
     </Link>
   )
 }
