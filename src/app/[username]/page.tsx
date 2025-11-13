@@ -3,9 +3,11 @@ import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import ProfileView from '@/components/profile/profile-view'
+import ProfileModulesView from '@/components/profile/profile-modules-view'
 import type { Database } from '@/types/database'
+import type { Module } from '@/types'
 
-export const revalidate = 60 // Revalidate every 60 seconds
+export const revalidate = 10 // Revalidate every 10 seconds for live preview
 
 type Props = {
   params: { username: string }
@@ -61,6 +63,25 @@ export default async function ProfilePage({ params }: Props) {
     notFound()
   }
 
+  // Check for modules first (new system)
+  const { data: modules } = await supabase
+    .from('modules')
+    .select('*')
+    .eq('profile_id', profile.id)
+    .eq('active', true)
+    .order('position')
+
+  // If modules exist, use the new module-based view
+  if (modules && modules.length > 0) {
+    return (
+      <ProfileModulesView
+        profile={profile}
+        modules={modules as Module[]}
+      />
+    )
+  }
+
+  // Otherwise, fall back to links (backward compatibility)
   const { data: links } = await supabase
     .from('links')
     .select('*')

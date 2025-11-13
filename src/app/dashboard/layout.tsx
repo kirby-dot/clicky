@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { createBrowserClient } from '@/lib/supabase'
-import { Link2, LayoutDashboard, Link as LinkIcon, Palette, BarChart3, Settings, LogOut, User } from 'lucide-react'
+import { Link2, LayoutDashboard, Link as LinkIcon, Palette, BarChart3, Settings, LogOut, User, Layout } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 export default function DashboardLayout({
@@ -69,9 +69,14 @@ export default function DashboardLayout({
                 label="Dashboard"
               />
               <NavItem
+                href="/dashboard/builder"
+                icon={<Layout className="w-5 h-5" />}
+                label="Page Builder"
+              />
+              <NavItem
                 href="/dashboard/links"
                 icon={<LinkIcon className="w-5 h-5" />}
-                label="Links"
+                label="Links (Legacy)"
               />
               <NavItem
                 href="/dashboard/appearance"
