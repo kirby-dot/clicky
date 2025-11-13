@@ -28,7 +28,9 @@ import {
   Code,
   Grid3x3,
   Columns,
-  ArrowUp
+  ArrowUp,
+  Edit2,
+  RefreshCw
 } from 'lucide-react'
 import type { Module, ModuleType, Profile } from '@/types'
 import {
@@ -65,7 +67,7 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     icon: <LinkIcon className="w-5 h-5" />,
     label: 'Link Button',
     description: 'A clickable link button',
-    defaultContent: { url: '', icon: '' }
+    defaultContent: { url: 'https://example.com' }
   },
   {
     type: 'social-links',
@@ -79,14 +81,14 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
     icon: <Type className="w-5 h-5" />,
     label: 'Header',
     description: 'Section heading',
-    defaultContent: { text: '', level: 'h2', align: 'center' }
+    defaultContent: { text: 'New Heading', level: 'h2', align: 'center' }
   },
   {
     type: 'text',
     icon: <Type className="w-5 h-5" />,
     label: 'Text Block',
     description: 'Paragraph text',
-    defaultContent: { text: '', align: 'center' }
+    defaultContent: { text: 'Add your text here...', align: 'center' }
   },
   {
     type: 'image',
@@ -191,7 +193,11 @@ export default function BuilderPage() {
   const supabase = createBrowserClient()
 
   const sensors = useSensors(
-    useSensor(PointerSensor),
+    useSensor(PointerSensor, {
+      activationConstraint: {
+        distance: 8,
+      },
+    }),
     useSensor(KeyboardSensor, {
       coordinateGetter: sortableKeyboardCoordinates,
     })
@@ -358,10 +364,11 @@ export default function BuilderPage() {
   }
 
   return (
-    <div className="flex gap-6 h-screen">
-      {/* Left Sidebar - Module Templates */}
-      <div className="w-64 overflow-y-auto border-r-4 border-black p-4 space-y-2">
-        <h2 className="text-xl font-black mb-4">Add Modules</h2>
+    <div className="space-y-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Left Sidebar - Module Templates */}
+        <div className="space-y-2">
+          <h2 className="text-xl font-black mb-4">Add Modules</h2>
         {MODULE_TEMPLATES.map((template) => (
           <button
             key={template.type}
@@ -378,15 +385,7 @@ export default function BuilderPage() {
       </div>
 
       {/* Center - Builder Canvas */}
-      <div className="flex-1 overflow-y-auto p-6 space-y-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-black text-gray-900">Page Builder</h1>
-            <p className="text-gray-600 mt-1 font-medium">
-              Drag and drop modules to build your page
-            </p>
-          </div>
-        </div>
+      <div className="lg:col-span-2 space-y-6">
 
         {modules.length === 0 ? (
           <Card className="py-12">
@@ -422,33 +421,38 @@ export default function BuilderPage() {
           </DndContext>
         )}
       </div>
+    </div>
 
-      {/* Right Sidebar - Live Preview */}
-      <div className="w-96 border-l-4 border-black bg-gray-50 overflow-hidden">
-        <div className="bg-neo-yellow border-b-4 border-black p-4">
-          <div className="flex items-center justify-between mb-2">
-            <h2 className="text-lg font-black">Live Preview</h2>
+      {/* Live Preview Section */}
+      <Card className="mt-6">
+        <CardHeader className="bg-neo-yellow border-b-4 border-black">
+          <CardTitle className="flex items-center justify-between">
+            <span>Live Preview</span>
             <a
               href={`/${profile.slug}`}
               target="_blank"
               rel="noopener noreferrer"
               className="text-sm font-bold underline flex items-center gap-1"
             >
-              View Page
+              View Full Page
               <ExternalLink className="w-4 h-4" />
             </a>
+          </CardTitle>
+          <CardDescription className="text-gray-700 font-medium">
+            Changes appear after a few seconds
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0 bg-gray-50">
+          <div className="relative w-full" style={{ height: '600px' }}>
+            <iframe
+              key={previewKey}
+              src={`/${profile.slug}?preview=${Date.now()}`}
+              className="w-full h-full border-0"
+              title="Profile Preview"
+            />
           </div>
-          <p className="text-sm text-gray-700 font-medium">
-            Updates automatically
-          </p>
-        </div>
-        <iframe
-          key={previewKey}
-          src={`/${profile.slug}`}
-          className="w-full h-full border-0"
-          title="Profile Preview"
-        />
-      </div>
+        </CardContent>
+      </Card>
 
       {/* Edit Module Modal */}
       {editingModule && (
@@ -473,12 +477,13 @@ function SortableModule({
   onToggleActive: (module: Module) => void
   onEdit: (module: Module) => void
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition } =
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
     useSortable({ id: module.id })
 
   const style = {
     transform: CSS.Transform.toString(transform),
     transition,
+    opacity: isDragging ? 0.5 : 1,
   }
 
   const template = MODULE_TEMPLATES.find((t) => t.type === module.type)
@@ -493,7 +498,7 @@ function SortableModule({
     >
       <div className="flex items-center gap-4">
         <button
-          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-black transition-colors"
+          className="cursor-grab active:cursor-grabbing text-gray-400 hover:text-black transition-colors touch-none p-2 hover:bg-gray-100 rounded"
           {...attributes}
           {...listeners}
         >
@@ -509,8 +514,8 @@ function SortableModule({
         </div>
 
         <div className="flex items-center gap-2">
-          <Button size="icon" variant="ghost" onClick={() => onEdit(module)}>
-            <Code className="w-5 h-5" />
+          <Button size="icon" variant="ghost" onClick={() => onEdit(module)} title="Edit">
+            <Edit2 className="w-5 h-5" />
           </Button>
           <Button
             size="icon"
