@@ -1,4 +1,4 @@
-import { createServerComponentClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
 import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
@@ -13,11 +13,23 @@ type Props = {
   params: { username: string }
 }
 
+// Helper to create server Supabase client
+function createServerClient() {
+  return createClient<Database>(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+        detectSessionInUrl: false
+      }
+    }
+  )
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient<Database>({
-    cookies: () => cookieStore
-  })
+  const supabase = createServerClient()
 
   const { data: profile } = await supabase
     .from('profiles')
@@ -44,10 +56,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
 }
 
 export default async function ProfilePage({ params }: Props) {
-  const cookieStore = cookies()
-  const supabase = createServerComponentClient<Database>({
-    cookies: () => cookieStore
-  })
+  const supabase = createServerClient()
 
   // Get current user to check if they own this profile
   const { data: { user } } = await supabase.auth.getUser()
