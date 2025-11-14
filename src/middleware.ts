@@ -1,14 +1,35 @@
-import { createMiddlewareClient } from '@supabase/auth-helpers-nextjs'
+import { createClient } from '@supabase/supabase-js'
 import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 
 export async function middleware(req: NextRequest) {
   const res = NextResponse.next()
-  const supabase = createMiddlewareClient({ req, res })
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession()
+  // Create Supabase client with explicit environment variables
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
+  const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+  const supabase = createClient(supabaseUrl, supabaseKey, {
+    auth: {
+      persistSession: false,
+      autoRefreshToken: false,
+      detectSessionInUrl: false
+    }
+  })
+
+  // Get session from cookies
+  const token = req.cookies.get('sb-access-token')?.value
+  let session = null
+
+  if (token) {
+    const { data: { user } } = await supabase.auth.getUser(token)
+    if (user) {
+      session = { user }
+    } else {
+      // Clear invalid token
+      res.cookies.delete('sb-access-token')
+      res.cookies.delete('sb-refresh-token')
+    }
+  }
 
   // Handle custom domain routing
   const hostname = req.headers.get('host') || ''
