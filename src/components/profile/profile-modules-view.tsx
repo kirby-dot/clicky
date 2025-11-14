@@ -81,12 +81,12 @@ export default function ProfileModulesView({ profile, modules, badge }: ProfileM
               <img
                 src={profile.avatar_url}
                 alt={profile.title}
-                className="w-32 h-32 mx-auto object-cover rounded-full border-2 border-gray-200 shadow-soft-lg"
+                className="w-32 h-32 mx-auto object-cover rounded-full shadow-lg ring-4 ring-white/50"
               />
             </div>
           )}
 
-          <div className="flex items-center justify-center gap-3 mb-4">
+          <div className="flex items-center justify-center gap-3 mb-4 flex-wrap">
             <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
               {profile.title}
             </h1>
@@ -94,10 +94,10 @@ export default function ProfileModulesView({ profile, modules, badge }: ProfileM
               const BadgeIcon = (LucideIcons as any)[badge.icon] || Award
               return (
                 <div
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 shadow-soft"
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-md"
                   style={{
-                    backgroundColor: `${badge.color}20`,
-                    borderColor: badge.color,
+                    backgroundColor: `${badge.color}15`,
+                    border: `2px solid ${badge.color}`,
                   }}
                   title={badge.description || badge.display_name}
                 >
@@ -106,7 +106,7 @@ export default function ProfileModulesView({ profile, modules, badge }: ProfileM
                     style={{ color: badge.color }}
                   />
                   <span
-                    className="text-sm font-bold"
+                    className="text-sm font-semibold"
                     style={{ color: badge.color }}
                   >
                     {badge.display_name}

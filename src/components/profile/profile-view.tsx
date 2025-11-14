@@ -119,7 +119,15 @@ export default function ProfileView({ profile, links, theme, badge }: ProfileVie
   }
 
   return (
-    <div className="min-h-screen py-12 px-4 bg-white">
+    <div
+      className="min-h-screen py-12 px-4"
+      style={{
+        background: themeConfig.gradient?.enabled
+          ? `linear-gradient(${themeConfig.gradient.direction || '135deg'}, ${themeConfig.gradient.colors.join(', ')})`
+          : themeConfig.colors.background,
+        fontFamily: themeConfig.fonts.body,
+      }}
+    >
       <motion.div
         className="max-w-2xl mx-auto"
         variants={container}
@@ -133,21 +141,31 @@ export default function ProfileView({ profile, links, theme, badge }: ProfileVie
               <img
                 src={profile.avatar_url}
                 alt={profile.title}
-                className="w-32 h-32 mx-auto object-cover border-4 border-black shadow-brutal"
+                className={`w-32 h-32 mx-auto object-cover shadow-lg ring-4 ring-white/50 ${getBorderRadiusClass()}`}
+                style={{ borderRadius: themeConfig.borderRadius === 'full' ? '9999px' : undefined }}
               />
             </div>
           )}
 
-          <div className="flex items-center justify-center gap-3 mb-4">
-            <h1 className="text-4xl md:text-5xl font-black text-black">
+          <div className="flex items-center justify-center gap-3 mb-4 flex-wrap">
+            <h1
+              className="text-4xl md:text-5xl font-bold"
+              style={{
+                color: themeConfig.colors.text,
+                fontFamily: themeConfig.fonts.heading,
+              }}
+            >
               {profile.title}
             </h1>
             {badge && (() => {
               const BadgeIcon = (LucideIcons as any)[badge.icon] || Award
               return (
                 <div
-                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-black shadow-brutal"
-                  style={{ backgroundColor: `${badge.color}20` }}
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full shadow-md"
+                  style={{
+                    backgroundColor: `${badge.color}15`,
+                    border: `2px solid ${badge.color}`,
+                  }}
                   title={badge.description || badge.display_name}
                 >
                   <BadgeIcon
@@ -155,7 +173,7 @@ export default function ProfileView({ profile, links, theme, badge }: ProfileVie
                     style={{ color: badge.color }}
                   />
                   <span
-                    className="text-sm font-bold"
+                    className="text-sm font-semibold"
                     style={{ color: badge.color }}
                   >
                     {badge.display_name}
@@ -166,15 +184,39 @@ export default function ProfileView({ profile, links, theme, badge }: ProfileVie
           </div>
 
           {profile.bio && (
-            <p className="text-lg text-gray-700 max-w-lg mx-auto font-medium">{profile.bio}</p>
+            <p
+              className="text-lg max-w-lg mx-auto"
+              style={{
+                color: themeConfig.colors.text,
+                opacity: 0.8,
+                fontFamily: themeConfig.fonts.body,
+              }}
+            >
+              {profile.bio}
+            </p>
           )}
         </motion.div>
 
         {/* Links */}
-        <motion.div variants={item} className="max-w-lg mx-auto space-y-4">
-          {links.map((link, index) => {
-            const colors = ['bg-neo-yellow', 'bg-neo-pink', 'bg-neo-blue', 'bg-neo-green', 'bg-neo-purple', 'bg-neo-orange']
-            const bgColor = colors[index % colors.length]
+        <motion.div variants={item} className={`max-w-lg mx-auto ${getSpacingClass()}`}>
+          {links.map((link) => {
+            const linkStyleClass = getLinkStyle()
+            const hoverClass = getHoverAnimation()
+
+            let borderStyle = {}
+            let shadowStyle = 'shadow-md hover:shadow-lg'
+
+            if (themeConfig.linkStyle === 'outlined') {
+              borderStyle = {
+                borderColor: themeConfig.colors.primary,
+                color: themeConfig.colors.linkText,
+              }
+              shadowStyle = ''
+            } else if (themeConfig.linkStyle === 'minimal') {
+              shadowStyle = ''
+            } else if (themeConfig.linkStyle === 'shadow') {
+              shadowStyle = 'shadow-lg hover:shadow-xl'
+            }
 
             return (
               <motion.a
@@ -183,18 +225,37 @@ export default function ProfileView({ profile, links, theme, badge }: ProfileVie
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={() => handleLinkClick(link)}
-                className={`block w-full px-6 py-4 text-center font-bold transition-all ${bgColor} border-4 border-black shadow-brutal hover:shadow-brutal-lg hover:translate-x-0.5 hover:translate-y-0.5 active:translate-x-1 active:translate-y-1 active:shadow-none flex items-center justify-center space-x-2 text-black text-lg`}
+                className={`${linkStyleClass} ${hoverClass} ${shadowStyle} flex items-center justify-center gap-2 relative overflow-hidden group`}
+                style={{
+                  backgroundColor: themeConfig.linkStyle === 'outlined' || themeConfig.linkStyle === 'minimal'
+                    ? 'transparent'
+                    : themeConfig.colors.linkBackground,
+                  color: themeConfig.colors.linkText,
+                  ...borderStyle,
+                  fontFamily: themeConfig.fonts.body,
+                }}
+                whileHover={{ scale: themeConfig.animations.hover === 'scale' ? 1.02 : 1 }}
                 whileTap={{ scale: 0.98 }}
               >
-                <span>{link.title}</span>
-                <ExternalLink className="w-5 h-5" />
+                {/* Hover overlay */}
+                <div
+                  className="absolute inset-0 opacity-0 group-hover:opacity-10 transition-opacity"
+                  style={{ backgroundColor: themeConfig.colors.primary }}
+                />
+
+                <span className="relative z-10 font-semibold">{link.title}</span>
+                <ExternalLink className="w-4 h-4 relative z-10 opacity-60 group-hover:opacity-100 transition-opacity" />
               </motion.a>
             )
           })}
         </motion.div>
 
         {links.length === 0 && (
-          <motion.div variants={item} className="text-center text-gray-700 py-12 font-medium">
+          <motion.div
+            variants={item}
+            className="text-center py-12"
+            style={{ color: themeConfig.colors.text, opacity: 0.6 }}
+          >
             <p>No links yet</p>
           </motion.div>
         )}
@@ -203,9 +264,13 @@ export default function ProfileView({ profile, links, theme, badge }: ProfileVie
         <motion.div variants={item} className="text-center mt-16">
           <a
             href="/"
-            className="inline-block text-sm text-black font-bold hover:underline bg-neo-yellow border-3 border-black px-6 py-3 shadow-brutal hover:shadow-brutal-lg transition-all"
+            className="inline-block text-sm font-semibold px-6 py-3 rounded-lg transition-all shadow-md hover:shadow-lg"
+            style={{
+              backgroundColor: themeConfig.colors.primary,
+              color: 'white',
+            }}
           >
-            Create your own Clicky
+            Create your own Clicky ✨
           </a>
         </motion.div>
       </motion.div>
