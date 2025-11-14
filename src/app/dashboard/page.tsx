@@ -197,48 +197,48 @@ export default function DashboardPage() {
 
   if (showCreateProfile) {
     return (
-      <div className="max-w-2xl mx-auto">
-        <div className="text-center mb-8">
-          <div className="w-20 h-20 bg-gradient-to-br from-purple-500 to-pink-500 rounded-3xl flex items-center justify-center mx-auto mb-4 shadow-lg">
-            <Sparkles className="w-10 h-10 text-white" />
+      <div className="max-w-2xl mx-auto animate-fade-in">
+        <div className="text-center mb-10">
+          <div className="w-24 h-24 bg-gradient-to-br from-purple-500 via-pink-500 to-purple-500 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-2xl animate-scale-in">
+            <Sparkles className="w-12 h-12 text-white" />
           </div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent mb-2">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent mb-3">
             Welcome to Clicky!
           </h1>
-          <p className="text-gray-600">Let&apos;s create your personalized link page</p>
+          <p className="text-lg text-gray-600">Let&apos;s create your personalized link page</p>
         </div>
 
-        <Card className="border-2 shadow-lg">
-          <CardHeader>
-            <CardTitle>Create your Clicky profile</CardTitle>
-            <CardDescription>
+        <Card className="border-2 border-purple-200 shadow-2xl animate-slide-up">
+          <CardHeader className="pb-6">
+            <CardTitle className="text-2xl">Create your Clicky profile</CardTitle>
+            <CardDescription className="text-base mt-2">
               Choose a unique URL for your link page
             </CardDescription>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleCreateProfile} className="space-y-4">
+            <form onSubmit={handleCreateProfile} className="space-y-6">
               <div>
-                <label htmlFor="slug" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="slug" className="block text-sm font-semibold text-gray-700 mb-3">
                   Your Clicky URL
                 </label>
                 <div className="flex items-center space-x-2">
-                  <span className="text-gray-500 font-medium">clicky.link/</span>
+                  <span className="text-gray-500 font-semibold bg-gray-100 px-3 py-2.5 rounded-lg border border-gray-200">clicky.link/</span>
                   <Input
                     id="slug"
                     placeholder="yourname"
                     value={slug}
                     onChange={(e) => setSlug(slugify(e.target.value))}
                     required
-                    className="flex-1"
+                    className="flex-1 h-11"
                   />
                 </div>
-                <p className="text-xs text-gray-500 mt-1">
+                <p className="text-sm text-gray-500 mt-2">
                   Use lowercase letters, numbers, and hyphens only
                 </p>
               </div>
 
               <div>
-                <label htmlFor="title" className="block text-sm font-medium text-gray-700 mb-2">
+                <label htmlFor="title" className="block text-sm font-semibold text-gray-700 mb-3">
                   Profile title
                 </label>
                 <Input
@@ -247,11 +247,12 @@ export default function DashboardPage() {
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
                   required
+                  className="h-11"
                 />
               </div>
 
               {error && (
-                <div className="p-3 rounded-md text-sm bg-red-50 text-red-800 border border-red-200">
+                <div className="p-4 rounded-lg text-sm bg-red-50 text-red-800 border-2 border-red-200 font-medium">
                   {error}
                 </div>
               )}
@@ -259,7 +260,7 @@ export default function DashboardPage() {
               <Button
                 type="submit"
                 disabled={creating}
-                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-lg py-6"
+                className="w-full bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-lg py-7 shadow-lg hover:shadow-xl transition-all hover:scale-105"
               >
                 {creating ? 'Creating your page...' : 'Create my page ✨'}
               </Button>
@@ -273,19 +274,19 @@ export default function DashboardPage() {
   const hasData = stats && (stats.views > 0 || stats.clicks > 0)
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-4xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">
+          <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 bg-clip-text text-transparent">
             Dashboard
           </h1>
-          <p className="text-gray-600 mt-1">Welcome back! Here&apos;s what&apos;s happening with your page.</p>
+          <p className="text-gray-600 mt-2">Welcome back! Here&apos;s what&apos;s happening with your page.</p>
         </div>
         {profile && (
           <Button
             onClick={() => window.open(`/${profile.slug}`, '_blank')}
-            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+            className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg hover:shadow-xl transition-all"
           >
             <ExternalLink className="w-4 h-4 mr-2" />
             View Page
@@ -295,37 +296,37 @@ export default function DashboardPage() {
 
       {/* Getting Started (for new users) */}
       {getSetupProgress() < 100 && (
-        <Card className="border-2 border-purple-200 bg-gradient-to-r from-purple-50 to-pink-50 shadow-lg">
+        <Card className="border-2 border-purple-200 bg-gradient-to-br from-purple-50 via-pink-50 to-purple-50 shadow-soft-lg animate-slide-up">
           <CardHeader>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
               <div>
-                <CardTitle className="flex items-center gap-2">
-                  <Sparkles className="w-5 h-5 text-purple-600" />
+                <CardTitle className="flex items-center gap-2 text-xl">
+                  <Sparkles className="w-6 h-6 text-purple-600" />
                   Get Started with Clicky
                 </CardTitle>
-                <CardDescription>Complete these steps to make the most of your page</CardDescription>
+                <CardDescription className="mt-1">Complete these steps to make the most of your page</CardDescription>
               </div>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-purple-600">{getSetupProgress()}%</div>
-                <div className="text-xs text-gray-600">Complete</div>
+              <div className="text-left sm:text-right">
+                <div className="text-3xl font-bold bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">{getSetupProgress()}%</div>
+                <div className="text-sm text-gray-600">Complete</div>
               </div>
             </div>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
               {setupTasks.map((task) => {
                 const Icon = task.completed ? CheckCircle2 : Circle
                 return (
                   <button
                     key={task.id}
                     onClick={task.action}
-                    className={`p-4 rounded-xl border-2 transition-all text-left ${
+                    className={`p-5 rounded-xl border-2 transition-all duration-200 text-left hover:scale-105 active:scale-95 ${
                       task.completed
-                        ? 'bg-white border-green-300 opacity-75'
+                        ? 'bg-white/80 border-green-300 opacity-75'
                         : 'bg-white border-purple-200 hover:border-purple-400 hover:shadow-md'
                     }`}
                   >
-                    <Icon className={`w-5 h-5 mb-2 ${task.completed ? 'text-green-600' : 'text-gray-400'}`} />
+                    <Icon className={`w-5 h-5 mb-3 ${task.completed ? 'text-green-600' : 'text-purple-400'}`} />
                     <p className="text-sm font-semibold text-gray-900">{task.label}</p>
                   </button>
                 )
@@ -365,66 +366,66 @@ export default function DashboardPage() {
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Quick Actions */}
-        <Card className="border-2 shadow-soft">
+        <Card className="border-2 shadow-soft-lg hover:shadow-soft-xl transition-shadow">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Sparkles className="w-5 h-5 text-purple-600" />
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Sparkles className="w-6 h-6 text-purple-600" />
               Quick Actions
             </CardTitle>
-            <CardDescription>Get things done faster</CardDescription>
+            <CardDescription className="mt-1">Get things done faster</CardDescription>
           </CardHeader>
           <CardContent className="grid grid-cols-2 gap-3">
             <Button
               onClick={() => router.push('/dashboard/builder')}
-              className="h-auto py-6 flex-col gap-2 bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600"
+              className="h-auto py-7 flex-col gap-3 bg-gradient-to-br from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 shadow-lg hover:shadow-xl transition-all hover:scale-105"
             >
-              <Plus className="w-6 h-6" />
+              <Plus className="w-7 h-7" />
               <span className="text-sm font-semibold">Add Link</span>
             </Button>
             <Button
               onClick={() => router.push('/dashboard/appearance')}
               variant="outline"
-              className="h-auto py-6 flex-col gap-2 border-2"
+              className="h-auto py-7 flex-col gap-3 border-2 hover:border-purple-300 hover:bg-purple-50 transition-all hover:scale-105"
             >
-              <Palette className="w-6 h-6" />
+              <Palette className="w-7 h-7" />
               <span className="text-sm font-semibold">Change Theme</span>
             </Button>
             <Button
               onClick={() => router.push('/dashboard/analytics')}
               variant="outline"
-              className="h-auto py-6 flex-col gap-2 border-2"
+              className="h-auto py-7 flex-col gap-3 border-2 hover:border-purple-300 hover:bg-purple-50 transition-all hover:scale-105"
             >
-              <BarChart3 className="w-6 h-6" />
+              <BarChart3 className="w-7 h-7" />
               <span className="text-sm font-semibold">View Analytics</span>
             </Button>
             <Button
               onClick={() => router.push('/dashboard/settings')}
               variant="outline"
-              className="h-auto py-6 flex-col gap-2 border-2"
+              className="h-auto py-7 flex-col gap-3 border-2 hover:border-purple-300 hover:bg-purple-50 transition-all hover:scale-105"
             >
-              <Settings className="w-6 h-6" />
+              <Settings className="w-7 h-7" />
               <span className="text-sm font-semibold">Settings</span>
             </Button>
           </CardContent>
         </Card>
 
         {/* Recent Activity */}
-        <Card className="border-2 shadow-soft">
+        <Card className="border-2 shadow-soft-lg hover:shadow-soft-xl transition-shadow">
           <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Activity className="w-5 h-5 text-purple-600" />
+            <CardTitle className="flex items-center gap-2 text-xl">
+              <Activity className="w-6 h-6 text-purple-600" />
               Recent Activity
             </CardTitle>
-            <CardDescription>Latest visitors to your page</CardDescription>
+            <CardDescription className="mt-1">Latest visitors to your page</CardDescription>
           </CardHeader>
           <CardContent>
             {hasData && stats.recentActivity.length > 0 ? (
               <div className="space-y-3">
                 {stats.recentActivity.map((activity, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b border-gray-100 last:border-0">
+                  <div key={i} className="flex items-center justify-between py-3 px-2 rounded-lg border-b border-gray-100 last:border-0 hover:bg-gray-50 transition-colors">
                     <div className="flex items-center gap-3">
-                      <div className={`w-2 h-2 rounded-full ${
-                        activity.type === 'view' ? 'bg-blue-500' : 'bg-green-500'
+                      <div className={`w-2.5 h-2.5 rounded-full ${
+                        activity.type === 'view' ? 'bg-blue-500 shadow-lg shadow-blue-500/50' : 'bg-green-500 shadow-lg shadow-green-500/50'
                       }`}></div>
                       <div>
                         <p className="text-sm font-semibold text-gray-900">
@@ -458,37 +459,38 @@ export default function DashboardPage() {
 
       {/* Profile Quick Info */}
       {profile && (
-        <Card className="border-2 shadow-soft">
+        <Card className="border-2 shadow-soft-lg hover:shadow-soft-xl transition-shadow">
           <CardHeader>
-            <CardTitle>Your Profile</CardTitle>
-            <CardDescription>Quick overview of your Clicky page</CardDescription>
+            <CardTitle className="text-xl">Your Profile</CardTitle>
+            <CardDescription className="mt-1">Quick overview of your Clicky page</CardDescription>
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div>
-                <p className="text-sm font-semibold text-gray-600 mb-1">Page URL</p>
+                <p className="text-sm font-semibold text-gray-600 mb-2">Page URL</p>
                 <div className="flex items-center gap-2">
-                  <code className="text-sm bg-gray-100 px-3 py-2 rounded-lg flex-1">
+                  <code className="text-sm bg-gradient-to-r from-purple-50 to-pink-50 px-4 py-2.5 rounded-lg flex-1 border border-purple-100">
                     clicky.link/{profile.slug}
                   </code>
                   <Button
                     size="sm"
                     variant="outline"
                     onClick={() => navigator.clipboard.writeText(`https://clicky.link/${profile.slug}`)}
+                    className="hover:bg-purple-50 hover:border-purple-300 transition-all"
                   >
                     <Share2 className="w-4 h-4" />
                   </Button>
                 </div>
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-600 mb-1">Title</p>
-                <p className="text-sm font-medium text-gray-900">{profile.title}</p>
+                <p className="text-sm font-semibold text-gray-600 mb-2">Title</p>
+                <p className="text-base font-medium text-gray-900">{profile.title}</p>
               </div>
               <div>
-                <p className="text-sm font-semibold text-gray-600 mb-1">Status</p>
+                <p className="text-sm font-semibold text-gray-600 mb-2">Status</p>
                 <div className="flex items-center gap-2">
-                  <div className={`w-2 h-2 rounded-full ${profile.published ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                  <span className="text-sm font-medium">
+                  <div className={`w-2.5 h-2.5 rounded-full ${profile.published ? 'bg-green-500 shadow-lg shadow-green-500/50' : 'bg-gray-400'}`}></div>
+                  <span className="text-sm font-semibold">
                     {profile.published ? 'Published' : 'Draft'}
                   </span>
                 </div>
