@@ -57,7 +57,8 @@ export default async function ProfilePage({ params }: Props) {
     .from('profiles')
     .select(`
       *,
-      theme:themes(*)
+      theme:themes(*),
+      badge:badges(*)
     `)
     .eq('slug', params.username)
     .single()
@@ -86,6 +87,7 @@ export default async function ProfilePage({ params }: Props) {
       <ProfileModulesView
         profile={profile}
         modules={modules as Module[]}
+        badge={profile.badge ? profile.badge[0] : null}
       />
     )
   }
@@ -103,6 +105,7 @@ export default async function ProfilePage({ params }: Props) {
       profile={profile}
       links={links || []}
       theme={profile.theme ? profile.theme[0] : null}
+      badge={profile.badge ? profile.badge[0] : null}
     />
   )
 }

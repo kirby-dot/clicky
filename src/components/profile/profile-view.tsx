@@ -2,13 +2,15 @@
 
 import { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { ExternalLink } from 'lucide-react'
-import type { Profile, Link, Theme, ThemeConfig } from '@/types'
+import { ExternalLink, Award } from 'lucide-react'
+import * as LucideIcons from 'lucide-react'
+import type { Profile, Link, Theme, ThemeConfig, Badge } from '@/types'
 
 interface ProfileViewProps {
   profile: Profile
   links: Link[]
   theme: Theme | null
+  badge?: Badge | null
 }
 
 const defaultTheme: ThemeConfig = {
@@ -33,7 +35,7 @@ const defaultTheme: ThemeConfig = {
   linkStyle: 'filled',
 }
 
-export default function ProfileView({ profile, links, theme }: ProfileViewProps) {
+export default function ProfileView({ profile, links, theme, badge }: ProfileViewProps) {
   const themeConfig: ThemeConfig = (theme?.config as unknown as ThemeConfig) || defaultTheme
 
   useEffect(() => {
@@ -136,9 +138,32 @@ export default function ProfileView({ profile, links, theme }: ProfileViewProps)
             </div>
           )}
 
-          <h1 className="text-4xl md:text-5xl font-black mb-4 text-black">
-            {profile.title}
-          </h1>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <h1 className="text-4xl md:text-5xl font-black text-black">
+              {profile.title}
+            </h1>
+            {badge && (() => {
+              const BadgeIcon = (LucideIcons as any)[badge.icon] || Award
+              return (
+                <div
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 border-black shadow-brutal"
+                  style={{ backgroundColor: `${badge.color}20` }}
+                  title={badge.description || badge.display_name}
+                >
+                  <BadgeIcon
+                    className="w-5 h-5"
+                    style={{ color: badge.color }}
+                  />
+                  <span
+                    className="text-sm font-bold"
+                    style={{ color: badge.color }}
+                  >
+                    {badge.display_name}
+                  </span>
+                </div>
+              )
+            })()}
+          </div>
 
           {profile.bio && (
             <p className="text-lg text-gray-700 max-w-lg mx-auto font-medium">{profile.bio}</p>

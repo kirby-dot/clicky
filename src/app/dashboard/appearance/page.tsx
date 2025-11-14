@@ -6,19 +6,41 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Palette, Save, Upload, Eye, Plus, Check, X } from 'lucide-react'
-import type { Profile, Theme, ThemeConfig } from '@/types'
+import { Palette, Save, Upload, Eye, Plus, Check, X, Download, FileUp, Award } from 'lucide-react'
+import type { Profile, Theme, ThemeConfig, Badge } from '@/types'
 import { motion, AnimatePresence } from 'framer-motion'
+import * as LucideIcons from 'lucide-react'
+
+// Popular Google Fonts
+const GOOGLE_FONTS = [
+  'Inter',
+  'Roboto',
+  'Open Sans',
+  'Lato',
+  'Montserrat',
+  'Poppins',
+  'Raleway',
+  'Nunito',
+  'Playfair Display',
+  'Merriweather',
+  'PT Sans',
+  'Ubuntu',
+  'Work Sans',
+  'Quicksand',
+  'DM Sans',
+]
 
 export default function AppearancePage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [themes, setThemes] = useState<Theme[]>([])
+  const [badges, setBadges] = useState<Badge[]>([])
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [title, setTitle] = useState('')
   const [bio, setBio] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null)
+  const [selectedBadge, setSelectedBadge] = useState<string | null>(null)
   const [previewTheme, setPreviewTheme] = useState<Theme | null>(null)
   const [showCustomCreator, setShowCustomCreator] = useState(false)
   const [customTheme, setCustomTheme] = useState<ThemeConfig>({
@@ -41,6 +63,12 @@ export default function AppearancePage() {
     },
     borderRadius: 'md',
     linkStyle: 'filled',
+    gradient: {
+      enabled: false,
+      type: 'linear',
+      direction: '135deg',
+      colors: ['#8B5CF6', '#A78BFA'],
+    },
   })
 
   const supabase = createBrowserClient()
@@ -69,6 +97,7 @@ export default function AppearancePage() {
         setBio(profileData.bio || '')
         setAvatarUrl(profileData.avatar_url || '')
         setSelectedTheme(profileData.theme_id)
+        setSelectedBadge(profileData.badge_id)
       }
 
       const { data: themesData } = await supabase
@@ -77,6 +106,14 @@ export default function AppearancePage() {
         .order('name')
 
       setThemes(themesData || [])
+
+      const { data: badgesData } = await supabase
+        .from('badges')
+        .select('*')
+        .eq('is_active', true)
+        .order('position')
+
+      setBadges(badgesData || [])
     } catch (error) {
       console.error('Error loading data:', error)
     } finally {
@@ -97,6 +134,7 @@ export default function AppearancePage() {
           bio,
           avatar_url: avatarUrl,
           theme_id: selectedTheme,
+          badge_id: selectedBadge,
         })
         .eq('id', profile.id)
 
@@ -109,6 +147,56 @@ export default function AppearancePage() {
     } finally {
       setSaving(false)
     }
+  }
+
+  const handleExportTheme = () => {
+    if (!selectedTheme) {
+      alert('Please select a theme first')
+      return
+    }
+
+    const theme = themes.find(t => t.id === selectedTheme)
+    if (!theme) return
+
+    const themeExport = {
+      name: theme.name,
+      config: theme.config,
+    }
+
+    const blob = new Blob([JSON.stringify(themeExport, null, 2)], { type: 'application/json' })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement('a')
+    a.href = url
+    a.download = `${theme.name.toLowerCase().replace(/\s+/g, '-')}-theme.json`
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  const handleImportTheme = () => {
+    const input = document.createElement('input')
+    input.type = 'file'
+    input.accept = '.json'
+    input.onchange = async (e) => {
+      const file = (e.target as HTMLInputElement).files?.[0]
+      if (!file) return
+
+      try {
+        const text = await file.text()
+        const imported = JSON.parse(text)
+
+        if (!imported.name || !imported.config) {
+          throw new Error('Invalid theme file format')
+        }
+
+        setCustomTheme(imported.config as ThemeConfig)
+        setShowCustomCreator(true)
+      } catch (error: any) {
+        alert(error.message || 'Failed to import theme')
+      }
+    }
+    input.click()
   }
 
   const handleSaveCustomTheme = async (name: string) => {
@@ -225,6 +313,66 @@ export default function AppearancePage() {
         </CardContent>
       </Card>
 
+      {/* Badge Selector */}
+      <Card className="border-2 border-amber-200 shadow-soft">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Award className="w-5 h-5 text-amber-500" />
+            Profile Badge
+          </CardTitle>
+          <CardDescription>Add a badge to showcase your identity or achievements</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3">
+            {/* No Badge Option */}
+            <button
+              onClick={() => setSelectedBadge(null)}
+              className={`p-4 rounded-xl border-2 transition-all text-center ${
+                selectedBadge === null
+                  ? 'border-gray-400 bg-gray-50 shadow-md'
+                  : 'border-gray-200 hover:border-gray-300'
+              }`}
+            >
+              <div className="w-10 h-10 mx-auto mb-2 rounded-full bg-gray-200 flex items-center justify-center">
+                <X className="w-5 h-5 text-gray-500" />
+              </div>
+              <p className="text-xs font-medium text-gray-700">No Badge</p>
+            </button>
+
+            {badges.map((badge) => {
+              const IconComponent = (LucideIcons as any)[badge.icon] || Award
+              const isSelected = selectedBadge === badge.id
+
+              return (
+                <button
+                  key={badge.id}
+                  onClick={() => setSelectedBadge(badge.id)}
+                  className={`p-4 rounded-xl border-2 transition-all text-center ${
+                    isSelected
+                      ? 'border-primary-500 shadow-md ring-2 ring-primary-200'
+                      : 'border-gray-200 hover:border-gray-300'
+                  }`}
+                  style={{
+                    backgroundColor: isSelected ? `${badge.color}10` : 'white',
+                  }}
+                >
+                  <div
+                    className="w-10 h-10 mx-auto mb-2 rounded-full flex items-center justify-center"
+                    style={{ backgroundColor: `${badge.color}20` }}
+                  >
+                    <IconComponent className="w-5 h-5" style={{ color: badge.color }} />
+                  </div>
+                  <p className="text-xs font-medium text-gray-900 truncate">{badge.display_name}</p>
+                  {badge.description && (
+                    <p className="text-xs text-gray-500 truncate mt-1">{badge.description}</p>
+                  )}
+                </button>
+              )
+            })}
+          </div>
+        </CardContent>
+      </Card>
+
       <Card className="border-2 border-gray-200 shadow-soft">
         <CardHeader>
           <div className="flex items-center justify-between">
@@ -235,13 +383,32 @@ export default function AppearancePage() {
               </CardTitle>
               <CardDescription>Choose or create a theme for your profile</CardDescription>
             </div>
-            <Button
-              onClick={() => setShowCustomCreator(true)}
-              className="bg-gradient-to-r from-primary-500 to-purple-500 hover:from-primary-600 hover:to-purple-600"
-            >
-              <Plus className="w-4 h-4 mr-2" />
-              Create Custom
-            </Button>
+            <div className="flex gap-2">
+              <Button
+                variant="outline"
+                onClick={handleImportTheme}
+                size="sm"
+              >
+                <FileUp className="w-4 h-4 mr-2" />
+                Import
+              </Button>
+              <Button
+                variant="outline"
+                onClick={handleExportTheme}
+                size="sm"
+              >
+                <Download className="w-4 h-4 mr-2" />
+                Export
+              </Button>
+              <Button
+                onClick={() => setShowCustomCreator(true)}
+                className="bg-gradient-to-r from-primary-500 to-purple-500 hover:from-primary-600 hover:to-purple-600"
+                size="sm"
+              >
+                <Plus className="w-4 h-4 mr-2" />
+                Create Custom
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent>
@@ -565,11 +732,121 @@ function CustomThemeCreator({
               </div>
 
               <div>
+                <h3 className="text-lg font-bold mb-4">Fonts</h3>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Heading Font</label>
+                    <select
+                      value={theme.fonts.heading}
+                      onChange={(e) =>
+                        onChange({
+                          ...theme,
+                          fonts: { ...theme.fonts, heading: e.target.value },
+                        })
+                      }
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                      {GOOGLE_FONTS.map((font) => (
+                        <option key={font} value={font} style={{ fontFamily: font }}>
+                          {font}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <div>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Body Font</label>
+                    <select
+                      value={theme.fonts.body}
+                      onChange={(e) =>
+                        onChange({
+                          ...theme,
+                          fonts: { ...theme.fonts, body: e.target.value },
+                        })
+                      }
+                      className="w-full px-3 py-2 rounded-lg border border-gray-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
+                    >
+                      {GOOGLE_FONTS.map((font) => (
+                        <option key={font} value={font} style={{ fontFamily: font }}>
+                          {font}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h3 className="text-lg font-bold mb-4">Background Gradient</h3>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-2">
+                    <input
+                      type="checkbox"
+                      checked={theme.gradient?.enabled || false}
+                      onChange={(e) =>
+                        onChange({
+                          ...theme,
+                          gradient: {
+                            ...(theme.gradient || {
+                              type: 'linear',
+                              direction: '135deg',
+                              colors: ['#8B5CF6', '#A78BFA'],
+                            }),
+                            enabled: e.target.checked,
+                          },
+                        })
+                      }
+                      className="w-4 h-4 rounded"
+                    />
+                    <span className="text-sm font-medium text-gray-700">Enable Gradient Background</span>
+                  </label>
+
+                  {theme.gradient?.enabled && (
+                    <>
+                      <div className="grid grid-cols-2 gap-3">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Color 1</label>
+                          <input
+                            type="color"
+                            value={theme.gradient?.colors[0] || '#8B5CF6'}
+                            onChange={(e) => {
+                              const newColors = [...(theme.gradient?.colors || ['#8B5CF6', '#A78BFA'])]
+                              newColors[0] = e.target.value
+                              onChange({
+                                ...theme,
+                                gradient: { ...theme.gradient!, colors: newColors },
+                              })
+                            }}
+                            className="w-full h-10 rounded-lg cursor-pointer border-2 border-gray-200"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 mb-1">Color 2</label>
+                          <input
+                            type="color"
+                            value={theme.gradient?.colors[1] || '#A78BFA'}
+                            onChange={(e) => {
+                              const newColors = [...(theme.gradient?.colors || ['#8B5CF6', '#A78BFA'])]
+                              newColors[1] = e.target.value
+                              onChange({
+                                ...theme,
+                                gradient: { ...theme.gradient!, colors: newColors },
+                              })
+                            }}
+                            className="w-full h-10 rounded-lg cursor-pointer border-2 border-gray-200"
+                          />
+                        </div>
+                      </div>
+                    </>
+                  )}
+                </div>
+              </div>
+
+              <div>
                 <h3 className="text-lg font-bold mb-4">Style</h3>
                 <div className="space-y-3">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">Border Radius</label>
-                    <div className="grid grid-cols-4 gap-2">
+                    <div className="grid grid-cols-5 gap-2">
                       {(['none', 'sm', 'md', 'lg', 'full'] as const).map((radius) => (
                         <button
                           key={radius}
@@ -613,7 +890,11 @@ function CustomThemeCreator({
               <h3 className="text-lg font-bold mb-4">Live Preview</h3>
               <div
                 className="rounded-2xl p-8 shadow-soft-lg"
-                style={{ backgroundColor: theme.colors.background }}
+                style={{
+                  background: theme.gradient?.enabled
+                    ? `linear-gradient(${theme.gradient.direction || '135deg'}, ${theme.gradient.colors.join(', ')})`
+                    : theme.colors.background,
+                }}
               >
                 <div className="max-w-sm mx-auto space-y-4">
                   <div className="text-center">
@@ -623,10 +904,24 @@ function CustomThemeCreator({
                         background: `linear-gradient(135deg, ${theme.colors.primary}, ${theme.colors.secondary})`
                       }}
                     />
-                    <h3 className="text-xl font-bold mb-2" style={{ color: theme.colors.text }}>
+                    <h3
+                      className="text-xl font-bold mb-2"
+                      style={{
+                        color: theme.colors.text,
+                        fontFamily: theme.fonts.heading,
+                      }}
+                    >
                       @yourname
                     </h3>
-                    <p style={{ color: theme.colors.text, opacity: 0.7 }}>Your bio goes here</p>
+                    <p
+                      style={{
+                        color: theme.colors.text,
+                        opacity: 0.7,
+                        fontFamily: theme.fonts.body,
+                      }}
+                    >
+                      Your bio goes here
+                    </p>
                   </div>
 
                   <div className="space-y-2">
@@ -639,7 +934,8 @@ function CustomThemeCreator({
                           color: theme.colors.linkText,
                           borderRadius: theme.borderRadius === 'full' ? '9999px' :
                                        theme.borderRadius === 'lg' ? '16px' :
-                                       theme.borderRadius === 'md' ? '12px' : '8px'
+                                       theme.borderRadius === 'md' ? '12px' : '8px',
+                          fontFamily: theme.fonts.body,
                         }}
                       >
                         {link}

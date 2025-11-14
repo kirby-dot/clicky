@@ -2,15 +2,18 @@
 
 import { useEffect } from 'react'
 import { motion } from 'framer-motion'
-import type { Profile, Module } from '@/types'
+import { Award } from 'lucide-react'
+import * as LucideIcons from 'lucide-react'
+import type { Profile, Module, Badge } from '@/types'
 import { ModuleRenderer } from '../modules/module-renderer'
 
 interface ProfileModulesViewProps {
   profile: Profile
   modules: Module[]
+  badge?: Badge | null
 }
 
-export default function ProfileModulesView({ profile, modules }: ProfileModulesViewProps) {
+export default function ProfileModulesView({ profile, modules, badge }: ProfileModulesViewProps) {
   useEffect(() => {
     // Track page view
     trackEvent('view', profile.id)
@@ -83,9 +86,35 @@ export default function ProfileModulesView({ profile, modules }: ProfileModulesV
             </div>
           )}
 
-          <h1 className="text-4xl md:text-5xl font-bold mb-4 text-gray-900">
-            {profile.title}
-          </h1>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-gray-900">
+              {profile.title}
+            </h1>
+            {badge && (() => {
+              const BadgeIcon = (LucideIcons as any)[badge.icon] || Award
+              return (
+                <div
+                  className="flex items-center gap-1.5 px-3 py-1.5 rounded-full border-2 shadow-soft"
+                  style={{
+                    backgroundColor: `${badge.color}20`,
+                    borderColor: badge.color,
+                  }}
+                  title={badge.description || badge.display_name}
+                >
+                  <BadgeIcon
+                    className="w-5 h-5"
+                    style={{ color: badge.color }}
+                  />
+                  <span
+                    className="text-sm font-bold"
+                    style={{ color: badge.color }}
+                  >
+                    {badge.display_name}
+                  </span>
+                </div>
+              )
+            })()}
+          </div>
 
           {profile.bio && (
             <p className="text-lg text-gray-600 max-w-lg mx-auto">{profile.bio}</p>

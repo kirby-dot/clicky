@@ -31,6 +31,12 @@ export interface ThemeConfig {
   }
   borderRadius: 'none' | 'sm' | 'md' | 'lg' | 'full'
   linkStyle: 'filled' | 'outlined' | 'minimal' | 'shadow'
+  gradient?: {
+    enabled: boolean
+    type: 'linear' | 'radial'
+    direction?: string // e.g., 'to-br', '135deg'
+    colors: string[] // array of colors for gradient
+  }
 }
 
 export interface LinkStyle {
@@ -438,4 +444,26 @@ export interface IntegrationConfig {
     options?: Array<{ label: string; value: string }>
   }>
   features: string[]
+}
+
+// Badge Types
+export type BadgeType = 'verification' | 'tier' | 'industry' | 'custom'
+
+export interface Badge {
+  id: string
+  name: string
+  display_name: string
+  description?: string
+  icon: string // lucide-react icon name or emoji
+  color: string // hex color
+  type: BadgeType
+  required_tier?: 'free' | 'pro' | 'enterprise'
+  is_active: boolean
+  position: number
+  created_at: string
+  updated_at: string
+}
+
+export interface ProfileWithBadge extends Profile {
+  badge?: Badge | null
 }

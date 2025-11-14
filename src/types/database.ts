@@ -46,6 +46,7 @@ export interface Database {
           title: string
           bio: string | null
           theme_id: string | null
+          badge_id: string | null
           avatar_url: string | null
           custom_css: string | null
           meta_tags: Json | null
@@ -65,6 +66,7 @@ export interface Database {
           title: string
           bio?: string | null
           theme_id?: string | null
+          badge_id?: string | null
           avatar_url?: string | null
           custom_css?: string | null
           meta_tags?: Json | null
@@ -84,6 +86,7 @@ export interface Database {
           title?: string
           bio?: string | null
           theme_id?: string | null
+          badge_id?: string | null
           avatar_url?: string | null
           custom_css?: string | null
           meta_tags?: Json | null
@@ -218,6 +221,50 @@ export interface Database {
           device_type?: string | null
           referrer?: string | null
           timestamp?: string
+        }
+      }
+      badges: {
+        Row: {
+          id: string
+          name: string
+          display_name: string
+          description: string | null
+          icon: string
+          color: string
+          type: 'verification' | 'tier' | 'industry' | 'custom'
+          required_tier: 'free' | 'pro' | 'enterprise' | null
+          is_active: boolean
+          position: number
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          name: string
+          display_name: string
+          description?: string | null
+          icon: string
+          color: string
+          type: 'verification' | 'tier' | 'industry' | 'custom'
+          required_tier?: 'free' | 'pro' | 'enterprise' | null
+          is_active?: boolean
+          position?: number
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          name?: string
+          display_name?: string
+          description?: string | null
+          icon?: string
+          color?: string
+          type?: 'verification' | 'tier' | 'industry' | 'custom'
+          required_tier?: 'free' | 'pro' | 'enterprise' | null
+          is_active?: boolean
+          position?: number
+          created_at?: string
+          updated_at?: string
         }
       }
     }
