@@ -21,6 +21,11 @@ export async function middleware(req: NextRequest) {
     return res
   }
 
+  // Skip auth confirmation page
+  if (req.nextUrl.pathname === '/auth/confirm') {
+    return res
+  }
+
   // Protect dashboard routes - redirect to login if no session
   if (req.nextUrl.pathname.startsWith('/dashboard')) {
     if (!hasSession) {

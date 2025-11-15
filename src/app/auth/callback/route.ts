@@ -7,14 +7,10 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
 
-  // Create redirect response
-  const redirectUrl = new URL('/dashboard', requestUrl.origin)
-  const response = NextResponse.redirect(redirectUrl)
-
   if (code) {
     const supabase = createClient(
-      process.env.NEXT_PUBLIC_SUPABASE_URL!,
-      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
+      'https://ddekvujqgnhkndhvdfma.supabase.co',
+      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkZWt2dWpxZ25oa25kaHZkZm1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMTcwMTYsImV4cCI6MjA3ODU5MzAxNn0.9pwv0Ma6HMnjxM8XsysmsovJKFnd6eqsfxNJuSeNBY8'
     )
 
     // Exchange code for session
@@ -26,25 +22,14 @@ export async function GET(request: NextRequest) {
     }
 
     if (data.session) {
-      // Set access token cookie on response
-      response.cookies.set('sb-access-token', data.session.access_token, {
-        path: '/',
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7 // 7 days
-      })
+      // Create redirect response with session data encoded in fragment
+      const redirectUrl = new URL('/auth/confirm', requestUrl.origin)
+      redirectUrl.hash = `access_token=${data.session.access_token}&refresh_token=${data.session.refresh_token}&expires_in=${data.session.expires_in}&token_type=${data.session.token_type}`
 
-      // Set refresh token cookie on response
-      response.cookies.set('sb-refresh-token', data.session.refresh_token, {
-        path: '/',
-        httpOnly: true,
-        secure: process.env.NODE_ENV === 'production',
-        sameSite: 'lax',
-        maxAge: 60 * 60 * 24 * 7 // 7 days
-      })
+      return NextResponse.redirect(redirectUrl)
     }
   }
 
-  return response
+  // No code provided, redirect to login
+  return NextResponse.redirect(new URL('/login', requestUrl.origin))
 }
