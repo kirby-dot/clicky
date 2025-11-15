@@ -79,6 +79,15 @@ export default async function ProfilePage({ params }: Props) {
     notFound()
   }
 
+  // Fetch the profile owner's subscription tier
+  const { data: userData } = await supabase
+    .from('users')
+    .select('subscription_tier')
+    .eq('id', profile.user_id)
+    .maybeSingle()
+
+  const subscriptionTier = (userData as { subscription_tier: string } | null)?.subscription_tier || 'free'
+
   // Check if profile is viewable (published OR owned by current user)
   const isOwner = user && profile.user_id === user.id
   if (!profile.published && !isOwner) {
@@ -107,6 +116,7 @@ export default async function ProfilePage({ params }: Props) {
         profile={profile}
         modules={modules as Module[]}
         sections={(sections as Section[]) || []}
+        subscriptionTier={subscriptionTier}
         badge={profile.badge ? profile.badge[0] : null}
       />
     )

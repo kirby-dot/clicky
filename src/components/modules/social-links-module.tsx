@@ -1,4 +1,4 @@
-import { Instagram, Twitter, Youtube, Linkedin, Facebook, Github, Music, MessageCircle } from 'lucide-react'
+import { Instagram, Twitter, Youtube, Linkedin, Facebook, Github, Music, MessageCircle, Globe, Mail, Phone, MapPin } from 'lucide-react'
 import type { Module, SocialLinksContent } from '@/types'
 
 interface SocialLinksModuleProps {
@@ -16,6 +16,27 @@ const SOCIAL_ICONS = {
   discord: MessageCircle,
   twitch: Music,
   spotify: Music,
+  website: Globe,
+  email: Mail,
+  phone: Phone,
+  location: MapPin,
+}
+
+const PLATFORM_COLORS: Record<string, string> = {
+  instagram: 'linear-gradient(135deg, #833ab4 0%, #fd1d1d 50%, #fcb045 100%)',
+  twitter: '#1DA1F2',
+  tiktok: '#000000',
+  youtube: '#FF0000',
+  linkedin: '#0077B5',
+  facebook: '#1877F2',
+  github: '#181717',
+  discord: '#5865F2',
+  twitch: '#9146FF',
+  spotify: '#1DB954',
+  website: '#6366f1',
+  email: '#ea580c',
+  phone: '#16a34a',
+  location: '#dc2626',
 }
 
 export function SocialLinksModule({ module }: SocialLinksModuleProps) {
@@ -28,6 +49,7 @@ export function SocialLinksModule({ module }: SocialLinksModuleProps) {
   const iconColor = (content as any).iconColor
   const customBgColor = (content as any).backgroundColor
   const customBorderRadius = (content as any).borderRadius
+  const useGlobalColors = (content as any).useGlobalColors || false
 
   const styleClasses = {
     rounded: 'rounded-2xl',
@@ -36,19 +58,39 @@ export function SocialLinksModule({ module }: SocialLinksModuleProps) {
   }
 
   return (
-    <div className={`flex ${layout === 'grid' ? 'grid grid-cols-4' : 'flex-row justify-center'} gap-3`}>
+    <div className={`flex ${layout === 'grid' ? 'grid grid-cols-4' : 'flex-row justify-center'} gap-3 flex-wrap`}>
       {content.links.map((link, index) => {
         const Icon = SOCIAL_ICONS[link.platform] || MessageCircle
-        const colors = ['bg-pastel-sky', 'bg-pastel-lavender', 'bg-pastel-mint', 'bg-pastel-rose', 'bg-pastel-peach', 'bg-pastel-butter']
-        const bgColor = colors[index % colors.length]
+        const platformColor = PLATFORM_COLORS[link.platform]
 
         // Use custom border radius if provided, otherwise use style class
         const borderRadiusClass = customBorderRadius === undefined ? styleClasses[iconStyle as keyof typeof styleClasses] : ''
-        const bgClass = customBgColor ? '' : (iconStyle === 'minimal' ? 'bg-white' : bgColor)
 
-        const iconStyles: React.CSSProperties = {
-          ...(customBgColor && { backgroundColor: customBgColor }),
-          ...(customBorderRadius !== undefined && { borderRadius: `${customBorderRadius}px` }),
+        // Determine background styling
+        let bgStyle: React.CSSProperties = {}
+        let bgClass = ''
+
+        if (customBgColor) {
+          bgStyle.backgroundColor = customBgColor
+        } else if (useGlobalColors) {
+          bgClass = ''
+          bgStyle.backgroundColor = 'var(--color-primary)'
+        } else if (iconStyle === 'minimal') {
+          bgClass = 'bg-white'
+        } else if (platformColor) {
+          bgStyle.background = platformColor
+        } else {
+          const colors = ['bg-pastel-sky', 'bg-pastel-lavender', 'bg-pastel-mint', 'bg-pastel-rose', 'bg-pastel-peach', 'bg-pastel-butter']
+          bgClass = colors[index % colors.length]
+        }
+
+        if (customBorderRadius !== undefined) {
+          bgStyle.borderRadius = `${customBorderRadius}px`
+        }
+
+        // Use global border radius if not custom
+        if (!customBorderRadius && useGlobalColors) {
+          bgStyle.borderRadius = 'var(--border-radius)'
         }
 
         return (
@@ -58,11 +100,12 @@ export function SocialLinksModule({ module }: SocialLinksModuleProps) {
             target="_blank"
             rel="noopener noreferrer"
             className={`${bgClass} ${borderRadiusClass} shadow-soft hover:shadow-soft-lg transition-all hover:scale-110 active:scale-95 p-4 flex items-center justify-center`}
-            style={iconStyles}
+            style={bgStyle}
             title={link.platform}
+            aria-label={link.platform}
           >
             <Icon
-              className="text-gray-700"
+              className={iconStyle === 'minimal' ? 'text-gray-700' : 'text-white'}
               style={{
                 width: `${iconSize}px`,
                 height: `${iconSize}px`,

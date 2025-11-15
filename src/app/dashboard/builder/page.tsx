@@ -2805,6 +2805,9 @@ function ModuleEditor({
                     { platform: 'github', label: 'GitHub', color: 'bg-gray-800', icon: Github },
                     { platform: 'spotify', label: 'Spotify', color: 'bg-green-500', icon: Music },
                     { platform: 'twitch', label: 'Twitch', color: 'bg-purple-600', icon: Music },
+                    { platform: 'discord', label: 'Discord', color: 'bg-indigo-600', icon: MessageCircle },
+                    { platform: 'website', label: 'Website', color: 'bg-blue-500', icon: ExternalLink },
+                    { platform: 'email', label: 'Email', color: 'bg-orange-500', icon: Mail },
                   ].map((social) => {
                     const links = ((editedModule.content as any).links || []) as Array<{ platform: string; url: string }>
                     const isSelected = links.some(l => l.platform === social.platform)
@@ -2913,6 +2916,21 @@ function ModuleEditor({
                     </button>
                   ))}
                 </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-3 cursor-pointer p-4 bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-primary-300 transition-all">
+                  <input
+                    type="checkbox"
+                    checked={((editedModule.content as any).useGlobalColors || false)}
+                    onChange={(e) => updateContent('useGlobalColors', e.target.checked)}
+                    className="w-5 h-5 text-primary-600 rounded focus:ring-primary-500"
+                  />
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900">Use Global Colors</div>
+                    <div className="text-xs text-gray-600">Match your profile's theme colors</div>
+                  </div>
+                </label>
               </div>
             </div>
           )}
