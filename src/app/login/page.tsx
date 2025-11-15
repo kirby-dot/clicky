@@ -15,6 +15,7 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false)
   const [googleLoading, setGoogleLoading] = useState(false)
   const [message, setMessage] = useState<{ type: 'success' | 'error'; text: string } | null>(null)
+  const [debugInfo, setDebugInfo] = useState<string>('')
   const router = useRouter()
   const supabase = createBrowserClient()
 
@@ -48,16 +49,11 @@ export default function LoginPage() {
   }
 
   const handleGoogleLogin = async () => {
-    alert('Button clicked! Check console for details.')
-    console.log('=== GOOGLE LOGIN CLICKED ===')
     setGoogleLoading(true)
     setMessage(null)
+    setDebugInfo('Starting OAuth...')
 
     try {
-      console.log('Creating OAuth request...')
-      console.log('Window origin:', window.location.origin)
-      console.log('Redirect URL:', `${window.location.origin}/auth/callback`)
-
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -65,14 +61,10 @@ export default function LoginPage() {
         },
       })
 
-      console.log('=== OAuth Response ===')
-      console.log('Data:', data)
-      console.log('Error:', error)
-      console.log('Provider:', data?.provider)
-      console.log('URL:', data?.url)
+      // Display full response on screen
+      setDebugInfo(`OAuth Response:\nProvider: ${data?.provider || 'none'}\nURL: ${data?.url || 'NO URL RETURNED'}\nError: ${error?.message || 'none'}`)
 
       if (error) {
-        console.error('OAuth error details:', error)
         setMessage({
           type: 'error',
           text: `OAuth error: ${error.message}`,
@@ -82,18 +74,17 @@ export default function LoginPage() {
       }
 
       if (data?.url) {
-        console.log('Redirecting to:', data.url)
+        setDebugInfo(`Redirecting to Google: ${data.url}`)
         window.location.href = data.url
       } else {
-        console.log('No URL in response - OAuth may have failed silently')
         setMessage({
           type: 'error',
-          text: 'Google OAuth did not return a redirect URL. Please check Supabase configuration.',
+          text: 'Supabase did not return a Google OAuth URL. Check: 1) Google OAuth is enabled in Supabase, 2) Client ID and Secret are set, 3) Redirect URL is configured in Google Console',
         })
         setGoogleLoading(false)
       }
     } catch (error: any) {
-      console.error('Exception in handleGoogleLogin:', error)
+      setDebugInfo(`Exception: ${error.message}`)
       setMessage({
         type: 'error',
         text: error.message || 'An error occurred',
@@ -213,6 +204,12 @@ export default function LoginPage() {
                   >
                     {message.text}
                   </motion.div>
+                )}
+
+                {debugInfo && (
+                  <div className="p-3 rounded-md text-xs bg-blue-50 text-blue-900 border border-blue-200 font-mono whitespace-pre-wrap">
+                    {debugInfo}
+                  </div>
                 )}
 
                 <Button type="submit" className="w-full" disabled={loading || googleLoading}>
