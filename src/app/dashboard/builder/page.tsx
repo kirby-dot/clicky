@@ -8,6 +8,7 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ModuleRenderer } from '@/components/modules/module-renderer'
+import { SectionEditor } from '@/components/sections/section-editor'
 import {
   Trash2,
   GripVertical,
@@ -48,8 +49,11 @@ import {
   X,
   Check,
   User,
+  Layout,
+  Layers,
+  FolderPlus,
 } from 'lucide-react'
-import type { Module, ModuleType, Profile } from '@/types'
+import type { Module, ModuleType, Profile, Section } from '@/types'
 import {
   DndContext,
   closestCenter,
@@ -228,6 +232,8 @@ function BuilderPageContent() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [profiles, setProfiles] = useState<Profile[]>([])
   const [modules, setModules] = useState<Module[]>([])
+  const [sections, setSections] = useState<Section[]>([])
+  const [editingSection, setEditingSection] = useState<Section | null>(null)
   const [loading, setLoading] = useState(true)
   const [editingModule, setEditingModule] = useState<Module | null>(null)
   const [selectedModule, setSelectedModule] = useState<Module | null>(null)
@@ -329,6 +335,15 @@ function BuilderPageContent() {
       if (profileData.style) {
         setPageStyle(profileData.style as any)
       }
+
+      // Load sections
+      const { data: sectionsData } = await supabase
+        .from('sections')
+        .select('*')
+        .eq('profile_id', profileData.id)
+        .order('order')
+
+      setSections((sectionsData as Section[]) || [])
 
       const { data: modulesData } = await supabase
         .from('modules')
@@ -456,6 +471,88 @@ function BuilderPageContent() {
     } catch (error: any) {
       console.error('Error updating module:', error)
       alert('Error updating module: ' + error.message)
+    }
+  }
+
+  // Section Management Functions
+  const handleAddSection = async () => {
+    if (!profile) return
+
+    setSaving(true)
+    try {
+      const { data, error } = await supabase
+        .from('sections')
+        .insert({
+          profile_id: profile.id,
+          title: 'New Section',
+          order: sections.length,
+          layout: {
+            columns: 1,
+            gap: 16,
+            mobileColumns: 1,
+            alignment: 'center',
+          },
+          style: {
+            backgroundColor: null,
+            backgroundImage: null,
+            backgroundGradient: null,
+            padding: { top: 24, bottom: 24, left: 16, right: 16 },
+            margin: { top: 0, bottom: 0 },
+            borderRadius: 0,
+            shadow: 'none',
+            fullWidth: false,
+          },
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      setSections([...sections, data as Section])
+      setEditingSection(data as Section)
+    } catch (error: any) {
+      console.error('Error adding section:', error)
+      alert('Error adding section: ' + error.message)
+    } finally {
+      setSaving(false)
+    }
+  }
+
+  const handleUpdateSection = async (section: Section) => {
+    try {
+      const { error } = await supabase
+        .from('sections')
+        .update({
+          title: section.title,
+          layout: section.layout,
+          style: section.style,
+        })
+        .eq('id', section.id)
+
+      if (error) throw error
+
+      setSections(sections.map((s) => (s.id === section.id ? section : s)))
+      setEditingSection(null)
+      setTimeout(refreshPreview, 100)
+    } catch (error: any) {
+      console.error('Error updating section:', error)
+      alert('Error updating section: ' + error.message)
+    }
+  }
+
+  const handleDeleteSection = async (id: string) => {
+    if (!confirm('Delete this section? All modules in this section will also be deleted.')) return
+
+    try {
+      const { error } = await supabase.from('sections').delete().eq('id', id)
+
+      if (error) throw error
+
+      setSections(sections.filter((s) => s.id !== id))
+      setModules(modules.filter((m) => m.section_id !== id))
+      setTimeout(refreshPreview, 100)
+    } catch (error) {
+      console.error('Error deleting section:', error)
     }
   }
 
@@ -693,6 +790,68 @@ function BuilderPageContent() {
               </div>
             </div>
 
+            {/* Sections */}
+            <div className="p-4 border-b border-gray-200">
+              <div className="flex items-center justify-between mb-3">
+                <h3 className="text-sm font-semibold text-gray-900 flex items-center gap-2">
+                  <Layers className="w-4 h-4" />
+                  Sections
+                </h3>
+                <Button
+                  onClick={handleAddSection}
+                  size="sm"
+                  className="bg-purple-500 hover:bg-purple-600 text-white"
+                  disabled={saving}
+                >
+                  <FolderPlus className="w-3 h-3 mr-1" />
+                  Add
+                </Button>
+              </div>
+
+              {sections.length === 0 ? (
+                <div className="text-center py-4 text-xs text-gray-500 bg-gray-50 rounded-lg">
+                  No sections yet. Add a section to organize your modules.
+                </div>
+              ) : (
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {sections
+                    .sort((a, b) => a.order - b.order)
+                    .map((section) => (
+                      <div
+                        key={section.id}
+                        className="flex items-center justify-between p-2 bg-purple-50 rounded-lg border border-purple-200 hover:bg-purple-100 transition-colors"
+                      >
+                        <div className="flex items-center gap-2 flex-1 min-w-0">
+                          <Layout className="w-3 h-3 text-purple-600 flex-shrink-0" />
+                          <span className="text-xs font-medium text-purple-900 truncate">
+                            {section.title || 'Untitled Section'}
+                          </span>
+                          <span className="text-xs text-purple-600">
+                            ({section.layout.columns} col)
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-1">
+                          <button
+                            onClick={() => setEditingSection(section)}
+                            className="p-1 hover:bg-purple-200 rounded"
+                            title="Edit section"
+                          >
+                            <Edit2 className="w-3 h-3 text-purple-700" />
+                          </button>
+                          <button
+                            onClick={() => handleDeleteSection(section.id)}
+                            className="p-1 hover:bg-red-100 rounded"
+                            title="Delete section"
+                          >
+                            <Trash2 className="w-3 h-3 text-red-600" />
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+
             {/* Module Templates */}
             <div className="flex-1 overflow-y-auto p-4 space-y-2">
               {filteredTemplates.length === 0 ? (
@@ -891,6 +1050,15 @@ function BuilderPageContent() {
           modules={modules}
           onSave={handleUpdateModule}
           onCancel={() => setEditingModule(null)}
+        />
+      )}
+
+      {/* Edit Section Modal */}
+      {editingSection && (
+        <SectionEditor
+          section={editingSection}
+          onSave={handleUpdateSection}
+          onCancel={() => setEditingSection(null)}
         />
       )}
 
