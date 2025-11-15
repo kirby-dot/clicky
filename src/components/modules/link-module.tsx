@@ -26,14 +26,15 @@ export function LinkModule({ module, profileId, bgColor }: LinkModuleProps) {
   }
 
   // Get customization options from content.style
+  // Only use module-specific styles if explicitly set, otherwise use global CSS variables
   const style = content.style || {}
-  const backgroundColor = style.backgroundColor || 'var(--color-primary, #f0f9ff)'
-  const textColor = style.textColor || 'var(--color-text, #111827)'
-  const borderColor = style.borderColor || 'var(--color-primary, #e5e7eb)'
-  const borderWidth = style.borderWidth !== undefined ? style.borderWidth : 1
-  const borderRadius = style.borderRadius !== undefined ? style.borderRadius : 'var(--border-radius, 16px)'
+  const backgroundColor = style.backgroundColor || undefined
+  const textColor = style.textColor || undefined
+  const borderColor = style.borderColor || undefined
+  const borderWidth = style.borderWidth
+  const borderRadius = style.borderRadius
   const shadow = style.shadow || 'sm'
-  const fontSize = style.fontSize || 'var(--body-size, 18px)'
+  const fontSize = style.fontSize
   const fontWeight = style.fontWeight || 'semibold'
   const align = style.align || 'center'
   const fullWidth = style.fullWidth !== undefined ? style.fullWidth : true
@@ -69,13 +70,13 @@ export function LinkModule({ module, profileId, bgColor }: LinkModuleProps) {
       onClick={handleClick}
       className={`block px-6 py-4 ${fontWeightClass} transition-all ${shadowClass} hover:scale-105 active:scale-95 flex items-center space-x-2 ${textAlignClass} ${fullWidth ? 'w-full' : 'w-auto'}`}
       style={{
-        backgroundColor,
-        color: textColor,
-        borderColor,
-        borderWidth: `${borderWidth}px`,
-        borderStyle: borderWidth > 0 ? 'solid' : 'none',
-        borderRadius: typeof borderRadius === 'number' ? `${borderRadius}px` : borderRadius,
-        fontSize: typeof fontSize === 'number' ? `${fontSize}px` : fontSize,
+        backgroundColor: backgroundColor || 'var(--color-primary)',
+        color: textColor || 'white',
+        borderColor: borderColor || 'transparent',
+        borderWidth: borderWidth !== undefined ? `${borderWidth}px` : '0px',
+        borderStyle: borderWidth && borderWidth > 0 ? 'solid' : 'none',
+        borderRadius: borderRadius !== undefined ? (typeof borderRadius === 'number' ? `${borderRadius}px` : borderRadius) : 'var(--border-radius)',
+        fontSize: fontSize !== undefined ? (typeof fontSize === 'number' ? `${fontSize}px` : fontSize) : 'var(--body-size)',
       }}
       whileTap={{ scale: 0.95 }}
     >

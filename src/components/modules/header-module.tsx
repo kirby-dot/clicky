@@ -18,20 +18,15 @@ export function HeaderModule({ module }: HeaderModuleProps) {
       'font-black'
     : 'font-black'
 
-  // Default font sizes based on level (if not specified)
-  const defaultFontSize = level === 'h1' ? 'text-4xl md:text-5xl' :
-    level === 'h2' ? 'text-3xl md:text-4xl' :
-    'text-2xl md:text-3xl'
-
-  const className = `${fontWeightClass} ${!content.fontSize ? defaultFontSize : ''} ${
+  const className = `${fontWeightClass} ${
     align === 'left' ? 'text-left' :
     align === 'right' ? 'text-right' :
     'text-center'
   } mb-4`
 
   const inlineStyles: React.CSSProperties = {
-    color: content.color || 'var(--color-text, inherit)',
-    fontSize: content.fontSize ? `${content.fontSize}px` : 'var(--heading-size, inherit)',
+    color: content.color || 'var(--color-text)',
+    fontSize: content.fontSize ? `${content.fontSize}px` : 'var(--heading-size)',
   }
 
   const Tag = level as keyof JSX.IntrinsicElements

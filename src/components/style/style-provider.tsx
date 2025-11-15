@@ -34,10 +34,10 @@ export function StyleProvider({ style, children }: StyleProviderProps) {
   }
 
   const headingSizes = {
-    small: '20px',
-    medium: '28px',
-    large: '36px',
-    xl: '48px',
+    small: '24px',
+    medium: '32px',
+    large: '40px',
+    xl: '56px',
   }
 
   const bodySizes = {
