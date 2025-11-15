@@ -25,12 +25,19 @@ export function ThemeProvider({ theme, children }: ThemeProviderProps) {
   // Add font family to inline styles
   const wrapperStyles = {
     ...cssVariables,
-    fontFamily: theme?.typography.fontFamily,
   } as React.CSSProperties
 
   return (
     <ThemeContext.Provider value={{ theme }}>
-      <div style={wrapperStyles}>
+      {theme && (
+        <style>{`
+          .theme-wrapper,
+          .theme-wrapper * {
+            font-family: ${theme.typography.fontFamily} !important;
+          }
+        `}</style>
+      )}
+      <div className="theme-wrapper" style={wrapperStyles}>
         {children}
       </div>
     </ThemeContext.Provider>
