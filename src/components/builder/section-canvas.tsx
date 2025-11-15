@@ -7,6 +7,7 @@ import { ModuleRenderer } from '../modules/module-renderer'
 import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { useDroppable } from '@dnd-kit/core'
+import { SortableContext, verticalListSortingStrategy } from '@dnd-kit/sortable'
 
 interface SectionCanvasProps {
   sections: Section[]
@@ -32,13 +33,16 @@ export function SectionCanvas({
   selectedModuleId,
 }: SectionCanvasProps) {
   const modulesWithoutSection = modules.filter(m => !m.section_id)
+  const sortedSections = sections.sort((a, b) => a.order - b.order)
 
   return (
     <div className="space-y-6 p-6">
       {/* Render Sections */}
-      {sections
-        .sort((a, b) => a.order - b.order)
-        .map((section) => {
+      <SortableContext
+        items={sortedSections.map(s => s.id)}
+        strategy={verticalListSortingStrategy}
+      >
+        {sortedSections.map((section) => {
           const sectionModules = modules.filter(m => m.section_id === section.id)
 
           return (
@@ -56,6 +60,7 @@ export function SectionCanvas({
             />
           )
         })}
+      </SortableContext>
 
       {/* Modules Without Section */}
       {modulesWithoutSection.length > 0 && (
@@ -125,6 +130,28 @@ function SectionContainer({
   const { layout, style } = section
   const columnCount = layout.columns
 
+  // Make section draggable for reordering
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({
+    id: section.id,
+    data: {
+      type: 'section',
+      section,
+    },
+  })
+
+  const sortableStyle = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  }
+
   // Group modules by column
   const columnModules: Module[][] = Array.from({ length: columnCount }, () => [])
   modules.forEach((module) => {
@@ -134,12 +161,64 @@ function SectionContainer({
     }
   })
 
+  // Build section styles from configuration
+  const sectionStyles: React.CSSProperties = {
+    marginTop: `${style.margin.top}px`,
+    marginBottom: `${style.margin.bottom}px`,
+    borderRadius: `${style.borderRadius}px`,
+  }
+
+  // Background handling
+  if (style.backgroundGradient?.enabled && style.backgroundGradient.colors.length > 0) {
+    const { type, direction, colors } = style.backgroundGradient
+    if (type === 'linear') {
+      sectionStyles.background = `linear-gradient(${direction || 'to bottom'}, ${colors.join(', ')})`
+    } else {
+      sectionStyles.background = `radial-gradient(circle, ${colors.join(', ')})`
+    }
+  } else if (style.backgroundImage) {
+    sectionStyles.backgroundImage = `url(${style.backgroundImage})`
+    sectionStyles.backgroundSize = 'cover'
+    sectionStyles.backgroundPosition = 'center'
+  } else if (style.backgroundColor) {
+    sectionStyles.backgroundColor = style.backgroundColor
+  } else {
+    sectionStyles.backgroundColor = '#ffffff'
+  }
+
+  // Content area padding
+  const contentPadding = {
+    paddingTop: `${style.padding.top}px`,
+    paddingBottom: `${style.padding.bottom}px`,
+    paddingLeft: `${style.padding.left}px`,
+    paddingRight: `${style.padding.right}px`,
+  }
+
+  // Shadow classes
+  const shadowClass = {
+    none: '',
+    sm: 'shadow-sm',
+    md: 'shadow-md',
+    lg: 'shadow-lg',
+    xl: 'shadow-xl',
+  }[style.shadow] || ''
+
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="border-2 border-purple-200 rounded-xl overflow-hidden bg-white shadow-sm"
+    <div
+      ref={setNodeRef}
+      style={{ ...sortableStyle, ...sectionStyles }}
+      className={`relative group border-2 border-purple-200 rounded-xl overflow-hidden ${shadowClass}`}
     >
+      {/* Drag Handle */}
+      <div
+        {...attributes}
+        {...listeners}
+        className="absolute top-2 left-2 z-20 p-2 bg-white/90 rounded-lg cursor-grab active:cursor-grabbing opacity-0 group-hover:opacity-100 transition-opacity shadow-md"
+        title="Drag to reorder section"
+      >
+        <GripVertical className="w-5 h-5 text-purple-600" />
+      </div>
+
       {/* Section Header */}
       <div className="bg-gradient-to-r from-purple-50 to-pink-50 border-b border-purple-200 p-4">
         <div className="flex items-center justify-between">
@@ -177,10 +256,11 @@ function SectionContainer({
 
       {/* Section Columns */}
       <div
-        className="grid gap-4 p-4"
+        className="grid"
         style={{
           gridTemplateColumns: `repeat(${columnCount}, 1fr)`,
           gap: `${layout.gap}px`,
+          ...contentPadding,
         }}
       >
         {columnModules.map((colMods, colIndex) => (
@@ -197,7 +277,7 @@ function SectionContainer({
           />
         ))}
       </div>
-    </motion.div>
+    </div>
   )
 }
 

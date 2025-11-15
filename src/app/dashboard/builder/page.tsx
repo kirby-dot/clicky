@@ -477,6 +477,31 @@ function BuilderPageContent() {
       return
     }
 
+    // Handle reordering sections
+    if (activeData?.type === 'section' && overData?.type === 'section') {
+      if (active.id === over.id) return
+
+      const oldIndex = sections.findIndex((s) => s.id === active.id)
+      const newIndex = sections.findIndex((s) => s.id === over.id)
+
+      if (oldIndex === -1 || newIndex === -1) return
+
+      const newSections = arrayMove(sections, oldIndex, newIndex)
+      setSections(newSections)
+
+      // Update order in database
+      try {
+        const updates = newSections.map((section, index) =>
+          supabase.from('sections').update({ order: index }).eq('id', section.id)
+        )
+        await Promise.all(updates)
+        setTimeout(refreshPreview, 100)
+      } catch (error) {
+        console.error('Error updating section order:', error)
+      }
+      return
+    }
+
     // Handle reordering modules
     if (active.id === over.id) return
 
