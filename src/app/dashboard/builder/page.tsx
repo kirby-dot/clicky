@@ -56,6 +56,8 @@ import {
   Layers,
   FolderPlus,
   Palette,
+  Send,
+  Inbox,
 } from 'lucide-react'
 import type { Module, ModuleType, Profile, Section, ProfileStyle } from '@/types'
 import {
@@ -230,6 +232,40 @@ const MODULE_TEMPLATES: ModuleTemplate[] = [
       ratio: '50-50'
     },
     color: 'bg-pastel-sky',
+    category: 'utility'
+  },
+  {
+    type: 'email-capture',
+    icon: <Inbox className="w-4 h-4" />,
+    label: 'Email Capture',
+    description: 'Grow your list',
+    defaultContent: {
+      title: 'Join my mailing list',
+      description: 'Get exclusive updates delivered straight to your inbox.',
+      placeholder: 'Enter your email',
+      buttonText: 'Subscribe',
+      successMessage: 'Thanks for subscribing! Check your inbox.'
+    },
+    color: 'bg-pastel-mint',
+    category: 'utility'
+  },
+  {
+    type: 'contact-form',
+    icon: <Send className="w-4 h-4" />,
+    label: 'Contact Form',
+    description: 'Get messages',
+    defaultContent: {
+      title: 'Get in Touch',
+      description: 'Send me a message and I\'ll get back to you soon.',
+      namePlaceholder: 'Your name',
+      emailPlaceholder: 'Your email',
+      messagePlaceholder: 'Your message',
+      buttonText: 'Send Message',
+      successMessage: 'Message sent! I\'ll get back to you soon.',
+      requireName: false,
+      requireEmail: false
+    },
+    color: 'bg-pastel-rose',
     category: 'utility'
   },
 ]
@@ -2931,6 +2967,205 @@ function ModuleEditor({
                     <div className="text-xs text-gray-600">Match your profile's theme colors</div>
                   </div>
                 </label>
+              </div>
+            </div>
+          )}
+
+          {module.type === 'email-capture' && (
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <Type className="w-4 h-4 text-primary-500" />
+                  Title
+                </label>
+                <Input
+                  value={(editedModule.content as any).title || ''}
+                  onChange={(e) => updateContent('title', e.target.value)}
+                  placeholder="Join my mailing list"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <Type className="w-4 h-4 text-primary-500" />
+                  Description
+                </label>
+                <Textarea
+                  value={(editedModule.content as any).description || ''}
+                  onChange={(e) => updateContent('description', e.target.value)}
+                  placeholder="Get exclusive updates delivered straight to your inbox."
+                  rows={3}
+                  className="text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all resize-none"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <Mail className="w-4 h-4 text-primary-500" />
+                  Email Placeholder
+                </label>
+                <Input
+                  value={(editedModule.content as any).placeholder || ''}
+                  onChange={(e) => updateContent('placeholder', e.target.value)}
+                  placeholder="Enter your email"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <MousePointerClick className="w-4 h-4 text-primary-500" />
+                  Button Text
+                </label>
+                <Input
+                  value={(editedModule.content as any).buttonText || ''}
+                  onChange={(e) => updateContent('buttonText', e.target.value)}
+                  placeholder="Subscribe"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <Check className="w-4 h-4 text-primary-500" />
+                  Success Message
+                </label>
+                <Input
+                  value={(editedModule.content as any).successMessage || ''}
+                  onChange={(e) => updateContent('successMessage', e.target.value)}
+                  placeholder="Thanks for subscribing! Check your inbox."
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                />
+              </div>
+            </div>
+          )}
+
+          {module.type === 'contact-form' && (
+            <div className="space-y-6">
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <Type className="w-4 h-4 text-primary-500" />
+                  Title
+                </label>
+                <Input
+                  value={(editedModule.content as any).title || ''}
+                  onChange={(e) => updateContent('title', e.target.value)}
+                  placeholder="Get in Touch"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <Type className="w-4 h-4 text-primary-500" />
+                  Description
+                </label>
+                <Textarea
+                  value={(editedModule.content as any).description || ''}
+                  onChange={(e) => updateContent('description', e.target.value)}
+                  placeholder="Send me a message and I'll get back to you soon."
+                  rows={3}
+                  className="text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all resize-none"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <User className="w-4 h-4 text-primary-500" />
+                  Name Placeholder
+                </label>
+                <Input
+                  value={(editedModule.content as any).namePlaceholder || ''}
+                  onChange={(e) => updateContent('namePlaceholder', e.target.value)}
+                  placeholder="Your name"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <Mail className="w-4 h-4 text-primary-500" />
+                  Email Placeholder
+                </label>
+                <Input
+                  value={(editedModule.content as any).emailPlaceholder || ''}
+                  onChange={(e) => updateContent('emailPlaceholder', e.target.value)}
+                  placeholder="Your email"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <MessageCircle className="w-4 h-4 text-primary-500" />
+                  Message Placeholder
+                </label>
+                <Input
+                  value={(editedModule.content as any).messagePlaceholder || ''}
+                  onChange={(e) => updateContent('messagePlaceholder', e.target.value)}
+                  placeholder="Your message"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  Field Requirements
+                </label>
+                <div className="space-y-3">
+                  <label className="flex items-center gap-3 cursor-pointer p-4 bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-primary-300 transition-all">
+                    <input
+                      type="checkbox"
+                      checked={((editedModule.content as any).requireName !== false)}
+                      onChange={(e) => updateContent('requireName', e.target.checked)}
+                      className="w-5 h-5 text-primary-600 rounded focus:ring-primary-500"
+                    />
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">Require Name</div>
+                      <div className="text-xs text-gray-600">Make name field mandatory</div>
+                    </div>
+                  </label>
+
+                  <label className="flex items-center gap-3 cursor-pointer p-4 bg-gray-50 rounded-xl border-2 border-gray-200 hover:border-primary-300 transition-all">
+                    <input
+                      type="checkbox"
+                      checked={((editedModule.content as any).requireEmail !== false)}
+                      onChange={(e) => updateContent('requireEmail', e.target.checked)}
+                      className="w-5 h-5 text-primary-600 rounded focus:ring-primary-500"
+                    />
+                    <div className="flex-1">
+                      <div className="font-semibold text-gray-900">Require Email</div>
+                      <div className="text-xs text-gray-600">Make email field mandatory</div>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <MousePointerClick className="w-4 h-4 text-primary-500" />
+                  Button Text
+                </label>
+                <Input
+                  value={(editedModule.content as any).buttonText || ''}
+                  onChange={(e) => updateContent('buttonText', e.target.value)}
+                  placeholder="Send Message"
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                />
+              </div>
+
+              <div className="space-y-3">
+                <label className="flex items-center gap-2 text-sm font-bold text-gray-900 uppercase tracking-wide">
+                  <Check className="w-4 h-4 text-primary-500" />
+                  Success Message
+                </label>
+                <Input
+                  value={(editedModule.content as any).successMessage || ''}
+                  onChange={(e) => updateContent('successMessage', e.target.value)}
+                  placeholder="Message sent! I'll get back to you soon."
+                  className="h-12 text-base border-2 border-gray-200 focus:border-primary-500 rounded-xl transition-all"
+                />
               </div>
             </div>
           )}
