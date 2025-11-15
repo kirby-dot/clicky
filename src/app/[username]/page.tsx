@@ -4,6 +4,7 @@ import { notFound } from 'next/navigation'
 import { Metadata } from 'next'
 import ProfileView from '@/components/profile/profile-view'
 import ProfileModulesView from '@/components/profile/profile-modules-view'
+import { ProfilePageClient } from '@/components/profile/profile-page-client'
 import type { Database } from '@/types/database'
 import type { Module, Section, Profile } from '@/types'
 
@@ -109,15 +110,15 @@ export default async function ProfilePage({ params }: Props) {
     .eq('active', true)
     .order('position')
 
-  // If modules exist, use the new module-based view
+  // If modules exist, use the new module-based view with password protection
   if (modules && modules.length > 0) {
     return (
-      <ProfileModulesView
+      <ProfilePageClient
         profile={profile}
         modules={modules as Module[]}
         sections={(sections as Section[]) || []}
         subscriptionTier={subscriptionTier}
-        badge={profile.badge ? profile.badge[0] : null}
+        isOwner={!!isOwner}
       />
     )
   }
