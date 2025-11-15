@@ -80,13 +80,13 @@ export function ButtonModule({ module }: ButtonModuleProps) {
   const className = `block ${widthClass} px-8 py-4 text-center ${fontWeightClass} ${shadowClass} transition-all hover:scale-105 active:scale-95`
 
   const inlineStyles: React.CSSProperties = {
-    backgroundColor: styleConfig.backgroundColor || '#6366f1',
+    backgroundColor: styleConfig.backgroundColor || 'var(--color-primary, #6366f1)',
     color: styleConfig.textColor || '#ffffff',
-    borderRadius: `${styleConfig.borderRadius ?? 16}px`,
+    borderRadius: styleConfig.borderRadius !== undefined ? `${styleConfig.borderRadius}px` : 'var(--border-radius, 16px)',
     ...(styleConfig.borderColor && styleConfig.borderWidth && {
       border: `${styleConfig.borderWidth}px solid ${styleConfig.borderColor}`,
     }),
-    ...(styleConfig.fontSize && { fontSize: `${styleConfig.fontSize}px` }),
+    fontSize: styleConfig.fontSize !== undefined ? `${styleConfig.fontSize}px` : 'var(--body-size, 16px)',
   }
 
   return (

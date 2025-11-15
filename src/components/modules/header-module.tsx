@@ -30,8 +30,8 @@ export function HeaderModule({ module }: HeaderModuleProps) {
   } mb-4`
 
   const inlineStyles: React.CSSProperties = {
-    ...(content.color && { color: content.color }),
-    ...(content.fontSize && { fontSize: `${content.fontSize}px` }),
+    color: content.color || 'var(--color-text, inherit)',
+    fontSize: content.fontSize ? `${content.fontSize}px` : 'var(--heading-size, inherit)',
   }
 
   const Tag = level as keyof JSX.IntrinsicElements

@@ -27,16 +27,16 @@ export function LinkModule({ module, profileId, bgColor }: LinkModuleProps) {
 
   // Get customization options from content.style
   const style = content.style || {}
-  const backgroundColor = style.backgroundColor || '#f0f9ff' // Default light blue
-  const textColor = style.textColor || '#111827' // Default dark gray
-  const borderColor = style.borderColor || '#e5e7eb' // Default light gray
-  const borderWidth = style.borderWidth !== undefined ? style.borderWidth : 1 // Default 1px
-  const borderRadius = style.borderRadius !== undefined ? style.borderRadius : 16 // Default 16px
-  const shadow = style.shadow || 'sm' // 'none' | 'sm' | 'md' | 'lg'
-  const fontSize = style.fontSize || 18 // Default 18px
-  const fontWeight = style.fontWeight || 'semibold' // 'normal' | 'medium' | 'semibold' | 'bold'
-  const align = style.align || 'center' // 'left' | 'center' | 'right'
-  const fullWidth = style.fullWidth !== undefined ? style.fullWidth : true // Default true
+  const backgroundColor = style.backgroundColor || 'var(--color-primary, #f0f9ff)'
+  const textColor = style.textColor || 'var(--color-text, #111827)'
+  const borderColor = style.borderColor || 'var(--color-primary, #e5e7eb)'
+  const borderWidth = style.borderWidth !== undefined ? style.borderWidth : 1
+  const borderRadius = style.borderRadius !== undefined ? style.borderRadius : 'var(--border-radius, 16px)'
+  const shadow = style.shadow || 'sm'
+  const fontSize = style.fontSize || 'var(--body-size, 18px)'
+  const fontWeight = style.fontWeight || 'semibold'
+  const align = style.align || 'center'
+  const fullWidth = style.fullWidth !== undefined ? style.fullWidth : true
 
   // Map shadow values to Tailwind classes
   const shadowClass = {
@@ -74,8 +74,8 @@ export function LinkModule({ module, profileId, bgColor }: LinkModuleProps) {
         borderColor,
         borderWidth: `${borderWidth}px`,
         borderStyle: borderWidth > 0 ? 'solid' : 'none',
-        borderRadius: `${borderRadius}px`,
-        fontSize: `${fontSize}px`,
+        borderRadius: typeof borderRadius === 'number' ? `${borderRadius}px` : borderRadius,
+        fontSize: typeof fontSize === 'number' ? `${fontSize}px` : fontSize,
       }}
       whileTap={{ scale: 0.95 }}
     >

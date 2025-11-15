@@ -25,8 +25,8 @@ export function TextModule({ module }: TextModuleProps) {
 
   const inlineStyles: React.CSSProperties = {
     whiteSpace: 'pre-wrap',
-    ...(content.color && { color: content.color }),
-    ...(content.fontSize && { fontSize: `${content.fontSize}px` }),
+    color: content.color || 'var(--color-text, inherit)',
+    fontSize: content.fontSize ? `${content.fontSize}px` : 'var(--body-size, inherit)',
   }
 
   return (

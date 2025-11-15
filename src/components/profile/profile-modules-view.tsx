@@ -140,7 +140,13 @@ export default function ProfileModulesView({ profile, modules, sections = [], ba
             const modulesWithoutSection = modules.filter(m => !m.section_id)
 
             return (
-              <div className="space-y-8">
+              <div
+                style={{
+                  display: 'flex',
+                  flexDirection: 'column',
+                  gap: 'var(--section-spacing, 32px)'
+                }}
+              >
                 {/* Render sections */}
                 {sectionsWithModules.map((section, index) => (
                   <SectionRenderer
@@ -153,7 +159,14 @@ export default function ProfileModulesView({ profile, modules, sections = [], ba
 
                 {/* Render modules without section */}
                 {modulesWithoutSection.length > 0 && (
-                  <div className="max-w-lg mx-auto space-y-4">
+                  <div
+                    className="max-w-lg mx-auto"
+                    style={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 'var(--module-spacing, 16px)'
+                    }}
+                  >
                     {modulesWithoutSection.map((module, index) => (
                       <ModuleRenderer
                         key={module.id}
