@@ -11,44 +11,41 @@ export default function AuthCallbackPage() {
 
   useEffect(() => {
     const handleAuth = async () => {
-      const params = new URLSearchParams(window.location.search)
-      const code = params.get('code')
-      const errorParam = params.get('error')
-      const errorDescription = params.get('error_description')
+      try {
+        // Check for error in URL
+        const params = new URLSearchParams(window.location.search)
+        const errorParam = params.get('error')
+        const errorDescription = params.get('error_description')
 
-      console.log('Auth callback:', {
-        hasCode: !!code,
-        error: errorParam,
-        hash: window.location.hash
-      })
+        if (errorParam) {
+          setError(errorDescription || errorParam)
+          setTimeout(() => router.push('/login'), 3000)
+          return
+        }
 
-      if (errorParam) {
-        setError(errorDescription || errorParam)
-        setTimeout(() => router.push('/login'), 3000)
-        return
-      }
+        // Parse hash for implicit flow tokens
+        const hash = window.location.hash.substring(1) // Remove the #
+        const hashParams = new URLSearchParams(hash)
+        const accessToken = hashParams.get('access_token')
+        const refreshToken = hashParams.get('refresh_token')
 
-      if (code) {
-        try {
-          // Debug: Check what's in localStorage
-          console.log('LocalStorage keys:', Object.keys(localStorage))
-          const authKeys = Object.keys(localStorage).filter(key => key.includes('auth') || key.includes('supabase'))
-          console.log('Auth-related keys:', authKeys)
-          authKeys.forEach(key => {
-            try {
-              const value = localStorage.getItem(key)
-              console.log(`${key}:`, value?.substring(0, 100))
-            } catch (e) {
-              console.log(`${key}: error reading`)
-            }
+        console.log('Auth callback - checking for tokens in hash:', {
+          hasAccessToken: !!accessToken,
+          hasRefreshToken: !!refreshToken
+        })
+
+        if (accessToken && refreshToken) {
+          console.log('Tokens found in hash, setting session...')
+
+          // Set the session using the tokens from the hash
+          const { data, error: sessionError } = await supabase.auth.setSession({
+            access_token: accessToken,
+            refresh_token: refreshToken
           })
 
-          console.log('Exchanging code for session...')
-          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
-
-          if (exchangeError) {
-            console.error('Exchange failed:', exchangeError.message)
-            setError(`Authentication failed: ${exchangeError.message}`)
+          if (sessionError) {
+            console.error('Failed to set session:', sessionError.message)
+            setError(`Authentication failed: ${sessionError.message}`)
             setTimeout(() => router.push('/login'), 3000)
             return
           }
@@ -65,17 +62,16 @@ export default function AuthCallbackPage() {
             router.push('/dashboard')
             return
           }
-        } catch (err: any) {
-          console.error('Unexpected error:', err)
-          setError(err.message || 'Authentication failed')
-          setTimeout(() => router.push('/login'), 3000)
-          return
         }
-      }
 
-      // If we get here with no code, redirect to login
-      console.log('No code found, redirecting to login')
-      router.push('/login')
+        // No tokens found, redirect to login
+        console.log('No tokens found, redirecting to login')
+        router.push('/login')
+      } catch (err: any) {
+        console.error('Unexpected error:', err)
+        setError(err.message || 'Authentication failed')
+        setTimeout(() => router.push('/login'), 3000)
+      }
     }
 
     handleAuth()
