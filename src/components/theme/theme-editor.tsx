@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { X, Type, Palette, Spacing, Wand2 } from 'lucide-react'
+import { X, Type, Palette, Ruler, Wand2 } from 'lucide-react'
 import type { GlobalTheme } from '@/types'
 
 interface ThemeEditorProps {
@@ -21,7 +21,7 @@ export function ThemeEditor({ theme, onSave, onCancel }: ThemeEditorProps) {
   const tabs = [
     { id: 'typography' as const, label: 'Typography', icon: Type },
     { id: 'colors' as const, label: 'Colors', icon: Palette },
-    { id: 'spacing' as const, label: 'Spacing', icon: Spacing },
+    { id: 'spacing' as const, label: 'Spacing', icon: Ruler },
     { id: 'effects' as const, label: 'Effects', icon: Wand2 },
   ]
 
