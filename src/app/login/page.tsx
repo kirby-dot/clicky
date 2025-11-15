@@ -48,6 +48,7 @@ export default function LoginPage() {
   }
 
   const handleGoogleLogin = async () => {
+    alert('Button clicked! Check console for details.')
     console.log('=== GOOGLE LOGIN CLICKED ===')
     setGoogleLoading(true)
     setMessage(null)
