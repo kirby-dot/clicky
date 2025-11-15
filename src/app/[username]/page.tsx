@@ -66,7 +66,6 @@ export default async function ProfilePage({ params }: Props) {
     .from('profiles')
     .select(`
       *,
-      theme:themes(*),
       badge:badges(*)
     `)
     .eq('slug', params.username)
