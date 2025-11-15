@@ -381,6 +381,87 @@ export interface ProfileLayoutStyle {
   backgroundGradient?: string
 }
 
+// Global Theme System Types
+export interface GlobalTheme {
+  typography: {
+    fontFamily: string
+    fontSize: {
+      xs: string
+      sm: string
+      base: string
+      lg: string
+      xl: string
+      '2xl': string
+      '3xl': string
+      '4xl': string
+    }
+    fontWeight: {
+      light: number
+      normal: number
+      medium: number
+      semibold: number
+      bold: number
+    }
+    lineHeight: {
+      tight: number
+      normal: number
+      relaxed: number
+    }
+    letterSpacing: {
+      tight: string
+      normal: string
+      wide: string
+    }
+  }
+  colors: {
+    primary: string
+    secondary: string
+    accent: string
+    background: {
+      light: string
+      dark: string
+    }
+    text: {
+      heading: string
+      body: string
+      muted: string
+      inverse: string
+    }
+    border: string
+    success: string
+    warning: string
+    error: string
+  }
+  spacing: {
+    xs: string
+    sm: string
+    md: string
+    lg: string
+    xl: string
+    '2xl': string
+    '3xl': string
+  }
+  effects: {
+    borderRadius: {
+      none: string
+      sm: string
+      md: string
+      lg: string
+      xl: string
+      '2xl': string
+      full: string
+    }
+    shadow: {
+      none: string
+      sm: string
+      md: string
+      lg: string
+      xl: string
+      '2xl': string
+    }
+  }
+}
+
 export type ProfileWithModules = Profile & {
   modules: Module[]
   theme?: Theme | null

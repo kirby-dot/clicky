@@ -4,9 +4,10 @@ import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Award } from 'lucide-react'
 import * as LucideIcons from 'lucide-react'
-import type { Profile, Module, Badge, Section, SectionWithModules } from '@/types'
+import type { Profile, Module, Badge, Section, SectionWithModules, GlobalTheme } from '@/types'
 import { ModuleRenderer } from '../modules/module-renderer'
 import { SectionRenderer } from '../sections/section-renderer'
+import { ThemeProvider } from '../theme/theme-provider'
 
 interface ProfileModulesViewProps {
   profile: Profile
@@ -16,6 +17,7 @@ interface ProfileModulesViewProps {
 }
 
 export default function ProfileModulesView({ profile, modules, sections = [], badge }: ProfileModulesViewProps) {
+  const globalTheme = profile.theme as GlobalTheme | null
   useEffect(() => {
     // Track page view
     trackEvent('view', profile.id)
@@ -61,15 +63,17 @@ export default function ProfileModulesView({ profile, modules, sections = [], ba
   const itemVariant = getItemVariant()
 
   return (
-    <div
-      className="min-h-screen py-12 px-4"
-      style={{
-        background: pageStyle.backgroundColor || 'linear-gradient(to-br, #f0f9ff, #faf5ff)',
-        backgroundImage: pageStyle.backgroundImage ? `url(${pageStyle.backgroundImage})` : undefined,
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
-      }}
-    >
+    <ThemeProvider theme={globalTheme}>
+      <div
+        className="min-h-screen py-12 px-4"
+        style={{
+          background: pageStyle.backgroundColor || 'linear-gradient(to-br, #f0f9ff, #faf5ff)',
+          backgroundImage: pageStyle.backgroundImage ? `url(${pageStyle.backgroundImage})` : undefined,
+          backgroundSize: 'cover',
+          backgroundPosition: 'center',
+          fontFamily: globalTheme?.typography.fontFamily || undefined,
+        }}
+      >
       <motion.div
         className={containerWidth === 'full' ? 'w-full' : 'max-w-2xl mx-auto'}
         variants={container}
@@ -230,6 +234,7 @@ export default function ProfileModulesView({ profile, modules, sections = [], ba
         </motion.div>
       </motion.div>
     </div>
+    </ThemeProvider>
   )
 }
 
