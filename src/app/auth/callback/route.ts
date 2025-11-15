@@ -6,6 +6,21 @@ import type { NextRequest } from 'next/server'
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
+  const error = requestUrl.searchParams.get('error')
+  const errorDescription = requestUrl.searchParams.get('error_description')
+
+  console.log('Auth callback received:', {
+    code: code ? 'present' : 'missing',
+    error,
+    errorDescription,
+    fullUrl: requestUrl.href
+  })
+
+  // If there's an error from the OAuth provider
+  if (error) {
+    console.error('OAuth provider error:', error, errorDescription)
+    return NextResponse.redirect(new URL(`/login?error=${error}`, requestUrl.origin))
+  }
 
   if (code) {
     const supabase = createClient(
@@ -14,14 +29,16 @@ export async function GET(request: NextRequest) {
     )
 
     // Exchange code for session
-    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+    const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
 
-    if (error) {
-      console.error('Auth callback error:', error)
-      return NextResponse.redirect(new URL('/login?error=auth_error', requestUrl.origin))
+    if (exchangeError) {
+      console.error('Auth callback error:', exchangeError)
+      return NextResponse.redirect(new URL(`/login?error=exchange_failed&message=${encodeURIComponent(exchangeError.message)}`, requestUrl.origin))
     }
 
     if (data.session) {
+      console.log('Session created successfully, setting cookies and redirecting to dashboard')
+
       // Create response and set cookies directly
       const redirectUrl = new URL('/dashboard', requestUrl.origin)
       const response = NextResponse.redirect(redirectUrl)
@@ -41,8 +58,12 @@ export async function GET(request: NextRequest) {
         secure: process.env.NODE_ENV === 'production'
       })
 
+      console.log('Cookies set, redirecting to:', redirectUrl.href)
       return response
     }
+
+    console.log('No session in data, redirecting to login')
+    return NextResponse.redirect(new URL('/login?error=no_session', requestUrl.origin))
   }
 
   // No code provided, redirect to login
