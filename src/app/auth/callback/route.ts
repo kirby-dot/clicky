@@ -22,11 +22,26 @@ export async function GET(request: NextRequest) {
     }
 
     if (data.session) {
-      // Create redirect response with session data encoded in fragment
-      const redirectUrl = new URL('/auth/confirm', requestUrl.origin)
-      redirectUrl.hash = `access_token=${data.session.access_token}&refresh_token=${data.session.refresh_token}&expires_in=${data.session.expires_in}&token_type=${data.session.token_type}`
+      // Create response and set cookies directly
+      const redirectUrl = new URL('/dashboard', requestUrl.origin)
+      const response = NextResponse.redirect(redirectUrl)
 
-      return NextResponse.redirect(redirectUrl)
+      // Set cookies on the response (non-httpOnly so middleware can read them)
+      response.cookies.set('sb-access-token', data.session.access_token, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production'
+      })
+
+      response.cookies.set('sb-refresh-token', data.session.refresh_token, {
+        path: '/',
+        maxAge: 60 * 60 * 24 * 7, // 7 days
+        sameSite: 'lax',
+        secure: process.env.NODE_ENV === 'production'
+      })
+
+      return response
     }
   }
 
