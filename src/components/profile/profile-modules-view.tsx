@@ -18,6 +18,14 @@ interface ProfileModulesViewProps {
 
 export default function ProfileModulesView({ profile, modules, sections = [], badge }: ProfileModulesViewProps) {
   const globalTheme = profile.theme as GlobalTheme | null
+
+  // Debug: Check if theme is loading
+  console.log('🎨 Theme Debug:', {
+    hasTheme: !!globalTheme,
+    themeData: globalTheme,
+    profileKeys: Object.keys(profile)
+  })
+
   useEffect(() => {
     // Track page view
     trackEvent('view', profile.id)
