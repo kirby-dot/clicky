@@ -10,58 +10,51 @@ export default function AuthCallbackPage() {
   const supabase = createBrowserClient()
 
   useEffect(() => {
-    const handleCallback = async () => {
-      try {
-        // Get the code from the URL
-        const params = new URLSearchParams(window.location.search)
-        const code = params.get('code')
-        const errorParam = params.get('error')
-        const errorDescription = params.get('error_description')
+    // Check for errors in URL
+    const params = new URLSearchParams(window.location.search)
+    const errorParam = params.get('error')
+    const errorDescription = params.get('error_description')
 
-        console.log('Callback page loaded:', { code: code ? 'present' : 'missing', error: errorParam })
-
-        if (errorParam) {
-          setError(errorDescription || errorParam)
-          setTimeout(() => router.push('/login'), 3000)
-          return
-        }
-
-        if (code) {
-          // Exchange the code for a session - this will work with PKCE
-          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
-
-          if (exchangeError) {
-            console.error('Exchange error:', exchangeError)
-            setError(exchangeError.message)
-            setTimeout(() => router.push('/login'), 3000)
-            return
-          }
-
-          if (data.session) {
-            console.log('Session established, redirecting to dashboard')
-
-            // Set cookies for middleware
-            document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-            document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-
-            router.push('/dashboard')
-          } else {
-            setError('No session created')
-            setTimeout(() => router.push('/login'), 3000)
-          }
-        } else {
-          // No code, redirect to login
-          router.push('/login')
-        }
-      } catch (err: any) {
-        console.error('Callback error:', err)
-        setError(err.message)
-        setTimeout(() => router.push('/login'), 3000)
-      }
+    if (errorParam) {
+      setError(errorDescription || errorParam)
+      setTimeout(() => router.push('/login'), 3000)
+      return
     }
 
-    handleCallback()
-  }, [router, supabase])
+    // Listen for auth state changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      console.log('Auth state change:', event, session ? 'session exists' : 'no session')
+
+      if (event === 'SIGNED_IN' && session) {
+        console.log('User signed in, setting cookies')
+
+        // Set cookies for middleware
+        document.cookie = `sb-access-token=${session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+        document.cookie = `sb-refresh-token=${session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+
+        router.push('/dashboard')
+      } else if (event === 'TOKEN_REFRESHED' && session) {
+        console.log('Token refreshed, setting cookies')
+
+        document.cookie = `sb-access-token=${session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+        document.cookie = `sb-refresh-token=${session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+
+        router.push('/dashboard')
+      }
+    })
+
+    // Set a timeout in case the auth doesn't complete
+    const timeout = setTimeout(() => {
+      subscription.unsubscribe()
+      setError('Authentication timed out')
+      setTimeout(() => router.push('/login'), 2000)
+    }, 10000)
+
+    return () => {
+      subscription.unsubscribe()
+      clearTimeout(timeout)
+    }
+  }, [router, supabase.auth])
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 flex items-center justify-center p-4">
