@@ -17,6 +17,7 @@ import { CountdownModule } from './countdown-module'
 import { EmailButtonModule } from './email-button-module'
 import { ButtonGridModule } from './button-grid-module'
 import { TwoColumnModule } from './two-column-module'
+import { EmailCaptureModule } from './email-capture-module'
 
 interface ModuleRendererProps {
   module: Module
@@ -67,6 +68,8 @@ export function ModuleRenderer({ module, profileId, index, borderAnimation = fal
         return <ButtonGridModule module={module} />
       case 'two-column':
         return <TwoColumnModule module={module} allModules={allModules} profileId={profileId} />
+      case 'email-capture':
+        return <EmailCaptureModule module={module} profileId={profileId} />
       default:
         return null
     }
