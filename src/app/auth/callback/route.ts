@@ -12,7 +12,37 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
-    await supabase.auth.exchangeCodeForSession(code)
+
+    // Exchange code for session
+    const { data, error } = await supabase.auth.exchangeCodeForSession(code)
+
+    if (error) {
+      console.error('Auth callback error:', error)
+      return NextResponse.redirect(new URL('/login?error=auth_error', requestUrl.origin))
+    }
+
+    if (data.session) {
+      // Set session cookies
+      const cookieStore = cookies()
+
+      // Set access token cookie
+      cookieStore.set('sb-access-token', data.session.access_token, {
+        path: '/',
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7 days
+      })
+
+      // Set refresh token cookie
+      cookieStore.set('sb-refresh-token', data.session.refresh_token, {
+        path: '/',
+        httpOnly: true,
+        secure: process.env.NODE_ENV === 'production',
+        sameSite: 'lax',
+        maxAge: 60 * 60 * 24 * 7 // 7 days
+      })
+    }
   }
 
   // URL to redirect to after sign in process completes
