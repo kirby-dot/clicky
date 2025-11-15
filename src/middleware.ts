@@ -21,8 +21,8 @@ export async function middleware(req: NextRequest) {
     return res
   }
 
-  // Skip auth confirmation page
-  if (req.nextUrl.pathname === '/auth/confirm') {
+  // Skip auth callback and confirmation pages
+  if (req.nextUrl.pathname === '/auth/callback' || req.nextUrl.pathname === '/auth/confirm') {
     return res
   }
 
