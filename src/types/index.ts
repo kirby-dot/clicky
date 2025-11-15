@@ -319,6 +319,56 @@ export type ModuleContent =
 
 export interface Module extends BaseModule {
   content: ModuleContent
+  section_id?: string | null
+  column_index?: number
+}
+
+// Section System Types
+export interface SectionLayout {
+  columns: 1 | 2 | 3 | 4
+  gap: number // spacing between columns in pixels
+  mobileColumns: 1 | 2
+  alignment: 'left' | 'center' | 'right'
+}
+
+export interface SectionStyle {
+  backgroundColor?: string | null
+  backgroundImage?: string | null
+  backgroundGradient?: {
+    enabled: boolean
+    type: 'linear' | 'radial'
+    direction?: string
+    colors: string[]
+  } | null
+  padding: {
+    top: number
+    bottom: number
+    left: number
+    right: number
+  }
+  margin: {
+    top: number
+    bottom: number
+  }
+  borderRadius: number
+  shadow: 'none' | 'sm' | 'md' | 'lg' | 'xl'
+  fullWidth: boolean
+}
+
+export interface Section {
+  id: string
+  profile_id: string
+  title?: string | null
+  order: number
+  layout: SectionLayout
+  style: SectionStyle
+  active: boolean
+  created_at: string
+  updated_at: string
+}
+
+export interface SectionWithModules extends Section {
+  modules: Module[]
 }
 
 export interface ProfileLayoutStyle {
