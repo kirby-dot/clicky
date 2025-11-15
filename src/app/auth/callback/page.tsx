@@ -10,50 +10,75 @@ export default function AuthCallbackPage() {
   const supabase = createBrowserClient()
 
   useEffect(() => {
-    // Check for errors in URL
-    const params = new URLSearchParams(window.location.search)
-    const errorParam = params.get('error')
-    const errorDescription = params.get('error_description')
+    const handleAuth = async () => {
+      const params = new URLSearchParams(window.location.search)
+      const code = params.get('code')
+      const errorParam = params.get('error')
+      const errorDescription = params.get('error_description')
 
-    if (errorParam) {
-      setError(errorDescription || errorParam)
-      setTimeout(() => router.push('/login'), 3000)
-      return
-    }
+      console.log('Auth callback:', {
+        hasCode: !!code,
+        error: errorParam,
+        hash: window.location.hash
+      })
 
-    // Listen for auth state changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      console.log('Auth state change:', event, session ? 'session exists' : 'no session')
-
-      if (event === 'SIGNED_IN' && session) {
-        console.log('User signed in, setting cookies')
-
-        // Set cookies for middleware
-        document.cookie = `sb-access-token=${session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-        document.cookie = `sb-refresh-token=${session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-
-        router.push('/dashboard')
-      } else if (event === 'TOKEN_REFRESHED' && session) {
-        console.log('Token refreshed, setting cookies')
-
-        document.cookie = `sb-access-token=${session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-        document.cookie = `sb-refresh-token=${session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
-
-        router.push('/dashboard')
+      if (errorParam) {
+        setError(errorDescription || errorParam)
+        setTimeout(() => router.push('/login'), 3000)
+        return
       }
-    })
 
-    // Set a timeout in case the auth doesn't complete
-    const timeout = setTimeout(() => {
-      subscription.unsubscribe()
-      setError('Authentication timed out')
-      setTimeout(() => router.push('/login'), 2000)
-    }, 10000)
+      if (code) {
+        try {
+          // Debug: Check what's in localStorage
+          console.log('LocalStorage keys:', Object.keys(localStorage))
+          const authKeys = Object.keys(localStorage).filter(key => key.includes('auth') || key.includes('supabase'))
+          console.log('Auth-related keys:', authKeys)
+          authKeys.forEach(key => {
+            try {
+              const value = localStorage.getItem(key)
+              console.log(`${key}:`, value?.substring(0, 100))
+            } catch (e) {
+              console.log(`${key}: error reading`)
+            }
+          })
 
-    return () => {
-      subscription.unsubscribe()
-      clearTimeout(timeout)
+          console.log('Exchanging code for session...')
+          const { data, error: exchangeError } = await supabase.auth.exchangeCodeForSession(code)
+
+          if (exchangeError) {
+            console.error('Exchange failed:', exchangeError.message)
+            setError(`Authentication failed: ${exchangeError.message}`)
+            setTimeout(() => router.push('/login'), 3000)
+            return
+          }
+
+          if (data.session) {
+            console.log('Session created successfully!')
+
+            // Set cookies for middleware
+            document.cookie = `sb-access-token=${data.session.access_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+            document.cookie = `sb-refresh-token=${data.session.refresh_token}; path=/; max-age=${60 * 60 * 24 * 7}; SameSite=Lax`
+
+            // Small delay to ensure cookies are set
+            await new Promise(resolve => setTimeout(resolve, 100))
+            router.push('/dashboard')
+            return
+          }
+        } catch (err: any) {
+          console.error('Unexpected error:', err)
+          setError(err.message || 'Authentication failed')
+          setTimeout(() => router.push('/login'), 3000)
+          return
+        }
+      }
+
+      // If we get here with no code, redirect to login
+      console.log('No code found, redirecting to login')
+      router.push('/login')
     }
+
+    handleAuth()
   }, [router, supabase.auth])
 
   return (
