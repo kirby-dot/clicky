@@ -22,9 +22,15 @@ export function ThemeProvider({ theme, children }: ThemeProviderProps) {
   // Generate CSS variables from theme
   const cssVariables = theme ? generateCSSVariables(theme) : {}
 
+  // Add font family to inline styles
+  const wrapperStyles = {
+    ...cssVariables,
+    fontFamily: theme?.typography.fontFamily,
+  } as React.CSSProperties
+
   return (
     <ThemeContext.Provider value={{ theme }}>
-      <div style={cssVariables as React.CSSProperties}>
+      <div style={wrapperStyles}>
         {children}
       </div>
     </ThemeContext.Provider>
@@ -36,46 +42,55 @@ function generateCSSVariables(theme: GlobalTheme): Record<string, string> {
 
   // Typography
   vars['--font-family'] = theme.typography.fontFamily
-  Object.entries(theme.typography.fontSize).forEach(([key, value]) => {
-    vars[`--font-size-${key}`] = value
-  })
-  Object.entries(theme.typography.fontWeight).forEach(([key, value]) => {
-    vars[`--font-weight-${key}`] = value.toString()
-  })
-  Object.entries(theme.typography.lineHeight).forEach(([key, value]) => {
-    vars[`--line-height-${key}`] = value.toString()
-  })
-  Object.entries(theme.typography.letterSpacing).forEach(([key, value]) => {
-    vars[`--letter-spacing-${key}`] = value
-  })
+
+  // Heading sizes
+  const headingSizes = {
+    small: '20px',
+    medium: '28px',
+    large: '36px',
+    xl: '48px',
+  }
+  vars['--heading-size'] = headingSizes[theme.typography.headingSize]
+
+  // Body sizes
+  const bodySizes = {
+    small: '14px',
+    medium: '16px',
+    large: '18px',
+  }
+  vars['--body-size'] = bodySizes[theme.typography.bodySize]
 
   // Colors
   vars['--color-primary'] = theme.colors.primary
   vars['--color-secondary'] = theme.colors.secondary
   vars['--color-accent'] = theme.colors.accent
-  vars['--color-bg-light'] = theme.colors.background.light
-  vars['--color-bg-dark'] = theme.colors.background.dark
-  vars['--color-text-heading'] = theme.colors.text.heading
-  vars['--color-text-body'] = theme.colors.text.body
-  vars['--color-text-muted'] = theme.colors.text.muted
-  vars['--color-text-inverse'] = theme.colors.text.inverse
-  vars['--color-border'] = theme.colors.border
-  vars['--color-success'] = theme.colors.success
-  vars['--color-warning'] = theme.colors.warning
-  vars['--color-error'] = theme.colors.error
+  vars['--color-background'] = theme.colors.background
+  vars['--color-text'] = theme.colors.text
 
-  // Spacing
-  Object.entries(theme.spacing).forEach(([key, value]) => {
-    vars[`--spacing-${key}`] = value
-  })
+  // Button/Module Roundness
+  const roundnessMap = {
+    square: '0px',
+    'slightly-rounded': '6px',
+    rounded: '12px',
+    pill: '9999px',
+  }
+  vars['--border-radius'] = roundnessMap[theme.layout.buttonRoundness]
 
-  // Effects
-  Object.entries(theme.effects.borderRadius).forEach(([key, value]) => {
-    vars[`--radius-${key}`] = value
-  })
-  Object.entries(theme.effects.shadow).forEach(([key, value]) => {
-    vars[`--shadow-${key}`] = value
-  })
+  // Section Spacing
+  const sectionSpacingMap = {
+    tight: '16px',
+    normal: '32px',
+    loose: '64px',
+  }
+  vars['--section-spacing'] = sectionSpacingMap[theme.layout.sectionSpacing]
+
+  // Module Spacing
+  const moduleSpacingMap = {
+    tight: '8px',
+    normal: '16px',
+    loose: '24px',
+  }
+  vars['--module-spacing'] = moduleSpacingMap[theme.layout.moduleSpacing]
 
   return vars
 }

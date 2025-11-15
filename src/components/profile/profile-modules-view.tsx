@@ -71,7 +71,6 @@ export default function ProfileModulesView({ profile, modules, sections = [], ba
           backgroundImage: pageStyle.backgroundImage ? `url(${pageStyle.backgroundImage})` : undefined,
           backgroundSize: 'cover',
           backgroundPosition: 'center',
-          fontFamily: globalTheme?.typography.fontFamily || undefined,
         }}
       >
       <motion.div

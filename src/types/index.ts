@@ -385,80 +385,20 @@ export interface ProfileLayoutStyle {
 export interface GlobalTheme {
   typography: {
     fontFamily: string
-    fontSize: {
-      xs: string
-      sm: string
-      base: string
-      lg: string
-      xl: string
-      '2xl': string
-      '3xl': string
-      '4xl': string
-    }
-    fontWeight: {
-      light: number
-      normal: number
-      medium: number
-      semibold: number
-      bold: number
-    }
-    lineHeight: {
-      tight: number
-      normal: number
-      relaxed: number
-    }
-    letterSpacing: {
-      tight: string
-      normal: string
-      wide: string
-    }
+    headingSize: 'small' | 'medium' | 'large' | 'xl'
+    bodySize: 'small' | 'medium' | 'large'
   }
   colors: {
     primary: string
     secondary: string
     accent: string
-    background: {
-      light: string
-      dark: string
-    }
-    text: {
-      heading: string
-      body: string
-      muted: string
-      inverse: string
-    }
-    border: string
-    success: string
-    warning: string
-    error: string
+    background: string
+    text: string
   }
-  spacing: {
-    xs: string
-    sm: string
-    md: string
-    lg: string
-    xl: string
-    '2xl': string
-    '3xl': string
-  }
-  effects: {
-    borderRadius: {
-      none: string
-      sm: string
-      md: string
-      lg: string
-      xl: string
-      '2xl': string
-      full: string
-    }
-    shadow: {
-      none: string
-      sm: string
-      md: string
-      lg: string
-      xl: string
-      '2xl': string
-    }
+  layout: {
+    buttonRoundness: 'square' | 'slightly-rounded' | 'rounded' | 'pill'
+    sectionSpacing: 'tight' | 'normal' | 'loose'
+    moduleSpacing: 'tight' | 'normal' | 'loose'
   }
 }
 
