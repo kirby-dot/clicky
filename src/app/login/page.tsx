@@ -48,11 +48,15 @@ export default function LoginPage() {
   }
 
   const handleGoogleLogin = async () => {
+    console.log('=== GOOGLE LOGIN CLICKED ===')
     setGoogleLoading(true)
     setMessage(null)
 
     try {
-      console.log('Starting Google OAuth...')
+      console.log('Creating OAuth request...')
+      console.log('Window origin:', window.location.origin)
+      console.log('Redirect URL:', `${window.location.origin}/auth/callback`)
+
       const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
@@ -60,17 +64,35 @@ export default function LoginPage() {
         },
       })
 
-      console.log('signInWithOAuth result:', { data, error })
+      console.log('=== OAuth Response ===')
+      console.log('Data:', data)
+      console.log('Error:', error)
+      console.log('Provider:', data?.provider)
+      console.log('URL:', data?.url)
 
       if (error) {
-        console.error('OAuth error:', error)
-        throw error
+        console.error('OAuth error details:', error)
+        setMessage({
+          type: 'error',
+          text: `OAuth error: ${error.message}`,
+        })
+        setGoogleLoading(false)
+        return
       }
 
-      console.log('OAuth should redirect now...')
-      // The redirect should happen automatically, don't set loading to false
+      if (data?.url) {
+        console.log('Redirecting to:', data.url)
+        window.location.href = data.url
+      } else {
+        console.log('No URL in response - OAuth may have failed silently')
+        setMessage({
+          type: 'error',
+          text: 'Google OAuth did not return a redirect URL. Please check Supabase configuration.',
+        })
+        setGoogleLoading(false)
+      }
     } catch (error: any) {
-      console.error('Caught error:', error)
+      console.error('Exception in handleGoogleLogin:', error)
       setMessage({
         type: 'error',
         text: error.message || 'An error occurred',

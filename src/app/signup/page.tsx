@@ -48,19 +48,51 @@ export default function SignupPage() {
   }
 
   const handleGoogleSignup = async () => {
+    console.log('=== GOOGLE SIGNUP CLICKED ===')
     setGoogleLoading(true)
     setMessage(null)
 
     try {
-      const { error } = await supabase.auth.signInWithOAuth({
+      console.log('Creating OAuth request...')
+      console.log('Window origin:', window.location.origin)
+      console.log('Redirect URL:', `${window.location.origin}/auth/callback`)
+
+      const { data, error } = await supabase.auth.signInWithOAuth({
         provider: 'google',
         options: {
           redirectTo: `${window.location.origin}/auth/callback`,
         },
       })
 
-      if (error) throw error
+      console.log('=== OAuth Response ===')
+      console.log('Data:', data)
+      console.log('Error:', error)
+      console.log('Provider:', data?.provider)
+      console.log('URL:', data?.url)
+
+      if (error) {
+        console.error('OAuth error details:', error)
+        setMessage({
+          type: 'error',
+          text: `OAuth error: ${error.message}`,
+        })
+        setGoogleLoading(false)
+        return
+      }
+
+      if (data?.url) {
+        console.log('Redirecting to:', data.url)
+        window.location.href = data.url
+      } else {
+        console.log('No URL in response - OAuth may have failed silently')
+        setMessage({
+          type: 'error',
+          text: 'Google OAuth did not return a redirect URL. Please check Supabase configuration.',
+        })
+        setGoogleLoading(false)
+      }
     } catch (error: any) {
+      console.error('Exception in handleGoogleSignup:', error)
       setMessage({
         type: 'error',
         text: error.message || 'An error occurred',
