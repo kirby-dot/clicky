@@ -7,6 +7,10 @@ export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
 
+  // Create redirect response
+  const redirectUrl = new URL('/dashboard', requestUrl.origin)
+  const response = NextResponse.redirect(redirectUrl)
+
   if (code) {
     const supabase = createClient(
       process.env.NEXT_PUBLIC_SUPABASE_URL!,
@@ -22,11 +26,8 @@ export async function GET(request: NextRequest) {
     }
 
     if (data.session) {
-      // Set session cookies
-      const cookieStore = cookies()
-
-      // Set access token cookie
-      cookieStore.set('sb-access-token', data.session.access_token, {
+      // Set access token cookie on response
+      response.cookies.set('sb-access-token', data.session.access_token, {
         path: '/',
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -34,8 +35,8 @@ export async function GET(request: NextRequest) {
         maxAge: 60 * 60 * 24 * 7 // 7 days
       })
 
-      // Set refresh token cookie
-      cookieStore.set('sb-refresh-token', data.session.refresh_token, {
+      // Set refresh token cookie on response
+      response.cookies.set('sb-refresh-token', data.session.refresh_token, {
         path: '/',
         httpOnly: true,
         secure: process.env.NODE_ENV === 'production',
@@ -45,6 +46,5 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // URL to redirect to after sign in process completes
-  return NextResponse.redirect(new URL('/dashboard', requestUrl.origin))
+  return response
 }
