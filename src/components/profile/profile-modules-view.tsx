@@ -4,10 +4,10 @@ import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Award } from 'lucide-react'
 import * as LucideIcons from 'lucide-react'
-import type { Profile, Module, Badge, Section, SectionWithModules, GlobalTheme } from '@/types'
+import type { Profile, Module, Badge, Section, SectionWithModules, ProfileStyle } from '@/types'
 import { ModuleRenderer } from '../modules/module-renderer'
 import { SectionRenderer } from '../sections/section-renderer'
-import { ThemeProvider } from '../theme/theme-provider'
+import { StyleProvider } from '../style/style-provider'
 
 interface ProfileModulesViewProps {
   profile: Profile
@@ -17,14 +17,7 @@ interface ProfileModulesViewProps {
 }
 
 export default function ProfileModulesView({ profile, modules, sections = [], badge }: ProfileModulesViewProps) {
-  const globalTheme = profile.theme as GlobalTheme | null
-
-  // Debug: Check if theme is loading
-  console.log('🎨 Theme Debug:', {
-    hasTheme: !!globalTheme,
-    themeData: globalTheme,
-    profileKeys: Object.keys(profile)
-  })
+  const profileStyle = (profile.style as Partial<ProfileStyle>) || {}
 
   useEffect(() => {
     // Track page view
@@ -46,11 +39,7 @@ export default function ProfileModulesView({ profile, modules, sections = [], ba
     show: { y: 0, opacity: 1 },
   }
 
-  // Get page style from profile
-  const pageStyle = (profile.style as any) || {}
-  const containerWidth = pageStyle.containerWidth || 'contained'
-  const animation = pageStyle.animation || 'fade-up'
-  const borderAnimation = pageStyle.borderAnimation || false
+  const animation = profileStyle.animation || 'fade-up'
 
   // Different animation variants
   const getItemVariant = () => {
@@ -70,19 +59,23 @@ export default function ProfileModulesView({ profile, modules, sections = [], ba
 
   const itemVariant = getItemVariant()
 
+  const bgColor = profileStyle.backgroundColor || '#ffffff'
+  const bgImage = profileStyle.backgroundImage
+  const bgGradient = profileStyle.backgroundGradient
+
   return (
-    <ThemeProvider theme={globalTheme}>
+    <StyleProvider style={profileStyle}>
       <div
         className="min-h-screen py-12 px-4"
         style={{
-          background: pageStyle.backgroundColor || 'linear-gradient(to-br, #f0f9ff, #faf5ff)',
-          backgroundImage: pageStyle.backgroundImage ? `url(${pageStyle.backgroundImage})` : undefined,
+          backgroundColor: bgColor,
+          backgroundImage: bgGradient || (bgImage ? `url(${bgImage})` : undefined),
           backgroundSize: 'cover',
           backgroundPosition: 'center',
         }}
       >
       <motion.div
-        className={containerWidth === 'full' ? 'w-full' : 'max-w-2xl mx-auto'}
+        className="max-w-2xl mx-auto"
         variants={container}
         initial="hidden"
         animate="show"
@@ -181,7 +174,6 @@ export default function ProfileModulesView({ profile, modules, sections = [], ba
                         module={module}
                         profileId={profile.id}
                         index={index}
-                        borderAnimation={borderAnimation}
                       />
                     ))}
                   </div>
@@ -191,8 +183,8 @@ export default function ProfileModulesView({ profile, modules, sections = [], ba
           }
 
           // Fallback to original layout if no sections
-          const layout = pageStyle.layout || 'stack'
-          const moduleSpacing = pageStyle.moduleSpacing || 4
+          const layout = 'stack'
+          const moduleSpacing = 4
 
           const spaceClass = ({
             2: 'space-y-2',
@@ -228,7 +220,6 @@ export default function ProfileModulesView({ profile, modules, sections = [], ba
                     module={module}
                     profileId={profile.id}
                     index={index}
-                    borderAnimation={borderAnimation}
                   />
                 </div>
               ))}
@@ -254,7 +245,7 @@ export default function ProfileModulesView({ profile, modules, sections = [], ba
         </motion.div>
       </motion.div>
     </div>
-    </ThemeProvider>
+    </StyleProvider>
   )
 }
 

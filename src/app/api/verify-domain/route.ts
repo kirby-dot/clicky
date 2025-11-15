@@ -38,11 +38,13 @@ export async function POST(request: Request) {
     }
 
     // Verify user owns this profile
-    const { data: profile } = await supabase
+    const { data: profileData } = await supabase
       .from('profiles')
       .select('user_id')
       .eq('id', profileId)
-      .single()
+      .maybeSingle()
+
+    const profile = profileData as { user_id: string } | null
 
     if (!profile || profile.user_id !== user.id) {
       return NextResponse.json(
@@ -56,9 +58,11 @@ export async function POST(request: Request) {
       .from('users')
       .select('subscription_tier')
       .eq('id', user.id)
-      .single()
+      .maybeSingle()
 
-    if (!userData || userData.subscription_tier !== 'enterprise') {
+    const userTier = userData as { subscription_tier: string } | null
+
+    if (!userTier || userTier.subscription_tier !== 'enterprise') {
       return NextResponse.json(
         { error: 'Custom domains are only available on Business plan' },
         { status: 403 }
@@ -87,13 +91,14 @@ export async function POST(request: Request) {
     }
 
     // Update profile with verification status
-    const { error: updateError } = await supabase
+    const updateData: any = {
+      custom_domain: domain,
+      domain_verified: verified,
+      domain_verified_at: verified ? new Date().toISOString() : null
+    }
+    const { error: updateError } = await (supabase as any)
       .from('profiles')
-      .update({
-        custom_domain: domain,
-        domain_verified: verified,
-        domain_verified_at: verified ? new Date().toISOString() : null
-      })
+      .update(updateData)
       .eq('id', profileId)
 
     if (updateError) {

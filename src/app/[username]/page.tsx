@@ -5,7 +5,7 @@ import { Metadata } from 'next'
 import ProfileView from '@/components/profile/profile-view'
 import ProfileModulesView from '@/components/profile/profile-modules-view'
 import type { Database } from '@/types/database'
-import type { Module, Section } from '@/types'
+import type { Module, Section, Profile } from '@/types'
 
 export const revalidate = 10 // Revalidate every 10 seconds for live preview
 
@@ -31,14 +31,16 @@ function createServerClient() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = createServerClient()
 
-  const { data: profile } = await supabase
+  const { data, error } = await supabase
     .from('profiles')
     .select('*')
     .eq('slug', params.username)
     .eq('published', true)
-    .single()
+    .maybeSingle()
 
-  if (!profile) {
+  const profile = data as Profile | null
+
+  if (!profile || error) {
     return {
       title: 'Profile Not Found',
     }
@@ -62,14 +64,16 @@ export default async function ProfilePage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Fetch profile - allow unpublished if user owns it
-  const { data: profile } = await supabase
+  const { data: profileData } = await supabase
     .from('profiles')
     .select(`
       *,
       badge:badges(*)
     `)
     .eq('slug', params.username)
-    .single()
+    .maybeSingle()
+
+  const profile = profileData as (Profile & { badge: any[] | null }) | null
 
   if (!profile) {
     notFound()
@@ -120,7 +124,7 @@ export default async function ProfilePage({ params }: Props) {
     <ProfileView
       profile={profile}
       links={links || []}
-      theme={profile.theme ? profile.theme[0] : null}
+      theme={null}
       badge={profile.badge ? profile.badge[0] : null}
     />
   )

@@ -381,25 +381,31 @@ export interface ProfileLayoutStyle {
   backgroundGradient?: string
 }
 
-// Global Theme System Types
-export interface GlobalTheme {
-  typography: {
-    fontFamily: string
-    headingSize: 'small' | 'medium' | 'large' | 'xl'
-    bodySize: 'small' | 'medium' | 'large'
-  }
-  colors: {
-    primary: string
-    secondary: string
-    accent: string
-    background: string
-    text: string
-  }
-  layout: {
-    buttonRoundness: 'square' | 'slightly-rounded' | 'rounded' | 'pill'
-    sectionSpacing: 'tight' | 'normal' | 'loose'
-    moduleSpacing: 'tight' | 'normal' | 'loose'
-  }
+// Unified Profile Style System
+export interface ProfileStyle {
+  // Typography
+  fontFamily: string
+  headingSize: 'small' | 'medium' | 'large' | 'xl'
+  bodySize: 'small' | 'medium' | 'large'
+
+  // Colors
+  primaryColor: string
+  secondaryColor: string
+  accentColor: string
+  backgroundColor: string
+  textColor: string
+
+  // Layout
+  buttonRoundness: 'square' | 'slightly-rounded' | 'rounded' | 'pill'
+  sectionSpacing: 'tight' | 'normal' | 'loose'
+  moduleSpacing: 'tight' | 'normal' | 'loose'
+
+  // Page Background
+  backgroundImage?: string
+  backgroundGradient?: string
+
+  // Animation
+  animation: 'none' | 'fade-in' | 'fade-up' | 'scale-in'
 }
 
 export type ProfileWithModules = Profile & {

@@ -53,11 +53,13 @@ export default function AnalyticsPage() {
       if (!user) return
 
       // Get profile
-      const { data: profileData } = await supabase
+      const { data } = await supabase
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
-        .single()
+        .maybeSingle()
+
+      const profileData = data as any
 
       if (profileData) {
         setProfile(profileData)
@@ -93,7 +95,8 @@ export default function AnalyticsPage() {
           query = query.gte('timestamp', dateFilter)
         }
 
-        const { data: events } = await query
+        const { data } = await query
+        const events = data as any[]
 
         if (events) {
           // Process analytics
