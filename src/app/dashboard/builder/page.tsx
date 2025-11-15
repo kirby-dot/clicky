@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ModuleRenderer } from '@/components/modules/module-renderer'
 import { SectionEditor } from '@/components/sections/section-editor'
+import { SectionCanvas } from '@/components/builder/section-canvas'
 import {
   Trash2,
   GripVertical,
@@ -66,6 +67,8 @@ import {
   TouchSensor,
   DragStartEvent,
   DragOverlay,
+  DragOverEvent,
+  useDroppable,
 } from '@dnd-kit/core'
 import {
   arrayMove,
@@ -363,30 +366,8 @@ function BuilderPageContent() {
     setPreviewKey(prev => prev + 1)
   }, [])
 
-  const handleAddModule = async (template: ModuleTemplate, sectionId?: string, columnIndex?: number) => {
+  const handleAddModule = async (template: ModuleTemplate, sectionId?: string | null, columnIndex?: number) => {
     if (!profile) return
-
-    // If no section specified and sections exist, ask user to select
-    if (!sectionId && sections.length > 0) {
-      const sectionChoice = window.prompt(
-        `Add module to which section?\n\n${sections.map((s, i) => `${i + 1}. ${s.title || 'Untitled Section'}`).join('\n')}\n\nEnter number (or leave empty to add without section):`
-      )
-
-      if (sectionChoice && parseInt(sectionChoice) > 0 && parseInt(sectionChoice) <= sections.length) {
-        const selectedSection = sections[parseInt(sectionChoice) - 1]
-        sectionId = selectedSection.id
-
-        // If multi-column, ask which column
-        if (selectedSection.layout.columns > 1) {
-          const columnChoice = window.prompt(
-            `Which column? (1-${selectedSection.layout.columns})`
-          )
-          if (columnChoice && parseInt(columnChoice) > 0 && parseInt(columnChoice) <= selectedSection.layout.columns) {
-            columnIndex = parseInt(columnChoice) - 1
-          }
-        }
-      }
-    }
 
     setSaving(true)
     try {
@@ -413,6 +394,30 @@ function BuilderPageContent() {
       alert('Error adding module: ' + error.message)
     } finally {
       setSaving(false)
+    }
+  }
+
+  const handleMoveModuleToSection = async (moduleId: string, sectionId: string | null, columnIndex: number) => {
+    try {
+      const { error } = await supabase
+        .from('modules')
+        .update({
+          section_id: sectionId,
+          column_index: columnIndex,
+        })
+        .eq('id', moduleId)
+
+      if (error) throw error
+
+      setModules(modules.map((m) =>
+        m.id === moduleId
+          ? { ...m, section_id: sectionId, column_index: columnIndex }
+          : m
+      ))
+      setTimeout(refreshPreview, 100)
+    } catch (error: any) {
+      console.error('Error moving module:', error)
+      alert('Error moving module: ' + error.message)
     }
   }
 
@@ -457,10 +462,28 @@ function BuilderPageContent() {
     const { active, over } = event
     setActiveId(null)
 
-    if (!over || active.id === over.id) return
+    if (!over) return
+
+    const activeData = active.data.current
+    const overData = over.data.current
+
+    // Handle dropping a module into a column
+    if (activeData?.type === 'module' && overData?.type === 'column') {
+      const moduleId = active.id as string
+      const sectionId = overData.sectionId
+      const columnIndex = overData.columnIndex
+
+      await handleMoveModuleToSection(moduleId, sectionId, columnIndex)
+      return
+    }
+
+    // Handle reordering modules
+    if (active.id === over.id) return
 
     const oldIndex = modules.findIndex((m) => m.id === active.id)
     const newIndex = modules.findIndex((m) => m.id === over.id)
+
+    if (oldIndex === -1 || newIndex === -1) return
 
     const newModules = arrayMove(modules, oldIndex, newIndex)
     setModules(newModules)
@@ -948,79 +971,32 @@ function BuilderPageContent() {
                     minHeight: 'inherit'
                   }}
                 >
-                  {modules.length === 0 ? (
-                    <div className="flex items-center justify-center py-24 px-4">
-                      <div className="text-center">
-                        <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                          <Plus className="w-8 h-8 text-gray-400" />
-                        </div>
-                        <p className="text-lg font-semibold text-gray-900 mb-2">Start building</p>
-                        <p className="text-sm text-gray-500">
-                          Add modules from the left sidebar
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <DndContext
-                      sensors={sensors}
-                      collisionDetection={closestCenter}
-                      onDragStart={handleDragStart}
-                      onDragEnd={handleDragEnd}
+                  <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragStart={handleDragStart}
+                    onDragEnd={handleDragEnd}
+                  >
+                    <SortableContext
+                      items={modules.map((m) => m.id)}
+                      strategy={verticalListSortingStrategy}
                     >
-                      <SortableContext
-                        items={modules.map((m) => m.id)}
-                        strategy={verticalListSortingStrategy}
-                      >
-                        <div className="space-y-4 p-4">
-                          {modules.map((module, index) => (
-                            <InCanvasModule
-                              key={module.id}
-                              module={module}
-                              profileId={profile.id}
-                              index={index}
-                              isSelected={selectedModule?.id === module.id}
-                              onSelect={() => {
-                                setSelectedModule(module)
-                                setRightPanelCollapsed(false)
-                              }}
-                              onDelete={handleDeleteModule}
-                              onToggleActive={handleToggleActive}
-                              onDuplicate={async (m) => {
-                                if (!profile) return
-                                const { data } = await supabase
-                                  .from('modules')
-                                  .insert({
-                                    profile_id: profile.id,
-                                    type: m.type,
-                                    title: m.title + ' (Copy)',
-                                    content: m.content,
-                                    position: modules.length,
-                                  })
-                                  .select()
-                                  .single()
-                                if (data) {
-                                  setModules([...modules, data as Module])
-                                  setTimeout(refreshPreview, 100)
-                                }
-                              }}
-                            />
-                          ))}
-                        </div>
-                      </SortableContext>
-                      <DragOverlay>
-                        {activeModule ? (
-                          <div className="opacity-90">
-                            <InCanvasModuleCard
-                              module={activeModule}
-                              profileId={profile.id}
-                              index={modules.findIndex(m => m.id === activeModule.id)}
-                              isDragging={true}
-                            />
-                          </div>
-                        ) : null}
-                      </DragOverlay>
-                    </DndContext>
-                  )}
+                      <SectionCanvas
+                        sections={sections}
+                        modules={modules}
+                        profileId={profile.id}
+                        onEditSection={(section) => setEditingSection(section)}
+                        onDeleteSection={handleDeleteSection}
+                        onSelectModule={(module) => {
+                          setSelectedModule(module)
+                          setRightPanelCollapsed(false)
+                        }}
+                        onDeleteModule={handleDeleteModule}
+                        onToggleActive={handleToggleActive}
+                        selectedModuleId={selectedModule?.id}
+                      />
+                    </SortableContext>
+                  </DndContext>
                 </div>
               </div>
             )}
