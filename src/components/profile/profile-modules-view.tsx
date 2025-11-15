@@ -4,16 +4,18 @@ import { useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { Award } from 'lucide-react'
 import * as LucideIcons from 'lucide-react'
-import type { Profile, Module, Badge } from '@/types'
+import type { Profile, Module, Badge, Section, SectionWithModules } from '@/types'
 import { ModuleRenderer } from '../modules/module-renderer'
+import { SectionRenderer } from '../sections/section-renderer'
 
 interface ProfileModulesViewProps {
   profile: Profile
   modules: Module[]
+  sections?: Section[]
   badge?: Badge | null
 }
 
-export default function ProfileModulesView({ profile, modules, badge }: ProfileModulesViewProps) {
+export default function ProfileModulesView({ profile, modules, sections = [], badge }: ProfileModulesViewProps) {
   useEffect(() => {
     // Track page view
     trackEvent('view', profile.id)
@@ -121,19 +123,52 @@ export default function ProfileModulesView({ profile, modules, badge }: ProfileM
           )}
         </motion.div>
 
-        {/* Modules */}
+        {/* Sections and Modules */}
         {(() => {
+          // If we have sections, render them with their modules
+          if (sections && sections.length > 0) {
+            // Group modules by section
+            const sectionsWithModules: SectionWithModules[] = sections.map(section => ({
+              ...section,
+              modules: modules.filter(m => m.section_id === section.id)
+            }))
+
+            // Get modules not in any section
+            const modulesWithoutSection = modules.filter(m => !m.section_id)
+
+            return (
+              <div className="space-y-8">
+                {/* Render sections */}
+                {sectionsWithModules.map((section, index) => (
+                  <SectionRenderer
+                    key={section.id}
+                    section={section}
+                    profileId={profile.id}
+                    sectionIndex={index}
+                  />
+                ))}
+
+                {/* Render modules without section */}
+                {modulesWithoutSection.length > 0 && (
+                  <div className="max-w-lg mx-auto space-y-4">
+                    {modulesWithoutSection.map((module, index) => (
+                      <ModuleRenderer
+                        key={module.id}
+                        module={module}
+                        profileId={profile.id}
+                        index={index}
+                        borderAnimation={borderAnimation}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            )
+          }
+
+          // Fallback to original layout if no sections
           const layout = pageStyle.layout || 'stack'
           const moduleSpacing = pageStyle.moduleSpacing || 4
-
-          // Map spacing to Tailwind gap classes
-          const gapClass = ({
-            2: 'gap-2',
-            3: 'gap-3',
-            4: 'gap-4',
-            6: 'gap-6',
-            8: 'gap-8'
-          } as Record<number, string>)[moduleSpacing] || 'gap-4'
 
           const spaceClass = ({
             2: 'space-y-2',
@@ -143,7 +178,14 @@ export default function ProfileModulesView({ profile, modules, badge }: ProfileM
             8: 'space-y-8'
           } as Record<number, string>)[moduleSpacing] || 'space-y-4'
 
-          // Choose container class based on layout
+          const gapClass = ({
+            2: 'gap-2',
+            3: 'gap-3',
+            4: 'gap-4',
+            6: 'gap-6',
+            8: 'gap-8'
+          } as Record<number, string>)[moduleSpacing] || 'gap-4'
+
           const containerClasses = ({
             'stack': `max-w-lg mx-auto ${spaceClass}`,
             'grid': `max-w-4xl mx-auto grid grid-cols-1 md:grid-cols-2 ${gapClass}`,

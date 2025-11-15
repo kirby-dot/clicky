@@ -5,7 +5,7 @@ import { Metadata } from 'next'
 import ProfileView from '@/components/profile/profile-view'
 import ProfileModulesView from '@/components/profile/profile-modules-view'
 import type { Database } from '@/types/database'
-import type { Module } from '@/types'
+import type { Module, Section } from '@/types'
 
 export const revalidate = 10 // Revalidate every 10 seconds for live preview
 
@@ -82,7 +82,14 @@ export default async function ProfilePage({ params }: Props) {
     notFound()
   }
 
-  // Check for modules first (new system)
+  // Check for sections and modules (new system)
+  const { data: sections } = await supabase
+    .from('sections')
+    .select('*')
+    .eq('profile_id', profile.id)
+    .eq('active', true)
+    .order('order')
+
   const { data: modules } = await supabase
     .from('modules')
     .select('*')
@@ -96,6 +103,7 @@ export default async function ProfilePage({ params }: Props) {
       <ProfileModulesView
         profile={profile}
         modules={modules as Module[]}
+        sections={(sections as Section[]) || []}
         badge={profile.badge ? profile.badge[0] : null}
       />
     )

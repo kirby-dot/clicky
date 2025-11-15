@@ -363,8 +363,30 @@ function BuilderPageContent() {
     setPreviewKey(prev => prev + 1)
   }, [])
 
-  const handleAddModule = async (template: ModuleTemplate) => {
+  const handleAddModule = async (template: ModuleTemplate, sectionId?: string, columnIndex?: number) => {
     if (!profile) return
+
+    // If no section specified and sections exist, ask user to select
+    if (!sectionId && sections.length > 0) {
+      const sectionChoice = window.prompt(
+        `Add module to which section?\n\n${sections.map((s, i) => `${i + 1}. ${s.title || 'Untitled Section'}`).join('\n')}\n\nEnter number (or leave empty to add without section):`
+      )
+
+      if (sectionChoice && parseInt(sectionChoice) > 0 && parseInt(sectionChoice) <= sections.length) {
+        const selectedSection = sections[parseInt(sectionChoice) - 1]
+        sectionId = selectedSection.id
+
+        // If multi-column, ask which column
+        if (selectedSection.layout.columns > 1) {
+          const columnChoice = window.prompt(
+            `Which column? (1-${selectedSection.layout.columns})`
+          )
+          if (columnChoice && parseInt(columnChoice) > 0 && parseInt(columnChoice) <= selectedSection.layout.columns) {
+            columnIndex = parseInt(columnChoice) - 1
+          }
+        }
+      }
+    }
 
     setSaving(true)
     try {
@@ -376,6 +398,8 @@ function BuilderPageContent() {
           title: template.label,
           content: template.defaultContent,
           position: modules.length,
+          section_id: sectionId || null,
+          column_index: columnIndex !== undefined ? columnIndex : 0,
         })
         .select()
         .single()
