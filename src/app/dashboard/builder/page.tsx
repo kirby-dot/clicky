@@ -1621,6 +1621,151 @@ function PropertiesPanel({
           </>
         )
 
+      case 'social-links':
+        const socialContent = editedModule.content as any
+        const socialLinks = socialContent.links || []
+
+        const addSocialLink = () => {
+          updateContent('links', [...socialLinks, { platform: 'instagram', url: '' }])
+        }
+
+        const updateSocialLink = (index: number, field: string, value: any) => {
+          const newLinks = [...socialLinks]
+          newLinks[index] = { ...newLinks[index], [field]: value }
+          updateContent('links', newLinks)
+        }
+
+        const removeSocialLink = (index: number) => {
+          updateContent('links', socialLinks.filter((_: any, i: number) => i !== index))
+        }
+
+        return (
+          <>
+            <div>
+              <div className="flex justify-between items-center mb-3">
+                <label className="block text-sm font-medium text-gray-700">Social Links</label>
+                <Button
+                  type="button"
+                  size="sm"
+                  onClick={addSocialLink}
+                  className="bg-purple-500 hover:bg-purple-600 text-white"
+                >
+                  <Plus className="w-4 h-4 mr-1" />
+                  Add Link
+                </Button>
+              </div>
+
+              {socialLinks.length === 0 ? (
+                <div className="text-center py-6 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300">
+                  <Share2 className="w-8 h-8 mx-auto text-gray-400 mb-2" />
+                  <p className="text-sm text-gray-500">No social links added yet</p>
+                  <p className="text-xs text-gray-400 mt-1">Click "Add Link" to get started</p>
+                </div>
+              ) : (
+                <div className="space-y-3">
+                  {socialLinks.map((link: any, index: number) => (
+                    <div key={index} className="flex gap-2 items-start p-3 bg-gray-50 rounded-lg">
+                      <div className="flex-1 space-y-2">
+                        <select
+                          value={link.platform}
+                          onChange={(e) => updateSocialLink(index, 'platform', e.target.value)}
+                          className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm"
+                        >
+                          <option value="instagram">Instagram</option>
+                          <option value="twitter">Twitter/X</option>
+                          <option value="tiktok">TikTok</option>
+                          <option value="youtube">YouTube</option>
+                          <option value="linkedin">LinkedIn</option>
+                          <option value="facebook">Facebook</option>
+                          <option value="github">GitHub</option>
+                          <option value="discord">Discord</option>
+                          <option value="twitch">Twitch</option>
+                          <option value="spotify">Spotify</option>
+                        </select>
+                        <Input
+                          type="url"
+                          value={link.url}
+                          onChange={(e) => updateSocialLink(index, 'url', e.target.value)}
+                          placeholder="https://..."
+                          className="text-sm"
+                        />
+                      </div>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => removeSocialLink(index)}
+                        className="text-red-500 hover:text-red-600 hover:bg-red-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Layout & Styling Options */}
+            <div className="pt-4 border-t border-gray-200">
+              <h4 className="text-sm font-bold text-gray-900 mb-3">Layout & Styling</h4>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Layout</label>
+                  <select
+                    value={socialContent.layout || 'horizontal'}
+                    onChange={(e) => updateContent('layout', e.target.value)}
+                    className="w-full border border-gray-300 rounded-lg px-3 py-2"
+                  >
+                    <option value="horizontal">Horizontal</option>
+                    <option value="grid">Grid</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Icon Size (px)</label>
+                  <Input
+                    type="number"
+                    min="24"
+                    max="64"
+                    value={socialContent.iconSize || 32}
+                    onChange={(e) => updateContent('iconSize', parseInt(e.target.value))}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Icon Color</label>
+                  <Input
+                    type="color"
+                    value={socialContent.iconColor || '#374151'}
+                    onChange={(e) => updateContent('iconColor', e.target.value)}
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Background</label>
+                  <Input
+                    type="color"
+                    value={socialContent.backgroundColor || '#f3f4f6'}
+                    onChange={(e) => updateContent('backgroundColor', e.target.value)}
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Border Radius (px)</label>
+                <Input
+                  type="number"
+                  min="0"
+                  max="50"
+                  value={socialContent.borderRadius !== undefined ? socialContent.borderRadius : 16}
+                  onChange={(e) => updateContent('borderRadius', parseInt(e.target.value))}
+                />
+              </div>
+            </div>
+          </>
+        )
+
       default:
         return (
           <div className="text-sm text-gray-500">
