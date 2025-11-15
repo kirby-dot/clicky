@@ -62,7 +62,8 @@ export default function LoginPage() {
       })
 
       // Display full response on screen
-      setDebugInfo(`OAuth Response:\nProvider: ${data?.provider || 'none'}\nURL: ${data?.url || 'NO URL RETURNED'}\nError: ${error?.message || 'none'}`)
+      const debugMessage = `OAuth Response:\nProvider: ${data?.provider || 'none'}\nURL: ${data?.url || 'NO URL RETURNED'}\nError: ${error?.message || 'none'}`
+      setDebugInfo(debugMessage)
 
       if (error) {
         setMessage({
@@ -74,7 +75,9 @@ export default function LoginPage() {
       }
 
       if (data?.url) {
-        setDebugInfo(`Redirecting to Google: ${data.url}`)
+        // Wait 3 seconds so user can read the debug info
+        setDebugInfo(`${debugMessage}\n\nRedirecting to Google in 3 seconds...`)
+        await new Promise(resolve => setTimeout(resolve, 3000))
         window.location.href = data.url
       } else {
         setMessage({
