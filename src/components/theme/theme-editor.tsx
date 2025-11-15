@@ -11,7 +11,28 @@ interface ThemeEditorProps {
 }
 
 export function ThemeEditor({ theme, onSave, onCancel }: ThemeEditorProps) {
-  const [editedTheme, setEditedTheme] = useState<GlobalTheme>(theme)
+  // Ensure theme has all required properties with defaults
+  const normalizedTheme: GlobalTheme = {
+    typography: {
+      fontFamily: theme.typography?.fontFamily || 'Inter, system-ui, sans-serif',
+      headingSize: theme.typography?.headingSize || 'large',
+      bodySize: theme.typography?.bodySize || 'medium',
+    },
+    colors: {
+      primary: theme.colors?.primary || '#6366f1',
+      secondary: theme.colors?.secondary || '#8b5cf6',
+      accent: theme.colors?.accent || '#ec4899',
+      background: theme.colors?.background || '#ffffff',
+      text: theme.colors?.text || '#111827',
+    },
+    layout: {
+      buttonRoundness: (theme as any).layout?.buttonRoundness || 'rounded',
+      sectionSpacing: (theme as any).layout?.sectionSpacing || 'normal',
+      moduleSpacing: (theme as any).layout?.moduleSpacing || 'normal',
+    },
+  }
+
+  const [editedTheme, setEditedTheme] = useState<GlobalTheme>(normalizedTheme)
 
   const handleSave = () => {
     onSave(editedTheme)
