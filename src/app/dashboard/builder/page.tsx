@@ -11,6 +11,7 @@ import { ModuleRenderer } from '@/components/modules/module-renderer'
 import { SectionEditor } from '@/components/sections/section-editor'
 import { SectionCanvas } from '@/components/builder/section-canvas'
 import { StyleEditor } from '@/components/style/style-editor'
+import { StyleProvider } from '@/components/style/style-provider'
 import {
   Trash2,
   GripVertical,
@@ -977,43 +978,45 @@ function BuilderPageContent() {
                   minHeight: deviceMode === 'mobile' ? '667px' : '600px'
                 }}
               >
-                <div
-                  className="relative w-full"
-                  style={{
-                    background: profileStyle.backgroundColor || '#ffffff',
-                    backgroundImage: profileStyle.backgroundGradient || (profileStyle.backgroundImage ? `url(${profileStyle.backgroundImage})` : undefined),
-                    backgroundSize: 'cover',
-                    backgroundPosition: 'center',
-                    minHeight: 'inherit'
-                  }}
-                >
-                  <DndContext
-                    sensors={sensors}
-                    collisionDetection={closestCenter}
-                    onDragStart={handleDragStart}
-                    onDragEnd={handleDragEnd}
+                <StyleProvider style={profileStyle}>
+                  <div
+                    className="relative w-full"
+                    style={{
+                      background: profileStyle.backgroundColor || '#ffffff',
+                      backgroundImage: profileStyle.backgroundGradient || (profileStyle.backgroundImage ? `url(${profileStyle.backgroundImage})` : undefined),
+                      backgroundSize: 'cover',
+                      backgroundPosition: 'center',
+                      minHeight: 'inherit'
+                    }}
                   >
-                    <SortableContext
-                      items={modules.map((m) => m.id)}
-                      strategy={verticalListSortingStrategy}
+                    <DndContext
+                      sensors={sensors}
+                      collisionDetection={closestCenter}
+                      onDragStart={handleDragStart}
+                      onDragEnd={handleDragEnd}
                     >
-                      <SectionCanvas
-                        sections={sections}
-                        modules={modules}
-                        profileId={profile.id}
-                        onEditSection={(section) => setEditingSection(section)}
-                        onDeleteSection={handleDeleteSection}
-                        onSelectModule={(module) => {
-                          setSelectedModule(module)
-                          setRightPanelCollapsed(false)
-                        }}
-                        onDeleteModule={handleDeleteModule}
-                        onToggleActive={handleToggleActive}
-                        selectedModuleId={selectedModule?.id}
-                      />
-                    </SortableContext>
-                  </DndContext>
-                </div>
+                      <SortableContext
+                        items={modules.map((m) => m.id)}
+                        strategy={verticalListSortingStrategy}
+                      >
+                        <SectionCanvas
+                          sections={sections}
+                          modules={modules}
+                          profileId={profile.id}
+                          onEditSection={(section) => setEditingSection(section)}
+                          onDeleteSection={handleDeleteSection}
+                          onSelectModule={(module) => {
+                            setSelectedModule(module)
+                            setRightPanelCollapsed(false)
+                          }}
+                          onDeleteModule={handleDeleteModule}
+                          onToggleActive={handleToggleActive}
+                          selectedModuleId={selectedModule?.id}
+                        />
+                      </SortableContext>
+                    </DndContext>
+                  </div>
+                </StyleProvider>
               </div>
             )}
           </div>
