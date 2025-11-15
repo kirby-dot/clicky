@@ -1,5 +1,6 @@
 import { createClient } from '@supabase/supabase-js'
 import { Database } from '@/types/database'
+import { env } from './env'
 
 // Browser client with singleton pattern
 let browserClient: ReturnType<typeof createClient<Database>> | null = null
@@ -7,14 +8,11 @@ let browserClient: ReturnType<typeof createClient<Database>> | null = null
 export const createBrowserClient = () => {
   if (browserClient) return browserClient
 
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL
-  const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
-
-  if (!supabaseUrl || !supabaseAnonKey) {
-    throw new Error('Missing Supabase environment variables')
+  if (!env.supabaseUrl || !env.supabaseAnonKey) {
+    throw new Error(`Missing Supabase environment variables: ${!env.supabaseUrl ? 'NEXT_PUBLIC_SUPABASE_URL' : ''} ${!env.supabaseAnonKey ? 'NEXT_PUBLIC_SUPABASE_ANON_KEY' : ''}`)
   }
 
-  browserClient = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+  browserClient = createClient<Database>(env.supabaseUrl, env.supabaseAnonKey, {
     auth: {
       persistSession: true,
       autoRefreshToken: true,
@@ -26,10 +24,11 @@ export const createBrowserClient = () => {
 }
 
 export const createServiceClient = () => {
-  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-  const supabaseServiceKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
+  if (!env.supabaseUrl || !env.supabaseServiceKey) {
+    throw new Error('Missing Supabase service environment variables')
+  }
 
-  return createClient<Database>(supabaseUrl, supabaseServiceKey, {
+  return createClient<Database>(env.supabaseUrl, env.supabaseServiceKey, {
     auth: {
       autoRefreshToken: false,
       persistSession: false
