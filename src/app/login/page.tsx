@@ -75,9 +75,9 @@ export default function LoginPage() {
       }
 
       if (data?.url) {
-        // Wait 3 seconds so user can read the debug info
-        setDebugInfo(`${debugMessage}\n\nRedirecting to Google in 3 seconds...`)
-        await new Promise(resolve => setTimeout(resolve, 3000))
+        // Wait 10 seconds so user can read the debug info
+        setDebugInfo(`${debugMessage}\n\nRedirecting to Google in 10 seconds...`)
+        await new Promise(resolve => setTimeout(resolve, 10000))
         window.location.href = data.url
       } else {
         setMessage({
