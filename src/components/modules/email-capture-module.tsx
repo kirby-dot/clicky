@@ -2,6 +2,7 @@
 
 import { useState } from 'react'
 import { Mail, Check, AlertCircle } from 'lucide-react'
+import { Modal } from '@/components/ui/modal'
 import type { Module } from '@/types'
 
 interface EmailCaptureModuleProps {
@@ -24,6 +25,7 @@ export function EmailCaptureModule({ module, profileId }: EmailCaptureModuleProp
     }
   }
 
+  const [isOpen, setIsOpen] = useState(false)
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [errorMessage, setErrorMessage] = useState('')
@@ -63,6 +65,17 @@ export function EmailCaptureModule({ module, profileId }: EmailCaptureModuleProp
     }
   }
 
+  const handleClose = () => {
+    setIsOpen(false)
+    // Reset form after modal closes
+    setTimeout(() => {
+      if (status === 'success') {
+        setStatus('idle')
+        setEmail('')
+      }
+    }, 300)
+  }
+
   const backgroundColor = content.style?.backgroundColor || 'var(--color-primary)'
   const textColor = content.style?.textColor || 'white'
   const buttonColor = content.style?.buttonColor || 'var(--color-secondary)'
@@ -70,94 +83,103 @@ export function EmailCaptureModule({ module, profileId }: EmailCaptureModuleProp
     ? `${content.style.borderRadius}px`
     : 'var(--border-radius)'
 
-  if (status === 'success') {
-    return (
-      <div
-        className="p-8 shadow-lg text-center"
+  return (
+    <>
+      {/* Button to trigger modal */}
+      <button
+        onClick={() => setIsOpen(true)}
+        className="w-full font-bold py-4 px-6 rounded-lg transition-all hover:scale-105 active:scale-95 shadow-lg flex items-center justify-center gap-3"
         style={{
-          backgroundColor,
+          backgroundColor: buttonColor,
           color: textColor,
           borderRadius,
         }}
       >
-        <div className="flex flex-col items-center gap-3">
-          <div className="w-16 h-16 rounded-full bg-green-500 flex items-center justify-center">
-            <Check className="w-8 h-8 text-white" />
-          </div>
-          <h3 className="text-2xl font-bold">
-            {content.successMessage || 'Thanks for subscribing!'}
-          </h3>
-          <p className="text-sm opacity-90">Check your email for confirmation</p>
-        </div>
-      </div>
-    )
-  }
+        <Mail className="w-5 h-5" />
+        {content.buttonText || 'Subscribe to Newsletter'}
+      </button>
 
-  return (
-    <div
-      className="p-8 shadow-lg"
-      style={{
-        backgroundColor,
-        color: textColor,
-        borderRadius,
-      }}
-    >
-      <div className="max-w-md mx-auto">
-        <div className="flex items-center gap-3 mb-4">
-          <div className="w-12 h-12 rounded-full bg-white/20 flex items-center justify-center">
-            <Mail className="w-6 h-6" />
-          </div>
-          <div>
-            <h3 className="text-2xl font-bold">
-              {content.title || 'Stay Updated'}
-            </h3>
-            {content.description && (
-              <p className="text-sm opacity-90 mt-1">{content.description}</p>
-            )}
-          </div>
-        </div>
-
-        <form onSubmit={handleSubmit} className="space-y-3">
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => {
-              setEmail(e.target.value)
-              if (status === 'error') setStatus('idle')
-            }}
-            placeholder={content.placeholder || 'Enter your email'}
-            className="w-full px-4 py-3 rounded-lg text-gray-900 focus:ring-4 focus:ring-white/30 focus:outline-none"
-            style={{
-              borderRadius,
-            }}
-            disabled={status === 'loading'}
-          />
-
-          {status === 'error' && errorMessage && (
-            <div className="flex items-center gap-2 text-sm bg-red-500/20 border border-red-500/30 rounded-lg px-4 py-2">
-              <AlertCircle className="w-4 h-4" />
-              {errorMessage}
+      {/* Modal with form */}
+      <Modal
+        isOpen={isOpen}
+        onClose={handleClose}
+        maxWidth="md"
+      >
+        {status === 'success' ? (
+          <div className="p-8 text-center">
+            <div className="flex flex-col items-center gap-4">
+              <div className="w-20 h-20 rounded-full bg-green-500 flex items-center justify-center">
+                <Check className="w-10 h-10 text-white" />
+              </div>
+              <h3 className="text-3xl font-bold text-gray-900">
+                {content.successMessage || 'Thanks for subscribing!'}
+              </h3>
+              <p className="text-gray-600">Check your email for confirmation</p>
+              <button
+                onClick={handleClose}
+                className="mt-4 px-8 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-all"
+              >
+                Close
+              </button>
             </div>
-          )}
+          </div>
+        ) : (
+          <div className="p-8">
+            <div className="flex items-center gap-4 mb-6">
+              <div className="w-14 h-14 rounded-full bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
+                <Mail className="w-7 h-7 text-white" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900">
+                  {content.title || 'Stay Updated'}
+                </h3>
+                {content.description && (
+                  <p className="text-gray-600 mt-1">{content.description}</p>
+                )}
+              </div>
+            </div>
 
-          <button
-            type="submit"
-            disabled={status === 'loading'}
-            className="w-full font-bold py-3 rounded-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
-            style={{
-              backgroundColor: buttonColor,
-              color: 'white',
-              borderRadius,
-            }}
-          >
-            {status === 'loading' ? 'Subscribing...' : (content.buttonText || 'Subscribe')}
-          </button>
-        </form>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => {
+                    setEmail(e.target.value)
+                    if (status === 'error') setStatus('idle')
+                  }}
+                  placeholder={content.placeholder || 'Enter your email'}
+                  className="w-full px-4 py-3 border border-gray-200 rounded-lg text-gray-900 focus:ring-2 focus:ring-blue-500 focus:border-transparent focus:outline-none transition-all"
+                  disabled={status === 'loading'}
+                />
+              </div>
 
-        <p className="text-xs text-center mt-4 opacity-70">
-          We respect your privacy. Unsubscribe anytime.
-        </p>
-      </div>
-    </div>
+              {status === 'error' && errorMessage && (
+                <div className="flex items-center gap-2 text-sm bg-red-50 border border-red-200 text-red-700 rounded-lg px-4 py-3">
+                  <AlertCircle className="w-4 h-4 flex-shrink-0" />
+                  {errorMessage}
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={status === 'loading'}
+                className="w-full font-bold py-3 rounded-lg transition-all hover:scale-105 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-lg"
+                style={{
+                  backgroundColor: buttonColor,
+                  color: 'white',
+                }}
+              >
+                {status === 'loading' ? 'Subscribing...' : (content.buttonText || 'Subscribe')}
+              </button>
+            </form>
+
+            <p className="text-xs text-center mt-6 text-gray-500">
+              We respect your privacy. Unsubscribe anytime.
+            </p>
+          </div>
+        )}
+      </Modal>
+    </>
   )
 }
