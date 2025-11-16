@@ -100,7 +100,7 @@ export default function TestModalPage() {
         </div>
 
         <div className="text-center text-sm text-gray-500 mt-8">
-          <p>Note: Form submissions won't work on this demo page (no Supabase connection)</p>
+          <p>Note: Form submissions won&apos;t work on this demo page (no Supabase connection)</p>
           <p>But you can see the full modal UI and interactions!</p>
         </div>
       </div>

@@ -2964,7 +2964,7 @@ function ModuleEditor({
                   />
                   <div className="flex-1">
                     <div className="font-semibold text-gray-900">Use Global Colors</div>
-                    <div className="text-xs text-gray-600">Match your profile's theme colors</div>
+                    <div className="text-xs text-gray-600">Match your profile&apos;s theme colors</div>
                   </div>
                 </label>
               </div>

@@ -56,7 +56,7 @@ export function PasswordProtection({ onUnlock, profileTitle }: PasswordProtectio
             Protected Profile
           </h2>
           <p className="text-center text-gray-600 mb-6">
-            This profile is password protected. Enter the password to view {profileTitle}'s content.
+            This profile is password protected. Enter the password to view {profileTitle}&apos;s content.
           </p>
 
           {/* Form */}

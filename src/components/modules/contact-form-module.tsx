@@ -141,7 +141,7 @@ export function ContactFormModule({ module, profileId }: ContactFormModuleProps)
               <h3 className="text-3xl font-bold text-gray-900">
                 {content.successMessage || 'Message Sent!'}
               </h3>
-              <p className="text-gray-600">We'll get back to you soon</p>
+              <p className="text-gray-600">We&apos;ll get back to you soon</p>
               <button
                 onClick={handleClose}
                 className="mt-4 px-8 py-3 bg-gray-900 text-white rounded-lg font-medium hover:bg-gray-800 transition-all"
