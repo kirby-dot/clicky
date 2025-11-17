@@ -9,6 +9,18 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
+        accent: {
+          50: '#fff7f3',
+          100: '#ffede5',
+          200: '#ffd9cc',
+          300: '#ffbfa3',
+          400: '#ff8f6b', // Primary accent color
+          500: '#ff6b3d',
+          600: '#f04a1a',
+          700: '#c73810',
+          800: '#a43115',
+          900: '#872e16',
+        },
         primary: {
           50: '#f0f9ff',
           100: '#e0f2fe',
@@ -32,6 +44,10 @@ const config: Config = {
           sage: '#D5E8D4',
           lilac: '#E8D5F5',
         },
+      },
+      backgroundImage: {
+        'gradient-radial': 'radial-gradient(ellipse at center, var(--tw-gradient-stops))',
+        'glass-gradient': 'linear-gradient(135deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.2) 100%)',
       },
       boxShadow: {
         'soft': '0 2px 8px rgba(0, 0, 0, 0.08)',

@@ -57,17 +57,17 @@ export function Modal({
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Backdrop */}
+          {/* Backdrop - with enhanced blur */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             transition={{ duration: 0.2 }}
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998]"
+            className="fixed inset-0 bg-black/40 backdrop-blur-md z-[9998]"
             onClick={closeOnBackdrop ? onClose : undefined}
           />
 
-          {/* Modal */}
+          {/* Modal - Glassmorphism style */}
           <div className="fixed inset-0 z-[9999] flex items-center justify-center p-4 pointer-events-none">
             <motion.div
               ref={modalRef}
@@ -75,19 +75,19 @@ export function Modal({
               animate={{ opacity: 1, scale: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95, y: 20 }}
               transition={{ duration: 0.2, ease: 'easeOut' }}
-              className={`bg-white rounded-2xl shadow-2xl w-full ${maxWidthClasses[maxWidth]} pointer-events-auto overflow-hidden`}
+              className={`bg-white/50 backdrop-blur-xl rounded-2xl shadow-lg border border-white/20 w-full ${maxWidthClasses[maxWidth]} pointer-events-auto overflow-hidden`}
               onClick={(e) => e.stopPropagation()}
             >
               {/* Header */}
               {title && (
-                <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
-                  <h2 className="text-xl font-bold text-gray-900">{title}</h2>
+                <div className="flex items-center justify-between px-6 py-4 border-b border-white/30">
+                  <h2 className="text-xl font-bold text-slate-800">{title}</h2>
                   <button
                     onClick={onClose}
-                    className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                    className="p-2 hover:bg-white/50 rounded-lg transition-colors"
                     aria-label="Close modal"
                   >
-                    <X className="w-5 h-5 text-gray-500" />
+                    <X className="w-5 h-5 text-slate-600" />
                   </button>
                 </div>
               )}
@@ -96,10 +96,10 @@ export function Modal({
               {!title && (
                 <button
                   onClick={onClose}
-                  className="absolute top-4 right-4 p-2 hover:bg-gray-100 rounded-lg transition-colors z-10"
+                  className="absolute top-4 right-4 p-2 hover:bg-white/50 rounded-lg transition-colors z-10"
                   aria-label="Close modal"
                 >
-                  <X className="w-5 h-5 text-gray-500" />
+                  <X className="w-5 h-5 text-slate-600" />
                 </button>
               )}
 
