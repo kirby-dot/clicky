@@ -6,13 +6,13 @@ import { createClient } from '@supabase/supabase-js'
 // 2. Send them to connected integrations
 // 3. Log the results
 
-const supabase = createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL!,
-  process.env.SUPABASE_SERVICE_ROLE_KEY! // Use service role for server-side
-)
-
 export async function POST(request: NextRequest) {
   try {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY! // Use service role for server-side
+    )
+
     const body = await request.json()
     const { event_type, profile_id, data } = body
 
