@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
     const { event_type, profile_id, data } = body
 
     // Get active integrations for this profile
-    const { data: integrations } = await supabase
+    const { data: integrations } = await (supabase as any)
       .from('integrations')
       .select('*')
       .eq('profile_id', profile_id)

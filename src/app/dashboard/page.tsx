@@ -53,7 +53,7 @@ export default function DashboardPage() {
 
       if (!user) return
 
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
@@ -80,7 +80,7 @@ export default function DashboardPage() {
   const loadStats = async (profileId: string) => {
     try {
       // Get all events
-      const { data: allEvents } = await supabase
+      const { data: allEvents } = await (supabase as any)
         .from('events')
         .select('*')
         .eq('profile_id', profileId)
@@ -89,7 +89,7 @@ export default function DashboardPage() {
       // Get today's events
       const today = new Date()
       today.setHours(0, 0, 0, 0)
-      const { data: todayEvents } = await supabase
+      const { data: todayEvents } = await (supabase as any)
         .from('events')
         .select('*')
         .eq('profile_id', profileId)
@@ -132,7 +132,7 @@ export default function DashboardPage() {
       if (!user) throw new Error('Not authenticated')
 
       // Check if slug is available
-      const { data: existing } = await supabase
+      const { data: existing } = await (supabase as any)
         .from('profiles')
         .select('id')
         .eq('slug', slug)
@@ -145,7 +145,7 @@ export default function DashboardPage() {
       }
 
       // Create profile
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('profiles')
         .insert({
           user_id: user.id,

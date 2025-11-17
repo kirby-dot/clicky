@@ -453,7 +453,7 @@ function BuilderPageContent() {
     if (!confirm('Delete this module?')) return
 
     try {
-      const { error } = await supabase.from('modules').delete().eq('id', id)
+      const { error } = await (supabase as any).from('modules').delete().eq('id', id)
 
       if (error) throw error
 
@@ -520,7 +520,7 @@ function BuilderPageContent() {
       // Update order in database
       try {
         const updates = newSections.map((section, index) =>
-          supabase.from('sections').update({ order: index }).eq('id', section.id)
+          (supabase as any).from('sections').update({ order: index }).eq('id', section.id)
         )
         await Promise.all(updates)
         setTimeout(refreshPreview, 100)
@@ -544,7 +544,7 @@ function BuilderPageContent() {
     // Update positions in database
     try {
       const updates = newModules.map((module, index) =>
-        supabase.from('modules').update({ position: index }).eq('id', module.id)
+        (supabase as any).from('modules').update({ position: index }).eq('id', module.id)
       )
       await Promise.all(updates)
       setTimeout(refreshPreview, 100)
@@ -644,7 +644,7 @@ function BuilderPageContent() {
     if (!confirm('Delete this section? All modules in this section will also be deleted.')) return
 
     try {
-      const { error } = await supabase.from('sections').delete().eq('id', id)
+      const { error } = await (supabase as any).from('sections').delete().eq('id', id)
 
       if (error) throw error
 

@@ -23,7 +23,7 @@ export async function middleware(req: NextRequest) {
       process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
     )
 
-    const { data: profile } = await supabase
+    const { data: profile } = await (supabase as any)
       .from('profiles')
       .select('slug')
       .eq('custom_domain', hostname.split(':')[0])  // Remove port if present

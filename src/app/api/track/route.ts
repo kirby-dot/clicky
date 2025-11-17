@@ -28,7 +28,7 @@ export async function POST(request: NextRequest) {
     const ipHash = hashIp(ip)
 
     // Insert event
-    await supabase.from('events').insert({
+    await (supabase as any).from('events').insert({
       profile_id: profile_id as string,
       link_id: link_id || null,
       event_type: event_type as 'view' | 'click',

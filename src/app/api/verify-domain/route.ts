@@ -38,7 +38,7 @@ export async function POST(request: Request) {
     }
 
     // Verify user owns this profile
-    const { data: profileData } = await supabase
+    const { data: profileData } = await (supabase as any)
       .from('profiles')
       .select('user_id')
       .eq('id', profileId)
@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     }
 
     // Check if user has Business plan
-    const { data: userData } = await supabase
+    const { data: userData } = await (supabase as any)
       .from('users')
       .select('subscription_tier')
       .eq('id', user.id)

@@ -65,13 +65,13 @@ export default function AnalyticsPage() {
         setProfile(profileData)
 
         // Get modules
-        const { data: modulesData } = await supabase
+        const { data: modulesData } = await (supabase as any)
           .from('modules')
           .select('*')
           .eq('profile_id', profileData.id)
           .order('position')
 
-        setModules(modulesData || [])
+        setModules((modulesData as any) || [])
 
         // Calculate date filter
         let dateFilter = ''
@@ -86,7 +86,7 @@ export default function AnalyticsPage() {
         }
 
         // Get analytics data
-        let query = supabase
+        let query = (supabase as any)
           .from('events')
           .select('*')
           .eq('profile_id', profileData.id)
