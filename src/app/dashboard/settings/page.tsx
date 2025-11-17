@@ -2,12 +2,8 @@
 
 import { useEffect, useState } from 'react'
 import { createBrowserClient } from '@/lib/supabase'
-import { Button } from '@/components/ui/button'
-import { Input } from '@/components/ui/input'
-import { Textarea } from '@/components/ui/textarea'
-import { Checkbox } from '@/components/ui/checkbox'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { User, Link2, CreditCard, Bell, Shield, Palette, Zap, Crown, Check, Sparkles, Users, Plus, X, Mail } from 'lucide-react'
+import { GlassPanel, GlassCard, GlassButton, GlassInput, GlassBadge } from '@/components/ui/glass'
+import { User, CreditCard, Bell, Shield, Crown, Check, Sparkles, Mail, AlertTriangle, Trash2 } from 'lucide-react'
 import type { Profile } from '@/types'
 
 type TabType = 'account' | 'billing' | 'notifications'
@@ -318,20 +314,20 @@ export default function SettingsPage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-64">
-        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-500"></div>
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-400"></div>
       </div>
     )
   }
 
   if (!user) {
     return (
-      <Card>
-        <CardHeader>
-          <CardTitle>Not authenticated</CardTitle>
-          <CardDescription>Please log in to access settings</CardDescription>
-        </CardHeader>
-      </Card>
+      <div className="p-8">
+        <GlassPanel className="p-12 text-center">
+          <h2 className="text-xl font-bold text-slate-800 mb-2">Not authenticated</h2>
+          <p className="text-slate-600 mb-6">Please log in to access settings</p>
+        </GlassPanel>
+      </div>
     )
   }
 
@@ -339,29 +335,37 @@ export default function SettingsPage() {
   const planInfo = PLAN_FEATURES[currentPlan]
 
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-3xl font-black text-gray-900">Settings</h1>
-        <p className="text-gray-600 mt-1 font-medium">Manage your account and preferences</p>
-      </div>
+    <div className="p-8 h-full overflow-y-auto">
+      {/* Header */}
+      <GlassPanel className="p-6 mb-6">
+        <h1 className="text-3xl font-bold text-slate-800">Settings</h1>
+        <p className="text-slate-600 mt-1">Manage your account and preferences</p>
+      </GlassPanel>
 
+      {/* Message Banner */}
       {message && (
-        <div className={`p-4 rounded-xl border ${
-          message.includes('Error') ? 'bg-red-50 border-red-200 text-red-800' : 'bg-green-50 border-green-200 text-green-800'
-        } shadow-soft`}>
-          <p className="font-semibold">{message}</p>
-        </div>
+        <GlassPanel className={`p-4 mb-6 border-2 ${
+          message.includes('Error')
+            ? 'border-red-300 bg-red-50/50'
+            : 'border-green-300 bg-green-50/50'
+        }`}>
+          <p className={`font-semibold ${
+            message.includes('Error') ? 'text-red-800' : 'text-green-800'
+          }`}>
+            {message}
+          </p>
+        </GlassPanel>
       )}
 
       {/* Tab Navigation */}
-      <div className="border-b border-gray-200">
-        <nav className="flex gap-8">
+      <GlassPanel className="p-2 mb-6">
+        <div className="flex gap-2">
           <button
             onClick={() => setActiveTab('account')}
-            className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors flex items-center gap-2 ${
+            className={`flex-1 py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
               activeTab === 'account'
-                ? 'border-purple-500 text-purple-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-accent-400 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-white/50'
             }`}
           >
             <Shield className="w-4 h-4" />
@@ -370,10 +374,10 @@ export default function SettingsPage() {
 
           <button
             onClick={() => setActiveTab('billing')}
-            className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors flex items-center gap-2 ${
+            className={`flex-1 py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
               activeTab === 'billing'
-                ? 'border-purple-500 text-purple-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-accent-400 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-white/50'
             }`}
           >
             <CreditCard className="w-4 h-4" />
@@ -382,65 +386,76 @@ export default function SettingsPage() {
 
           <button
             onClick={() => setActiveTab('notifications')}
-            className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors flex items-center gap-2 ${
+            className={`flex-1 py-3 px-4 rounded-xl font-semibold text-sm transition-all flex items-center justify-center gap-2 ${
               activeTab === 'notifications'
-                ? 'border-purple-500 text-purple-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+                ? 'bg-accent-400 text-white shadow-sm'
+                : 'text-slate-600 hover:bg-white/50'
             }`}
           >
             <Bell className="w-4 h-4" />
             Notifications
           </button>
-        </nav>
-      </div>
+        </div>
+      </GlassPanel>
 
       {/* Tab Content */}
-      <div className="py-6">
+      <div>
         {/* Account Tab */}
         {activeTab === 'account' && (
           <div className="space-y-6">
-            <Card>
-              <CardHeader className="bg-gradient-to-r from-pastel-rose to-pastel-peach border-b border-gray-200">
-                <CardTitle>Account Security</CardTitle>
-                <CardDescription className="text-gray-600">
-                  Manage your account security and credentials
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
+            <GlassPanel className="p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-blue-100/50 rounded-xl">
+                  <User className="w-6 h-6 text-blue-600" />
+                </div>
                 <div>
-                  <p className="text-sm font-semibold text-gray-700 mb-2">Email:</p>
-                  <p className="font-medium">{user.email}</p>
+                  <h2 className="text-xl font-bold text-slate-800">Account Security</h2>
+                  <p className="text-sm text-slate-600">Manage your account security and credentials</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <p className="text-sm font-semibold text-slate-700 mb-2">Email</p>
+                  <div className="flex items-center gap-2">
+                    <Mail className="w-4 h-4 text-slate-500" />
+                    <p className="font-medium text-slate-800">{user.email}</p>
+                  </div>
                 </div>
 
-                <div className="pt-4 border-t border-gray-200">
-                  <Button variant="outline" onClick={() => alert('Password reset email sent!')}>
+                <div className="pt-4 border-t border-white/30">
+                  <GlassButton variant="secondary" onClick={() => alert('Password reset email sent!')}>
                     Change Password
-                  </Button>
+                  </GlassButton>
                 </div>
-              </CardContent>
-            </Card>
+              </div>
+            </GlassPanel>
 
             {/* Danger Zone */}
-            <Card>
-              <CardHeader className="bg-red-50 border-b border-red-200">
-                <CardTitle className="text-red-800">Danger Zone</CardTitle>
-                <CardDescription className="text-red-700">
-                  Irreversible actions
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <Button
-                  variant="destructive"
-                  onClick={() => {
-                    if (confirm('Are you sure? This will delete your account and all data permanently.')) {
-                      alert('Account deletion would be processed here')
-                    }
-                  }}
-                >
-                  Delete Account
-                </Button>
-              </CardContent>
-            </Card>
+            <GlassPanel className="p-6 border-2 border-red-300 bg-red-50/30">
+              <div className="flex items-center gap-3 mb-4">
+                <div className="p-3 bg-red-100/50 rounded-xl">
+                  <AlertTriangle className="w-6 h-6 text-red-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-red-800">Danger Zone</h2>
+                  <p className="text-sm text-red-700">Irreversible actions</p>
+                </div>
+              </div>
+
+              <GlassButton
+                variant="secondary"
+                onClick={() => {
+                  if (confirm('Are you sure? This will delete your account and all data permanently.')) {
+                    alert('Account deletion would be processed here')
+                  }
+                }}
+                className="border-red-400 text-red-700 hover:bg-red-100/50"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Account
+              </GlassButton>
+            </GlassPanel>
           </div>
         )}
 
@@ -448,124 +463,128 @@ export default function SettingsPage() {
         {activeTab === 'billing' && (
           <div className="space-y-6">
             {/* Current Plan */}
-            <Card>
-              <CardHeader className="bg-gradient-to-r from-pastel-lavender to-pastel-lilac border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Current Plan</CardTitle>
-                    <CardDescription className="text-gray-600">
-                      You&apos;re on the {planInfo.name} plan
-                    </CardDescription>
+            <GlassPanel className="p-6">
+              <div className="flex items-center justify-between mb-6">
+                <div className="flex items-center gap-3">
+                  <div className="p-3 bg-purple-100/50 rounded-xl">
+                    <Crown className="w-6 h-6 text-purple-600" />
                   </div>
-                  <div className="flex items-center gap-2 px-4 py-2 bg-white rounded-lg border-2 border-purple-200">
-                    <Crown className="w-5 h-5 text-purple-600" />
-                    <span className="font-bold text-purple-600">{planInfo.name}</span>
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-800">Current Plan</h2>
+                    <p className="text-sm text-slate-600">You're on the {planInfo.name} plan</p>
                   </div>
                 </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Price</p>
-                    <p className="text-2xl font-bold">${planInfo.price}<span className="text-sm font-normal text-gray-600">/mo</span></p>
-                  </div>
-                  <div>
-                    <p className="text-sm text-gray-600 mb-1">Status</p>
-                    <span className="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-800 text-sm font-semibold">
-                      Active
-                    </span>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+                <GlassBadge variant="success">Active</GlassBadge>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <GlassCard className="p-4">
+                  <p className="text-sm text-slate-600 mb-1">Price</p>
+                  <p className="text-3xl font-bold text-slate-800">
+                    ${planInfo.price}
+                    <span className="text-sm font-normal text-slate-600">/mo</span>
+                  </p>
+                </GlassCard>
+                <GlassCard className="p-4">
+                  <p className="text-sm text-slate-600 mb-1">Plan</p>
+                  <p className="text-3xl font-bold text-slate-800">{planInfo.name}</p>
+                </GlassCard>
+              </div>
+            </GlassPanel>
 
             {/* Plan Selector */}
             <div>
-              <h2 className="text-xl font-bold text-gray-900 mb-4">Choose Your Plan</h2>
+              <h2 className="text-xl font-bold text-slate-800 mb-4 px-1">Choose Your Plan</h2>
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 {/* Free Plan */}
-                <div className={`border-2 rounded-2xl p-6 bg-white shadow-soft transition-all ${
-                  currentPlan === 'free' ? 'border-purple-500 ring-2 ring-purple-200' : 'border-gray-200 hover:border-gray-300'
+                <GlassCard className={`p-6 transition-all ${
+                  currentPlan === 'free'
+                    ? 'ring-2 ring-accent-400 border-2 border-accent-400'
+                    : 'hover:bg-white/60'
                 }`}>
                   <div className="text-center mb-4">
-                    <h3 className="text-2xl font-bold">Free</h3>
-                    <div className="text-4xl font-bold my-4">$0</div>
-                    <p className="text-sm text-gray-600">Forever free</p>
+                    <h3 className="text-2xl font-bold text-slate-800">Free</h3>
+                    <div className="text-4xl font-bold text-slate-800 my-4">$0</div>
+                    <p className="text-sm text-slate-600">Forever free</p>
                   </div>
                   <ul className="space-y-2 mb-6">
                     {PLAN_FEATURES.free.features.map((feature, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm">{feature}</span>
+                        <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-slate-700">{feature}</span>
                       </li>
                     ))}
                   </ul>
-                  <Button
+                  <GlassButton
                     className="w-full"
                     disabled={currentPlan === 'free'}
-                    variant={currentPlan === 'free' ? 'default' : 'outline'}
+                    variant={currentPlan === 'free' ? 'primary' : 'secondary'}
                     onClick={() => handleSwitchPlan('free')}
                   >
                     {currentPlan === 'free' ? 'Current Plan' : 'Switch to Free'}
-                  </Button>
-                </div>
+                  </GlassButton>
+                </GlassCard>
 
                 {/* Pro Plan */}
-                <div className={`border-2 rounded-2xl p-6 bg-gradient-to-br from-pastel-butter to-pastel-peach shadow-soft-lg relative transition-all ${
-                  currentPlan === 'pro' ? 'border-purple-500 ring-2 ring-purple-200' : 'border-primary-300 hover:border-primary-400'
+                <GlassCard className={`p-6 relative transition-all ${
+                  currentPlan === 'pro'
+                    ? 'ring-2 ring-accent-400 border-2 border-accent-400'
+                    : 'hover:bg-white/60'
                 }`}>
-                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary-500 text-white px-4 py-1 rounded-full font-bold text-xs shadow-soft">
+                  <div className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-accent-400 text-white px-4 py-1 rounded-full font-bold text-xs shadow-sm">
                     POPULAR
                   </div>
                   <div className="text-center mb-4">
-                    <h3 className="text-2xl font-bold">Pro</h3>
-                    <div className="text-4xl font-bold my-4">$9</div>
-                    <p className="text-sm text-gray-700">per month</p>
+                    <h3 className="text-2xl font-bold text-slate-800">Pro</h3>
+                    <div className="text-4xl font-bold text-slate-800 my-4">$9</div>
+                    <p className="text-sm text-slate-600">per month</p>
                   </div>
                   <ul className="space-y-2 mb-6">
                     {PLAN_FEATURES.pro.features.map((feature, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <Check className="w-5 h-5 text-primary-600 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm font-semibold">{feature}</span>
+                        <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-slate-700 font-medium">{feature}</span>
                       </li>
                     ))}
                   </ul>
-                  <Button
+                  <GlassButton
                     className="w-full"
                     disabled={currentPlan === 'pro'}
-                    variant={currentPlan === 'pro' ? 'default' : 'outline'}
+                    variant={currentPlan === 'pro' ? 'primary' : 'secondary'}
                     onClick={() => handleSwitchPlan('pro')}
                   >
                     {currentPlan === 'pro' ? 'Current Plan' : 'Upgrade to Pro'}
-                  </Button>
-                </div>
+                  </GlassButton>
+                </GlassCard>
 
                 {/* Business Plan */}
-                <div className={`border-2 rounded-2xl p-6 bg-white shadow-soft transition-all ${
-                  currentPlan === 'business' ? 'border-purple-500 ring-2 ring-purple-200' : 'border-gray-200 hover:border-gray-300'
+                <GlassCard className={`p-6 transition-all ${
+                  currentPlan === 'business'
+                    ? 'ring-2 ring-accent-400 border-2 border-accent-400'
+                    : 'hover:bg-white/60'
                 }`}>
                   <div className="text-center mb-4">
-                    <h3 className="text-2xl font-bold">Business</h3>
-                    <div className="text-4xl font-bold my-4">$29</div>
-                    <p className="text-sm text-gray-600">per month</p>
+                    <h3 className="text-2xl font-bold text-slate-800">Business</h3>
+                    <div className="text-4xl font-bold text-slate-800 my-4">$29</div>
+                    <p className="text-sm text-slate-600">per month</p>
                   </div>
                   <ul className="space-y-2 mb-6">
                     {PLAN_FEATURES.business.features.map((feature, i) => (
                       <li key={i} className="flex items-start gap-2">
-                        <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
-                        <span className="text-sm font-semibold">{feature}</span>
+                        <Check className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
+                        <span className="text-sm text-slate-700 font-medium">{feature}</span>
                       </li>
                     ))}
                   </ul>
-                  <Button
+                  <GlassButton
                     className="w-full"
                     disabled={currentPlan === 'business'}
-                    variant={currentPlan === 'business' ? 'default' : 'outline'}
+                    variant={currentPlan === 'business' ? 'primary' : 'secondary'}
                     onClick={() => handleSwitchPlan('business')}
                   >
                     {currentPlan === 'business' ? 'Current Plan' : 'Upgrade to Business'}
-                  </Button>
-                </div>
+                  </GlassButton>
+                </GlassCard>
               </div>
             </div>
           </div>
@@ -574,57 +593,77 @@ export default function SettingsPage() {
         {/* Notifications Tab */}
         {activeTab === 'notifications' && (
           <div className="space-y-6">
-            <Card>
-              <CardHeader className="bg-gradient-to-r from-pastel-mint to-pastel-sage border-b border-gray-200">
-                <CardTitle>Email Notifications</CardTitle>
-                <CardDescription className="text-gray-600">
-                  Manage how you receive notifications
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6 space-y-4">
-                <div className="py-3 border-b border-gray-200">
-                  <Checkbox
+            <GlassPanel className="p-6">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-3 bg-green-100/50 rounded-xl">
+                  <Bell className="w-6 h-6 text-green-600" />
+                </div>
+                <div>
+                  <h2 className="text-xl font-bold text-slate-800">Email Notifications</h2>
+                  <p className="text-sm text-slate-600">Manage how you receive notifications</p>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <label className="flex items-start gap-3 p-4 bg-white/20 rounded-xl hover:bg-white/40 transition-all cursor-pointer">
+                  <input
+                    type="checkbox"
                     checked={notifications.marketing}
-                    onChange={(checked) => setNotifications({ ...notifications, marketing: checked })}
-                    label="Marketing emails"
-                    description="Receive emails about new features and updates"
+                    onChange={(e) => setNotifications({ ...notifications, marketing: e.target.checked })}
+                    className="mt-0.5 w-4 h-4 rounded border-slate-300 text-accent-400 focus:ring-accent-400"
                   />
-                </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-slate-800">Marketing emails</p>
+                    <p className="text-sm text-slate-600">Receive emails about new features and updates</p>
+                  </div>
+                </label>
 
-                <div className="py-3 border-b border-gray-200">
-                  <Checkbox
+                <label className="flex items-start gap-3 p-4 bg-white/20 rounded-xl hover:bg-white/40 transition-all cursor-pointer">
+                  <input
+                    type="checkbox"
                     checked={notifications.analytics}
-                    onChange={(checked) => setNotifications({ ...notifications, analytics: checked })}
-                    label="Analytics reports"
-                    description="Weekly summary of your profile performance"
+                    onChange={(e) => setNotifications({ ...notifications, analytics: e.target.checked })}
+                    className="mt-0.5 w-4 h-4 rounded border-slate-300 text-accent-400 focus:ring-accent-400"
                   />
-                </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-slate-800">Analytics reports</p>
+                    <p className="text-sm text-slate-600">Weekly summary of your profile performance</p>
+                  </div>
+                </label>
 
-                <div className="py-3 border-b border-gray-200">
-                  <Checkbox
+                <label className="flex items-start gap-3 p-4 bg-white/20 rounded-xl hover:bg-white/40 transition-all cursor-pointer">
+                  <input
+                    type="checkbox"
                     checked={notifications.security}
-                    onChange={(checked) => setNotifications({ ...notifications, security: checked })}
-                    label="Security alerts"
-                    description="Get notified about account security"
+                    onChange={(e) => setNotifications({ ...notifications, security: e.target.checked })}
+                    className="mt-0.5 w-4 h-4 rounded border-slate-300 text-accent-400 focus:ring-accent-400"
                   />
-                </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-slate-800">Security alerts</p>
+                    <p className="text-sm text-slate-600">Get notified about account security</p>
+                  </div>
+                </label>
 
-                <div className="py-3">
-                  <Checkbox
+                <label className="flex items-start gap-3 p-4 bg-white/20 rounded-xl hover:bg-white/40 transition-all cursor-pointer">
+                  <input
+                    type="checkbox"
                     checked={notifications.billing}
-                    onChange={(checked) => setNotifications({ ...notifications, billing: checked })}
-                    label="Billing notifications"
-                    description="Receipts and billing updates"
+                    onChange={(e) => setNotifications({ ...notifications, billing: e.target.checked })}
+                    className="mt-0.5 w-4 h-4 rounded border-slate-300 text-accent-400 focus:ring-accent-400"
                   />
-                </div>
+                  <div className="flex-1">
+                    <p className="font-semibold text-slate-800">Billing notifications</p>
+                    <p className="text-sm text-slate-600">Receipts and billing updates</p>
+                  </div>
+                </label>
+              </div>
 
-                <div className="pt-4 border-t border-gray-200">
-                  <Button onClick={() => setMessage('Notification preferences saved!')}>
-                    Save Preferences
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
+              <div className="pt-6 border-t border-white/30 mt-6">
+                <GlassButton onClick={() => setMessage('Notification preferences saved!')}>
+                  Save Preferences
+                </GlassButton>
+              </div>
+            </GlassPanel>
           </div>
         )}
       </div>

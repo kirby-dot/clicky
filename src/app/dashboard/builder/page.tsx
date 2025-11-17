@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase'
 import { GlassPanel, GlassButton, GlassInput, GlassBadge } from '@/components/ui/glass'
 import {
@@ -33,11 +33,12 @@ export default function BuilderPage() {
   const [searchQuery, setSearchQuery] = useState('')
   const [expandedSections, setExpandedSections] = useState<Set<string>>(new Set())
   const router = useRouter()
+  const searchParams = useSearchParams()
   const supabase = createBrowserClient()
 
   useEffect(() => {
     loadData()
-  }, [])
+  }, [searchParams])
 
   const loadData = async () => {
     try {
@@ -47,14 +48,25 @@ export default function BuilderPage() {
         return
       }
 
-      // Load profile
+      // Get profile ID from URL parameter
+      const profileId = searchParams.get('profile')
+
+      if (!profileId) {
+        // No profile specified, redirect to dashboard
+        router.push('/dashboard')
+        return
+      }
+
+      // Load specific profile
       const { data: profileData } = await (supabase as any)
         .from('profiles')
         .select('*')
-        .eq('user_id', user.id)
+        .eq('id', profileId)
+        .eq('user_id', user.id) // Ensure user owns this profile
         .single()
 
       if (!profileData) {
+        // Profile not found or doesn't belong to user
         router.push('/dashboard')
         return
       }
