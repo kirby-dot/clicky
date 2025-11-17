@@ -3,159 +3,131 @@
 import { useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase'
-import { GlassPanel, GlassCard, GlassButton, GlassInput, GlassBadge } from '@/components/ui/glass'
-import { slugify, isValidSlug } from '@/lib/utils'
+import { GlassPanel, GlassCard, GlassButton, GlassBadge } from '@/components/ui/glass'
 import {
   Plus, ExternalLink, Eye, MousePointerClick, TrendingUp, Layout,
-  Settings, BarChart3, Sparkles, Share2, Activity, Link2, Users
+  BarChart3, Sparkles, Users, Link2, Activity, Clock, Zap, Edit2
 } from 'lucide-react'
 import type { Profile } from '@/types'
 
 interface DashboardStats {
+  totalViews: number
+  totalClicks: number
+  clickRate: number
+  profileCount: number
+  moduleCount: number
+  activeProfiles: number
+}
+
+interface ProfileWithStats extends Profile {
   views: number
   clicks: number
-  clickRate: number
-  viewsToday: number
-  clicksToday: number
+  moduleCount: number
+}
+
+interface RecentActivity {
+  type: 'view' | 'click' | 'edit'
+  profile: string
+  timestamp: string
+  details?: string
 }
 
 export default function DashboardPage() {
   const [loading, setLoading] = useState(true)
-  const [profile, setProfile] = useState<Profile | null>(null)
+  const [profiles, setProfiles] = useState<ProfileWithStats[]>([])
   const [stats, setStats] = useState<DashboardStats | null>(null)
-  const [showCreateProfile, setShowCreateProfile] = useState(false)
-  const [slug, setSlug] = useState('')
-  const [title, setTitle] = useState('')
-  const [creating, setCreating] = useState(false)
-  const [error, setError] = useState('')
-
+  const [recentActivity, setRecentActivity] = useState<RecentActivity[]>([])
   const router = useRouter()
   const supabase = createBrowserClient()
 
   useEffect(() => {
-    loadProfile()
+    loadDashboard()
   }, [])
 
-  const loadProfile = async () => {
+  const loadDashboard = async () => {
     try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (!user) return
-
-      const { data, error } = await (supabase as any)
-        .from('profiles')
-        .select('*')
-        .eq('user_id', user.id)
-        .single()
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error loading profile:', error)
-      }
-
-      setProfile(data)
-      setShowCreateProfile(!data)
-
-      if (data) {
-        await loadStats(data.id)
-      }
-    } catch (error) {
-      console.error('Error:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
-
-  const loadStats = async (profileId: string) => {
-    try {
-      const { data: allEvents } = await (supabase as any)
-        .from('events')
-        .select('*')
-        .eq('profile_id', profileId)
-        .order('timestamp', { ascending: false })
-
-      const today = new Date()
-      today.setHours(0, 0, 0, 0)
-      const { data: todayEvents } = await (supabase as any)
-        .from('events')
-        .select('*')
-        .eq('profile_id', profileId)
-        .gte('timestamp', today.toISOString())
-
-      const views = allEvents?.filter((e: any) => e.event_type === 'view').length || 0
-      const clicks = allEvents?.filter((e: any) => e.event_type === 'click').length || 0
-      const viewsToday = todayEvents?.filter((e: any) => e.event_type === 'view').length || 0
-      const clicksToday = todayEvents?.filter((e: any) => e.event_type === 'click').length || 0
-
-      setStats({
-        views,
-        clicks,
-        clickRate: views > 0 ? (clicks / views) * 100 : 0,
-        viewsToday,
-        clicksToday,
-      })
-    } catch (error) {
-      console.error('Error loading stats:', error)
-    }
-  }
-
-  const handleCreateProfile = async () => {
-    setError('')
-
-    if (!title.trim()) {
-      setError('Please enter a title')
-      return
-    }
-
-    const generatedSlug = slugify(slug || title)
-
-    if (!isValidSlug(generatedSlug)) {
-      setError('Username must be 3-30 characters (letters, numbers, hyphens)')
-      return
-    }
-
-    setCreating(true)
-
-    try {
-      const {
-        data: { user },
-      } = await supabase.auth.getUser()
-
-      if (!user) return
-
-      const { data: existingProfile } = await (supabase as any)
-        .from('profiles')
-        .select('slug')
-        .eq('slug', generatedSlug)
-        .single()
-
-      if (existingProfile) {
-        setError('Username is already taken')
-        setCreating(false)
+      const { data: { user } } = await supabase.auth.getUser()
+      if (!user) {
+        router.push('/login')
         return
       }
 
-      const { data, error } = await (supabase as any)
+      // Load all profiles
+      const { data: profilesData } = await (supabase as any)
         .from('profiles')
-        .insert({
-          user_id: user.id,
-          title,
-          slug: generatedSlug,
-          published: true,
+        .select('*')
+        .eq('user_id', user.id)
+        .order('created_at', { ascending: false })
+
+      if (!profilesData || profilesData.length === 0) {
+        setLoading(false)
+        return
+      }
+
+      // Load modules count for each profile
+      const { data: modulesData } = await (supabase as any)
+        .from('modules')
+        .select('profile_id')
+        .in('profile_id', profilesData.map((p: Profile) => p.id))
+
+      // Load events for stats
+      const { data: eventsData } = await (supabase as any)
+        .from('events')
+        .select('*')
+        .in('profile_id', profilesData.map((p: Profile) => p.id))
+        .order('timestamp', { ascending: false })
+        .limit(100)
+
+      // Calculate stats per profile
+      const profilesWithStats: ProfileWithStats[] = profilesData.map((profile: Profile) => {
+        const profileModules = modulesData?.filter((m: any) => m.profile_id === profile.id) || []
+        const profileEvents = eventsData?.filter((e: any) => e.profile_id === profile.id) || []
+        const views = profileEvents.filter((e: any) => e.event_type === 'view').length
+        const clicks = profileEvents.filter((e: any) => e.event_type === 'click').length
+
+        return {
+          ...profile,
+          views,
+          clicks,
+          moduleCount: profileModules.length
+        }
+      })
+
+      setProfiles(profilesWithStats)
+
+      // Calculate overall stats
+      const totalViews = profilesWithStats.reduce((sum, p) => sum + p.views, 0)
+      const totalClicks = profilesWithStats.reduce((sum, p) => sum + p.clicks, 0)
+      const totalModules = profilesWithStats.reduce((sum, p) => sum + p.moduleCount, 0)
+      const activeProfiles = profilesWithStats.filter(p => p.published).length
+
+      setStats({
+        totalViews,
+        totalClicks,
+        clickRate: totalViews > 0 ? (totalClicks / totalViews) * 100 : 0,
+        profileCount: profilesData.length,
+        moduleCount: totalModules,
+        activeProfiles
+      })
+
+      // Create recent activity feed
+      const activities: RecentActivity[] = (eventsData || [])
+        .slice(0, 10)
+        .map((event: any) => {
+          const profile = profilesData.find((p: Profile) => p.id === event.profile_id)
+          return {
+            type: event.event_type,
+            profile: profile?.title || 'Unknown',
+            timestamp: event.timestamp,
+            details: event.event_type === 'click' ? event.module_id : undefined
+          }
         })
-        .select()
-        .single()
 
-      if (error) throw error
-
-      setProfile(data)
-      setShowCreateProfile(false)
-      router.push('/dashboard/builder')
-    } catch (error: any) {
-      setError(error.message || 'Failed to create profile')
+      setRecentActivity(activities)
+    } catch (error) {
+      console.error('Error loading dashboard:', error)
     } finally {
-      setCreating(false)
+      setLoading(false)
     }
   }
 
@@ -167,59 +139,23 @@ export default function DashboardPage() {
     )
   }
 
-  if (showCreateProfile) {
+  // No profiles - show onboarding
+  if (profiles.length === 0) {
     return (
       <div className="p-8 h-full flex items-center justify-center">
-        <GlassPanel className="p-8 max-w-md w-full">
-          <div className="text-center mb-6">
-            <div className="w-16 h-16 bg-gradient-to-br from-accent-400 to-accent-600 rounded-2xl mx-auto mb-4 flex items-center justify-center">
-              <Sparkles className="w-8 h-8 text-white" />
-            </div>
-            <h2 className="text-2xl font-bold text-slate-800 mb-2">Create Your Profile</h2>
-            <p className="text-slate-600">Get started with your link-in-bio page</p>
+        <GlassPanel className="p-12 max-w-2xl text-center">
+          <div className="w-20 h-20 bg-gradient-to-br from-accent-400 to-accent-600 rounded-3xl mx-auto mb-6 flex items-center justify-center">
+            <Sparkles className="w-10 h-10 text-white" />
           </div>
-
-          <div className="space-y-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Profile Title
-              </label>
-              <GlassInput
-                value={title}
-                onChange={setTitle}
-                placeholder="My Awesome Profile"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 mb-2">
-                Username (URL)
-              </label>
-              <GlassInput
-                value={slug}
-                onChange={setSlug}
-                placeholder={title ? slugify(title) : 'my-username'}
-              />
-              <p className="text-xs text-slate-500 mt-1">
-                Your profile will be at: yoursite.com/{slug || slugify(title) || 'username'}
-              </p>
-            </div>
-
-            {error && (
-              <div className="p-3 bg-red-100/80 border border-red-200 rounded-xl text-red-700 text-sm">
-                {error}
-              </div>
-            )}
-
-            <GlassButton
-              onClick={handleCreateProfile}
-              disabled={creating}
-              className="w-full"
-              size="lg"
-            >
-              {creating ? 'Creating...' : 'Create Profile'}
-            </GlassButton>
-          </div>
+          <h2 className="text-3xl font-bold text-slate-800 mb-3">Welcome to Clicky!</h2>
+          <p className="text-lg text-slate-600 mb-8">
+            Let&apos;s create your first link-in-bio profile to get started.
+            You&apos;ll be able to add links, images, videos, and more!
+          </p>
+          <GlassButton onClick={() => router.push('/dashboard/profiles')} size="lg">
+            <Plus className="w-5 h-5 mr-2" />
+            Create Your First Profile
+          </GlassButton>
         </GlassPanel>
       </div>
     )
@@ -227,148 +163,235 @@ export default function DashboardPage() {
 
   return (
     <div className="p-8 h-full overflow-y-auto">
-      <GlassPanel className="p-6 mb-6">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold text-slate-800">Dashboard</h1>
-            <p className="text-slate-600 mt-1">Welcome back! Here&apos;s your overview</p>
-          </div>
-          <GlassButton onClick={() => router.push('/dashboard/builder')}>
-            <Layout className="w-4 h-4 mr-2" />
-            Edit Profile
-          </GlassButton>
-        </div>
-      </GlassPanel>
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-4xl font-bold text-slate-800 mb-2">Dashboard</h1>
+        <p className="text-lg text-slate-600">Welcome back! Here&apos;s your overview</p>
+      </div>
 
-      {profile && (
-        <>
-          {/* Profile Card */}
-          <GlassPanel className="p-6 mb-6">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div className="w-16 h-16 bg-gradient-to-br from-accent-400 to-accent-600 rounded-2xl flex items-center justify-center">
-                  <Link2 className="w-8 h-8 text-white" />
-                </div>
-                <div>
-                  <h2 className="text-xl font-bold text-slate-800">{profile.title}</h2>
-                  <p className="text-slate-600">yoursite.com/{profile.slug}</p>
-                </div>
+      {/* Stats Grid */}
+      {stats && (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-blue-100/50 rounded-xl">
+                <Eye className="w-6 h-6 text-blue-600" />
               </div>
-              <div className="flex items-center gap-2">
-                <GlassBadge variant={profile.published ? 'success' : 'warning'}>
-                  {profile.published ? 'Published' : 'Draft'}
-                </GlassBadge>
-                <GlassButton
-                  variant="secondary"
-                  size="sm"
-                  onClick={() => window.open(`/${profile.slug}`, '_blank')}
-                >
-                  <ExternalLink className="w-4 h-4 mr-2" />
-                  View
+              <TrendingUp className="w-5 h-5 text-green-500" />
+            </div>
+            <p className="text-sm font-semibold text-slate-600 mb-1">Total Views</p>
+            <p className="text-3xl font-bold text-slate-800">{stats.totalViews.toLocaleString()}</p>
+            <p className="text-xs text-slate-500 mt-2">Across all profiles</p>
+          </GlassCard>
+
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-purple-100/50 rounded-xl">
+                <MousePointerClick className="w-6 h-6 text-purple-600" />
+              </div>
+              <TrendingUp className="w-5 h-5 text-green-500" />
+            </div>
+            <p className="text-sm font-semibold text-slate-600 mb-1">Total Clicks</p>
+            <p className="text-3xl font-bold text-slate-800">{stats.totalClicks.toLocaleString()}</p>
+            <p className="text-xs text-slate-500 mt-2">{stats.clickRate.toFixed(1)}% click rate</p>
+          </GlassCard>
+
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-green-100/50 rounded-xl">
+                <Users className="w-6 h-6 text-green-600" />
+              </div>
+              <GlassBadge variant="success">{stats.activeProfiles} active</GlassBadge>
+            </div>
+            <p className="text-sm font-semibold text-slate-600 mb-1">Your Profiles</p>
+            <p className="text-3xl font-bold text-slate-800">{stats.profileCount}</p>
+            <p className="text-xs text-slate-500 mt-2">{stats.moduleCount} total modules</p>
+          </GlassCard>
+
+          <GlassCard className="p-6">
+            <div className="flex items-center justify-between mb-4">
+              <div className="p-3 bg-orange-100/50 rounded-xl">
+                <Zap className="w-6 h-6 text-accent-600" />
+              </div>
+              <Activity className="w-5 h-5 text-accent-500" />
+            </div>
+            <p className="text-sm font-semibold text-slate-600 mb-1">Engagement</p>
+            <p className="text-3xl font-bold text-slate-800">{stats.clickRate.toFixed(1)}%</p>
+            <p className="text-xs text-slate-500 mt-2">Average across profiles</p>
+          </GlassCard>
+        </div>
+      )}
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Profiles Overview - Takes 2 columns */}
+        <div className="lg:col-span-2 space-y-6">
+          <GlassPanel className="p-6">
+            <div className="flex items-center justify-between mb-6">
+              <h2 className="text-2xl font-bold text-slate-800">Your Profiles</h2>
+              <GlassButton
+                variant="secondary"
+                size="sm"
+                onClick={() => router.push('/dashboard/profiles')}
+              >
+                View All
+              </GlassButton>
+            </div>
+
+            <div className="space-y-4">
+              {profiles.slice(0, 3).map((profile) => (
+                <GlassCard key={profile.id} className="p-4" hover>
+                  <div className="flex items-center gap-4">
+                    <div className="w-16 h-16 bg-gradient-to-br from-accent-400 to-accent-600 rounded-xl flex items-center justify-center flex-shrink-0">
+                      <Link2 className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2 mb-1">
+                        <h3 className="font-bold text-slate-800 truncate">{profile.title}</h3>
+                        {profile.published ? (
+                          <GlassBadge variant="success">Live</GlassBadge>
+                        ) : (
+                          <GlassBadge variant="default">Draft</GlassBadge>
+                        )}
+                      </div>
+                      <p className="text-sm text-slate-600 truncate">/{profile.slug}</p>
+                      <div className="flex items-center gap-4 mt-2">
+                        <span className="text-xs text-slate-500">
+                          <Eye className="w-3 h-3 inline mr-1" />
+                          {profile.views} views
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          <MousePointerClick className="w-3 h-3 inline mr-1" />
+                          {profile.clicks} clicks
+                        </span>
+                        <span className="text-xs text-slate-500">
+                          <Layout className="w-3 h-3 inline mr-1" />
+                          {profile.moduleCount} modules
+                        </span>
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <GlassButton
+                        variant="secondary"
+                        size="sm"
+                        onClick={() => router.push(`/dashboard/builder?profile=${profile.id}`)}
+                      >
+                        <Edit2 className="w-4 h-4 mr-1" />
+                        Edit
+                      </GlassButton>
+                      {profile.published && (
+                        <GlassButton
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => window.open(`/${profile.slug}`, '_blank')}
+                        >
+                          <ExternalLink className="w-4 h-4 mr-1" />
+                          View
+                        </GlassButton>
+                      )}
+                    </div>
+                  </div>
+                </GlassCard>
+              ))}
+            </div>
+
+            {profiles.length === 0 && (
+              <div className="text-center py-12">
+                <p className="text-slate-600 mb-4">No profiles yet</p>
+                <GlassButton onClick={() => router.push('/dashboard/profiles')}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Create Profile
                 </GlassButton>
               </div>
-            </div>
+            )}
           </GlassPanel>
+        </div>
 
-          {/* Stats Grid */}
-          {stats && (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
-              <GlassCard className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-blue-100/50 rounded-xl">
-                    <Eye className="w-6 h-6 text-blue-600" />
-                  </div>
-                  <TrendingUp className="w-5 h-5 text-green-500" />
-                </div>
-                <p className="text-sm font-semibold text-slate-600">Total Views</p>
-                <p className="text-3xl font-bold text-slate-800 mt-1">{stats.views}</p>
-                <p className="text-xs text-slate-500 mt-2">+{stats.viewsToday} today</p>
-              </GlassCard>
-
-              <GlassCard className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-purple-100/50 rounded-xl">
-                    <MousePointerClick className="w-6 h-6 text-purple-600" />
-                  </div>
-                  <TrendingUp className="w-5 h-5 text-green-500" />
-                </div>
-                <p className="text-sm font-semibold text-slate-600">Total Clicks</p>
-                <p className="text-3xl font-bold text-slate-800 mt-1">{stats.clicks}</p>
-                <p className="text-xs text-slate-500 mt-2">+{stats.clicksToday} today</p>
-              </GlassCard>
-
-              <GlassCard className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-green-100/50 rounded-xl">
-                    <BarChart3 className="w-6 h-6 text-green-600" />
-                  </div>
-                  <Activity className="w-5 h-5 text-green-500" />
-                </div>
-                <p className="text-sm font-semibold text-slate-600">Click Rate</p>
-                <p className="text-3xl font-bold text-slate-800 mt-1">{stats.clickRate.toFixed(1)}%</p>
-                <p className="text-xs text-slate-500 mt-2">Engagement rate</p>
-              </GlassCard>
-
-              <GlassCard className="p-6">
-                <div className="flex items-center justify-between mb-4">
-                  <div className="p-3 bg-orange-100/50 rounded-xl">
-                    <Share2 className="w-6 h-6 text-accent-600" />
-                  </div>
-                  <Sparkles className="w-5 h-5 text-accent-500" />
-                </div>
-                <p className="text-sm font-semibold text-slate-600">Profile Status</p>
-                <p className="text-xl font-bold text-slate-800 mt-1">Active</p>
-                <p className="text-xs text-slate-500 mt-2">All systems go</p>
-              </GlassCard>
-            </div>
-          )}
-
+        {/* Sidebar - Recent Activity */}
+        <div className="space-y-6">
           {/* Quick Actions */}
           <GlassPanel className="p-6">
             <h3 className="text-lg font-bold text-slate-800 mb-4">Quick Actions</h3>
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
               <button
-                onClick={() => router.push('/dashboard/builder')}
-                className="flex items-center gap-4 p-4 bg-white/30 hover:bg-white/50 rounded-xl transition-all group"
+                onClick={() => router.push('/dashboard/profiles')}
+                className="w-full flex items-center gap-3 p-3 bg-white/30 hover:bg-white/50 rounded-xl transition-all group text-left"
               >
-                <div className="p-3 bg-blue-100/50 rounded-xl group-hover:scale-110 transition-transform">
-                  <Layout className="w-6 h-6 text-blue-600" />
+                <div className="p-2 bg-blue-100/50 rounded-lg group-hover:scale-110 transition-transform">
+                  <Plus className="w-4 h-4 text-blue-600" />
                 </div>
-                <div className="text-left">
-                  <p className="font-semibold text-slate-800">Edit Page</p>
-                  <p className="text-sm text-slate-600">Customize your profile</p>
+                <div>
+                  <p className="font-semibold text-slate-800 text-sm">New Profile</p>
+                  <p className="text-xs text-slate-600">Create a new page</p>
                 </div>
               </button>
 
               <button
                 onClick={() => router.push('/dashboard/analytics')}
-                className="flex items-center gap-4 p-4 bg-white/30 hover:bg-white/50 rounded-xl transition-all group"
+                className="w-full flex items-center gap-3 p-3 bg-white/30 hover:bg-white/50 rounded-xl transition-all group text-left"
               >
-                <div className="p-3 bg-purple-100/50 rounded-xl group-hover:scale-110 transition-transform">
-                  <BarChart3 className="w-6 h-6 text-purple-600" />
+                <div className="p-2 bg-purple-100/50 rounded-lg group-hover:scale-110 transition-transform">
+                  <BarChart3 className="w-4 h-4 text-purple-600" />
                 </div>
-                <div className="text-left">
-                  <p className="font-semibold text-slate-800">View Analytics</p>
-                  <p className="text-sm text-slate-600">Check your stats</p>
+                <div>
+                  <p className="font-semibold text-slate-800 text-sm">Analytics</p>
+                  <p className="text-xs text-slate-600">View detailed stats</p>
                 </div>
               </button>
 
               <button
-                onClick={() => router.push('/dashboard/settings')}
-                className="flex items-center gap-4 p-4 bg-white/30 hover:bg-white/50 rounded-xl transition-all group"
+                onClick={() => router.push('/dashboard/appearance')}
+                className="w-full flex items-center gap-3 p-3 bg-white/30 hover:bg-white/50 rounded-xl transition-all group text-left"
               >
-                <div className="p-3 bg-green-100/50 rounded-xl group-hover:scale-110 transition-transform">
-                  <Settings className="w-6 h-6 text-green-600" />
+                <div className="p-2 bg-green-100/50 rounded-lg group-hover:scale-110 transition-transform">
+                  <Sparkles className="w-4 h-4 text-green-600" />
                 </div>
-                <div className="text-left">
-                  <p className="font-semibold text-slate-800">Settings</p>
-                  <p className="text-sm text-slate-600">Manage your account</p>
+                <div>
+                  <p className="font-semibold text-slate-800 text-sm">Customize</p>
+                  <p className="text-xs text-slate-600">Edit appearance</p>
                 </div>
               </button>
             </div>
           </GlassPanel>
-        </>
-      )}
+
+          {/* Recent Activity */}
+          <GlassPanel className="p-6">
+            <h3 className="text-lg font-bold text-slate-800 mb-4">Recent Activity</h3>
+            <div className="space-y-3">
+              {recentActivity.length > 0 ? (
+                recentActivity.slice(0, 5).map((activity, i) => (
+                  <div key={i} className="flex items-start gap-3">
+                    <div className={`p-2 rounded-lg flex-shrink-0 ${
+                      activity.type === 'view' ? 'bg-blue-100/50' :
+                      activity.type === 'click' ? 'bg-purple-100/50' :
+                      'bg-green-100/50'
+                    }`}>
+                      {activity.type === 'view' ? <Eye className="w-3 h-3" /> :
+                       activity.type === 'click' ? <MousePointerClick className="w-3 h-3" /> :
+                       <Edit2 className="w-3 h-3" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-semibold text-slate-800 truncate">
+                        {activity.type === 'view' ? 'Profile viewed' :
+                         activity.type === 'click' ? 'Link clicked' :
+                         'Profile edited'}
+                      </p>
+                      <p className="text-xs text-slate-600 truncate">{activity.profile}</p>
+                      <p className="text-xs text-slate-500">
+                        {new Date(activity.timestamp).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8">
+                  <Clock className="w-8 h-8 text-slate-400 mx-auto mb-2" />
+                  <p className="text-sm text-slate-600">No recent activity</p>
+                </div>
+              )}
+            </div>
+          </GlassPanel>
+        </div>
+      </div>
     </div>
   )
 }
