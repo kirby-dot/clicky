@@ -72,18 +72,18 @@ export async function POST(request: Request) {
     }
 
     // Fetch profile owner's email for notification
-    const { data: profile } = await supabase
+    const { data: profile } = await (supabase
       .from('profiles')
       .select('user_id, title')
       .eq('id', profile_id)
-      .maybeSingle()
+      .maybeSingle() as any)
 
     if (profile) {
-      const { data: userData } = await supabase
+      const { data: userData } = await (supabase
         .from('users')
         .select('email')
-        .eq('id', profile.user_id)
-        .maybeSingle()
+        .eq('id', (profile as any).user_id)
+        .maybeSingle() as any)
 
       if (userData) {
         // TODO: Send email notification to profile owner
