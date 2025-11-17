@@ -148,7 +148,7 @@ export default function SettingsPage() {
       const { data: teamData } = await (supabase as any)
         .from('team_members')
         .select('*')
-        .eq('inviter_id', userData.id)
+        .eq('profile_id', profileData?.id)
         .order('invited_at', { ascending: false })
 
       setTeamMembers(teamData || [])
@@ -270,12 +270,11 @@ export default function SettingsPage() {
         return
       }
 
-      // Create a placeholder user_id (in real app, this would be the actual user_id after they accept)
+      // Create team member invitation
       const { error } = await (supabase as any)
         .from('team_members')
         .insert({
-          user_id: user.id, // Placeholder - would be updated when they accept
-          inviter_id: user.id,
+          profile_id: profile?.id,
           email: inviteEmail,
           role: inviteRole,
           status: 'pending'
