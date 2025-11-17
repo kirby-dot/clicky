@@ -1,7 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import type { SectionWithModules } from '@/types'
+import type { SectionWithModules, Module } from '@/types'
 import { ModuleRenderer } from '@/components/modules/module-renderer'
 
 interface SectionRendererProps {
@@ -79,7 +79,7 @@ export function SectionRenderer({ section, profileId, sectionIndex }: SectionRen
   // Sort modules into their respective columns
   modules
     .filter(m => m.active)
-    .sort((a, b) => a.order - b.order)
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0))
     .forEach(module => {
       const colIndex = module.column_index || 0
       if (columnGroups[colIndex]) {

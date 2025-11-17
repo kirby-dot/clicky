@@ -35,7 +35,7 @@ export function ThemeProvider({ theme, children }: ThemeProviderProps) {
     small: '20px',
     medium: '28px',
     large: '36px',
-    xl: '48px',
+    xlarge: '48px',
   }
 
   const bodySizes = {
@@ -45,15 +45,15 @@ export function ThemeProvider({ theme, children }: ThemeProviderProps) {
   }
 
   const sectionSpacingMap = {
-    tight: '16px',
+    compact: '16px',
     normal: '32px',
-    loose: '64px',
+    spacious: '64px',
   }
 
   const moduleSpacingMap = {
-    tight: '8px',
+    compact: '8px',
     normal: '16px',
-    loose: '24px',
+    spacious: '24px',
   }
 
   return (
@@ -95,7 +95,7 @@ function generateCSSVariables(theme: GlobalTheme): Record<string, string> {
     small: '20px',
     medium: '28px',
     large: '36px',
-    xl: '48px',
+    xlarge: '48px',
   }
   vars['--heading-size'] = headingSizes[theme.typography.headingSize]
 
@@ -125,17 +125,17 @@ function generateCSSVariables(theme: GlobalTheme): Record<string, string> {
 
   // Section Spacing
   const sectionSpacingMap = {
-    tight: '16px',
+    compact: '16px',
     normal: '32px',
-    loose: '64px',
+    spacious: '64px',
   }
   vars['--section-spacing'] = sectionSpacingMap[theme.layout.sectionSpacing]
 
   // Module Spacing
   const moduleSpacingMap = {
-    tight: '8px',
+    compact: '8px',
     normal: '16px',
-    loose: '24px',
+    spacious: '24px',
   }
   vars['--module-spacing'] = moduleSpacingMap[theme.layout.moduleSpacing]
 

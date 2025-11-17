@@ -51,15 +51,14 @@ export function ThemeEditor({ theme, onSave, onCancel }: ThemeEditorProps) {
 
   const roundnessOptions = [
     { value: 'square' as const, label: 'Square', borderRadius: '0px' },
-    { value: 'slightly-rounded' as const, label: 'Slightly Rounded', borderRadius: '6px' },
     { value: 'rounded' as const, label: 'Rounded', borderRadius: '12px' },
     { value: 'pill' as const, label: 'Pill', borderRadius: '9999px' },
   ]
 
   const spacingOptions = [
-    { value: 'tight' as const, label: 'Tight', gap: '8px' },
+    { value: 'compact' as const, label: 'Compact', gap: '8px' },
     { value: 'normal' as const, label: 'Normal', gap: '16px' },
-    { value: 'loose' as const, label: 'Loose', gap: '32px' },
+    { value: 'spacious' as const, label: 'Spacious', gap: '32px' },
   ]
 
   return (
@@ -127,7 +126,7 @@ export function ThemeEditor({ theme, onSave, onCancel }: ThemeEditorProps) {
                   Heading Size
                 </label>
                 <div className="grid grid-cols-4 gap-2">
-                  {(['small', 'medium', 'large', 'xl'] as const).map((size) => (
+                  {(['small', 'medium', 'large', 'xlarge'] as const).map((size) => (
                     <button
                       key={size}
                       onClick={() =>

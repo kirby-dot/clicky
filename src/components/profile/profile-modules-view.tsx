@@ -184,7 +184,7 @@ export default function ProfileModulesView({ profile, modules, sections = [], ba
           }
 
           // Fallback to original layout if no sections
-          const layout = 'stack'
+          const layout: 'stack' | 'grid' | 'masonry' | 'centered' = 'stack'
           const moduleSpacing = 4
 
           const spaceClass = ({
@@ -215,7 +215,7 @@ export default function ProfileModulesView({ profile, modules, sections = [], ba
               {modules.map((module, index) => (
                 <div
                   key={module.id}
-                  className={layout === 'masonry' ? 'break-inside-avoid mb-4' : ''}
+                  className={(layout as string) === 'masonry' ? 'break-inside-avoid mb-4' : ''}
                 >
                   <ModuleRenderer
                     module={module}
