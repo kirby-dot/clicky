@@ -28,15 +28,15 @@ export async function POST(request: Request) {
     )
 
     // Check if email already captured for this profile
-    const { data: existing } = await supabase
+    const { data: existing } = await (supabase
       .from('email_captures' as any)
       .select('id, subscribed')
       .eq('profile_id', profile_id)
       .eq('email', email.toLowerCase())
-      .maybeSingle()
+      .maybeSingle() as any)
 
     if (existing) {
-      if (existing.subscribed) {
+      if ((existing as any).subscribed) {
         return NextResponse.json(
           { error: 'This email is already subscribed' },
           { status: 409 }
@@ -49,7 +49,7 @@ export async function POST(request: Request) {
             subscribed: true,
             unsubscribed_at: null,
           } as any)
-          .eq('id', existing.id) as any)
+          .eq('id', (existing as any).id) as any)
 
         if (updateError) {
           console.error('Resubscribe error:', updateError)
