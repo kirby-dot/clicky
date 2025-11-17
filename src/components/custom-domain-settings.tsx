@@ -68,7 +68,7 @@ export function CustomDomainSettings({ profile, userPlan, onUpdate }: CustomDoma
       const { createBrowserClient } = await import('@/lib/supabase')
       const supabase = createBrowserClient()
 
-      const { error: updateError } = await supabase
+      const { error: updateError } = await (supabase as any)
         .from('profiles')
         .update({
           custom_domain: null,

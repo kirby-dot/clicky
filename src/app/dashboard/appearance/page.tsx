@@ -85,7 +85,7 @@ export default function AppearancePage() {
 
       if (!user) return
 
-      const { data: profileData } = await supabase
+      const { data: profileData } = await (supabase as any)
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
@@ -100,14 +100,14 @@ export default function AppearancePage() {
         setSelectedBadge(profileData.badge_id)
       }
 
-      const { data: themesData } = await supabase
+      const { data: themesData } = await (supabase as any)
         .from('themes')
         .select('*')
         .order('name')
 
       setThemes(themesData || [])
 
-      const { data: badgesData } = await supabase
+      const { data: badgesData } = await (supabase as any)
         .from('badges')
         .select('*')
         .eq('is_active', true)
@@ -127,7 +127,7 @@ export default function AppearancePage() {
     setSaving(true)
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('profiles')
         .update({
           title,
@@ -203,7 +203,7 @@ export default function AppearancePage() {
     if (!profile) return
 
     try {
-      const { data: newTheme, error } = await supabase
+      const { data: newTheme, error } = await (supabase as any)
         .from('themes')
         .insert({
           name,

@@ -45,7 +45,7 @@ export default function ProfilesPage() {
       setUser(userData)
 
       // Load profiles
-      const { data: profilesData } = await supabase
+      const { data: profilesData } = await (supabase as any)
         .from('profiles')
         .select('*')
         .eq('user_id', userData.id)
@@ -54,7 +54,7 @@ export default function ProfilesPage() {
       setProfiles(profilesData || [])
 
       // Load subscription
-      const { data: subData } = await supabase
+      const { data: subData } = await (supabase as any)
         .from('subscriptions')
         .select('plan')
         .eq('user_id', userData.id)
@@ -91,7 +91,7 @@ export default function ProfilesPage() {
       }
 
       // Check if slug is already taken
-      const { data: existingProfile } = await supabase
+      const { data: existingProfile } = await (supabase as any)
         .from('profiles')
         .select('id')
         .eq('slug', newProfileSlug)
@@ -102,7 +102,7 @@ export default function ProfilesPage() {
         return
       }
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('profiles')
         .insert({
           user_id: user.id,
@@ -132,7 +132,7 @@ export default function ProfilesPage() {
     }
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('profiles')
         .delete()
         .eq('id', profileId)

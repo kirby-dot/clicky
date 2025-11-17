@@ -124,7 +124,7 @@ export default function SettingsPage() {
       setUser(userData)
 
       // Load profile
-      const { data: profileData } = await supabase
+      const { data: profileData } = await (supabase as any)
         .from('profiles')
         .select('*')
         .eq('user_id', userData.id)
@@ -133,7 +133,7 @@ export default function SettingsPage() {
       setProfile(profileData)
 
       // Load subscription
-      const { data: subData } = await supabase
+      const { data: subData } = await (supabase as any)
         .from('subscriptions')
         .select('*')
         .eq('user_id', userData.id)
@@ -145,7 +145,7 @@ export default function SettingsPage() {
       setSubscription(subData)
 
       // Load team members
-      const { data: teamData } = await supabase
+      const { data: teamData } = await (supabase as any)
         .from('team_members')
         .select('*')
         .eq('inviter_id', userData.id)
@@ -167,7 +167,7 @@ export default function SettingsPage() {
     setMessage('')
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('profiles')
         .update({
           title: profile.title,
@@ -201,7 +201,7 @@ export default function SettingsPage() {
     }
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('profiles')
         .update({ slug: newSlug })
         .eq('id', profile.id)
@@ -223,7 +223,7 @@ export default function SettingsPage() {
       // Check if there's an active subscription
       if (subscription) {
         // Update existing subscription
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('subscriptions')
           .update({
             plan,
@@ -234,7 +234,7 @@ export default function SettingsPage() {
         if (error) throw error
       } else {
         // Create new subscription
-        const { error } = await supabase
+        const { error } = await (supabase as any)
           .from('subscriptions')
           .insert({
             user_id: user.id,
@@ -271,7 +271,7 @@ export default function SettingsPage() {
       }
 
       // Create a placeholder user_id (in real app, this would be the actual user_id after they accept)
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('team_members')
         .insert({
           user_id: user.id, // Placeholder - would be updated when they accept
@@ -298,7 +298,7 @@ export default function SettingsPage() {
     if (!confirm('Are you sure you want to remove this team member?')) return
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('team_members')
         .delete()
         .eq('id', memberId)

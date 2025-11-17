@@ -237,7 +237,7 @@ export default function IntegrationsPage() {
       if (!user) return
 
       // Get profile
-      const { data: profileData } = await supabase
+      const { data: profileData } = await (supabase as any)
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
@@ -247,7 +247,7 @@ export default function IntegrationsPage() {
         setProfile(profileData)
 
         // Get integrations
-        const { data: integrationsData } = await supabase
+        const { data: integrationsData } = await (supabase as any)
           .from('integrations')
           .select('*')
           .eq('profile_id', profileData.id)
@@ -271,7 +271,7 @@ export default function IntegrationsPage() {
     if (!profile || !selectedIntegration) return
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('integrations')
         .upsert({
           profile_id: profile.id,
@@ -294,7 +294,7 @@ export default function IntegrationsPage() {
 
   const handleToggleIntegration = async (integration: Integration) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('integrations')
         .update({ is_active: !integration.is_active })
         .eq('id', integration.id)
@@ -324,7 +324,7 @@ export default function IntegrationsPage() {
     if (!confirm('Are you sure you want to remove this integration?')) return
 
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('integrations')
         .delete()
         .eq('id', integration.id)

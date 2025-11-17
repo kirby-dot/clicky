@@ -28,7 +28,7 @@ export default function DashboardLayout({
 
       if (user) {
         // Get user's subscription/plan
-        const { data: subData } = await supabase
+        const { data: subData } = await (supabase as any)
           .from('subscriptions')
           .select('plan')
           .eq('user_id', user.id)
@@ -42,7 +42,7 @@ export default function DashboardLayout({
         }
 
         // Get user's profiles
-        const { data: profilesData } = await supabase
+        const { data: profilesData } = await (supabase as any)
           .from('profiles')
           .select('id, title, slug, published')
           .eq('user_id', user.id)

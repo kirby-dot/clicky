@@ -32,7 +32,7 @@ function createServerClient() {
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const supabase = createServerClient()
 
-  const { data, error } = await supabase
+  const { data, error } = await (supabase as any)
     .from('profiles')
     .select('*')
     .eq('slug', params.username)
@@ -65,7 +65,7 @@ export default async function ProfilePage({ params }: Props) {
   const { data: { user } } = await supabase.auth.getUser()
 
   // Fetch profile - allow unpublished if user owns it
-  const { data: profileData } = await supabase
+  const { data: profileData } = await (supabase as any)
     .from('profiles')
     .select(`
       *,
@@ -81,7 +81,7 @@ export default async function ProfilePage({ params }: Props) {
   }
 
   // Fetch the profile owner's subscription tier
-  const { data: userData } = await supabase
+  const { data: userData } = await (supabase as any)
     .from('users')
     .select('subscription_tier')
     .eq('id', profile.user_id)
@@ -96,14 +96,14 @@ export default async function ProfilePage({ params }: Props) {
   }
 
   // Check for sections and modules (new system)
-  const { data: sections } = await supabase
+  const { data: sections } = await (supabase as any)
     .from('sections')
     .select('*')
     .eq('profile_id', profile.id)
     .eq('active', true)
     .order('order')
 
-  const { data: modules } = await supabase
+  const { data: modules } = await (supabase as any)
     .from('modules')
     .select('*')
     .eq('profile_id', profile.id)
@@ -124,7 +124,7 @@ export default async function ProfilePage({ params }: Props) {
   }
 
   // Otherwise, fall back to links (backward compatibility)
-  const { data: links } = await supabase
+  const { data: links } = await (supabase as any)
     .from('links')
     .select('*')
     .eq('profile_id', profile.id)
