@@ -328,26 +328,26 @@ function BuilderPageContent() {
       if (!user) return
 
       // Load all user profiles for the profile switcher
-      const { data: allProfiles } = await supabase
+      const { data: allProfiles } = await (supabase as any)
         .from('profiles')
         .select('*')
         .eq('user_id', user.id)
         .order('created_at', { ascending: true })
 
-      setProfiles(allProfiles || [])
+      setProfiles((allProfiles as any) || [])
 
       let profileData
 
       // If a specific profile ID is provided in the URL, load that profile
       if (profileIdFromUrl) {
-        const { data } = await supabase
+        const { data } = await (supabase as any)
           .from('profiles')
           .select('*')
           .eq('id', profileIdFromUrl)
           .eq('user_id', user.id) // Security: ensure the profile belongs to the user
           .maybeSingle()
 
-        profileData = data
+        profileData = data as any
       } else {
         // Otherwise, load the user's first profile
         profileData = allProfiles && allProfiles.length > 0 ? allProfiles[0] : null
@@ -368,7 +368,7 @@ function BuilderPageContent() {
       }
 
       // Load sections
-      const { data: sectionsData } = await supabase
+      const { data: sectionsData } = await (supabase as any)
         .from('sections')
         .select('*')
         .eq('profile_id', profileData.id)
@@ -376,7 +376,7 @@ function BuilderPageContent() {
 
       setSections((sectionsData as Section[]) || [])
 
-      const { data: modulesData } = await supabase
+      const { data: modulesData } = await (supabase as any)
         .from('modules')
         .select('*')
         .eq('profile_id', profileData.id)
