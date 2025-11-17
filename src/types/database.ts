@@ -267,6 +267,245 @@ export interface Database {
           updated_at?: string
         }
       }
+      modules: {
+        Row: {
+          id: string
+          profile_id: string
+          section_id: string | null
+          type: string
+          title: string | null
+          content: Json
+          position: number
+          visible: boolean
+          active: boolean
+          clicks: number
+          order: number | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          section_id?: string | null
+          type: string
+          title?: string | null
+          content: Json
+          position: number
+          visible?: boolean
+          active?: boolean
+          clicks?: number
+          order?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          section_id?: string | null
+          type?: string
+          title?: string | null
+          content?: Json
+          position?: number
+          visible?: boolean
+          active?: boolean
+          clicks?: number
+          order?: number | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      sections: {
+        Row: {
+          id: string
+          profile_id: string
+          name: string
+          layout: string
+          order: number
+          visible: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          name: string
+          layout: string
+          order: number
+          visible?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          name?: string
+          layout?: string
+          order?: number
+          visible?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      email_captures: {
+        Row: {
+          id: string
+          profile_id: string
+          module_id: string | null
+          email: string
+          subscribed: boolean
+          source: string | null
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          module_id?: string | null
+          email: string
+          subscribed?: boolean
+          source?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          module_id?: string | null
+          email?: string
+          subscribed?: boolean
+          source?: string | null
+          metadata?: Json | null
+          created_at?: string
+        }
+      }
+      contact_messages: {
+        Row: {
+          id: string
+          profile_id: string
+          module_id: string | null
+          name: string
+          email: string
+          message: string
+          read: boolean
+          metadata: Json | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          module_id?: string | null
+          name: string
+          email: string
+          message: string
+          read?: boolean
+          metadata?: Json | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          module_id?: string | null
+          name?: string
+          email?: string
+          message?: string
+          read?: boolean
+          metadata?: Json | null
+          created_at?: string
+        }
+      }
+      integrations: {
+        Row: {
+          id: string
+          profile_id: string
+          provider: string
+          config: Json
+          is_active: boolean
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          provider: string
+          config: Json
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          provider?: string
+          config?: Json
+          is_active?: boolean
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      subscriptions: {
+        Row: {
+          id: string
+          user_id: string
+          plan: string
+          status: string
+          current_period_start: string | null
+          current_period_end: string | null
+          cancel_at: string | null
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          plan: string
+          status: string
+          current_period_start?: string | null
+          current_period_end?: string | null
+          cancel_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          plan?: string
+          status?: string
+          current_period_start?: string | null
+          current_period_end?: string | null
+          cancel_at?: string | null
+          created_at?: string
+          updated_at?: string
+        }
+      }
+      team_members: {
+        Row: {
+          id: string
+          profile_id: string
+          email: string
+          role: string
+          status: string
+          invited_at: string
+          joined_at: string | null
+        }
+        Insert: {
+          id?: string
+          profile_id: string
+          email: string
+          role: string
+          status: string
+          invited_at?: string
+          joined_at?: string | null
+        }
+        Update: {
+          id?: string
+          profile_id?: string
+          email?: string
+          role?: string
+          status?: string
+          invited_at?: string
+          joined_at?: string | null
+        }
+      }
     }
     Views: {
       [_ in never]: never
