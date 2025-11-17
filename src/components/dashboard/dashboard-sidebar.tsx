@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Home, BarChart, Settings, LogOut, Box, ChevronDown, Plus, ExternalLink } from 'lucide-react'
@@ -22,8 +22,7 @@ const navItems: NavItem[] = [
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
 ]
 
-export function DashboardSidebar() {
-  const pathname = usePathname()
+function ProfileSwitcher() {
   const router = useRouter()
   const searchParams = useSearchParams()
   const supabase = createBrowserClient()
@@ -70,15 +69,122 @@ export function DashboardSidebar() {
     }
   }
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut()
-    router.push('/')
-  }
-
   const handleProfileSelect = (profile: Profile) => {
     setSelectedProfile(profile)
     setShowProfileDropdown(false)
     router.push(`/dashboard/builder?profile=${profile.id}`)
+  }
+
+  if (loading || profiles.length === 0) {
+    return null
+  }
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setShowProfileDropdown(!showProfileDropdown)}
+        className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-white/30 hover:bg-white/50 rounded-xl transition-all group"
+      >
+        <div className="flex items-center gap-3 flex-1 min-w-0">
+          <div className="w-10 h-10 bg-gradient-to-br from-accent-400 to-accent-600 rounded-lg flex items-center justify-center flex-shrink-0">
+            <span className="text-white font-bold text-sm">
+              {selectedProfile?.title?.charAt(0).toUpperCase() || 'P'}
+            </span>
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-semibold text-slate-800 truncate">
+              {selectedProfile?.title || 'Select Profile'}
+            </p>
+            <p className="text-xs text-slate-500 truncate">
+              {profiles.length} profile{profiles.length !== 1 ? 's' : ''}
+            </p>
+          </div>
+        </div>
+        <ChevronDown className={cn(
+          "w-4 h-4 text-slate-600 transition-transform",
+          showProfileDropdown && "rotate-180"
+        )} />
+      </button>
+
+      {/* Dropdown */}
+      {showProfileDropdown && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white/50 backdrop-blur-xl rounded-xl border border-white/30 shadow-lg z-50 overflow-hidden">
+          <div className="max-h-64 overflow-y-auto p-2">
+            {profiles.map((profile) => (
+              <button
+                key={profile.id}
+                onClick={() => handleProfileSelect(profile)}
+                className={cn(
+                  "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-left",
+                  selectedProfile?.id === profile.id
+                    ? "bg-accent-400 text-white"
+                    : "hover:bg-white/50 text-slate-800"
+                )}
+              >
+                <div className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
+                  selectedProfile?.id === profile.id
+                    ? "bg-white/20"
+                    : "bg-gradient-to-br from-accent-400 to-accent-600"
+                )}>
+                  <span className="font-bold text-xs text-white">
+                    {profile.title?.charAt(0).toUpperCase()}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-semibold truncate">{profile.title}</p>
+                  <p className={cn(
+                    "text-xs truncate",
+                    selectedProfile?.id === profile.id ? "text-white/70" : "text-slate-500"
+                  )}>
+                    /{profile.slug}
+                  </p>
+                </div>
+                {profile.published && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      window.open(`/${profile.slug}`, '_blank')
+                    }}
+                    className={cn(
+                      "p-1.5 rounded-lg transition-all",
+                      selectedProfile?.id === profile.id
+                        ? "hover:bg-white/20"
+                        : "hover:bg-white/30"
+                    )}
+                  >
+                    <ExternalLink className="w-3 h-3" />
+                  </button>
+                )}
+              </button>
+            ))}
+          </div>
+          <div className="border-t border-white/30 p-2">
+            <button
+              onClick={() => {
+                setShowProfileDropdown(false)
+                router.push('/dashboard/profiles')
+              }}
+              className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/50 transition-all text-slate-800"
+            >
+              <Plus className="w-4 h-4" />
+              <span className="text-sm font-semibold">New Profile</span>
+            </button>
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function DashboardSidebar() {
+  const pathname = usePathname()
+  const router = useRouter()
+  const supabase = createBrowserClient()
+
+  const handleLogout = async () => {
+    await supabase.auth.signOut()
+    router.push('/')
   }
 
   return (
@@ -91,106 +197,10 @@ export function DashboardSidebar() {
         <p className="text-sm text-slate-500 mt-1">Link in Bio Builder</p>
       </div>
 
-      {/* Profile Switcher */}
-      {!loading && profiles.length > 0 && (
-        <div className="relative">
-          <button
-            onClick={() => setShowProfileDropdown(!showProfileDropdown)}
-            className="w-full flex items-center justify-between gap-2 px-4 py-3 bg-white/30 hover:bg-white/50 rounded-xl transition-all group"
-          >
-            <div className="flex items-center gap-3 flex-1 min-w-0">
-              <div className="w-10 h-10 bg-gradient-to-br from-accent-400 to-accent-600 rounded-lg flex items-center justify-center flex-shrink-0">
-                <span className="text-white font-bold text-sm">
-                  {selectedProfile?.title?.charAt(0).toUpperCase() || 'P'}
-                </span>
-              </div>
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-semibold text-slate-800 truncate">
-                  {selectedProfile?.title || 'Select Profile'}
-                </p>
-                <p className="text-xs text-slate-500 truncate">
-                  {profiles.length} profile{profiles.length !== 1 ? 's' : ''}
-                </p>
-              </div>
-            </div>
-            <ChevronDown className={cn(
-              "w-4 h-4 text-slate-600 transition-transform",
-              showProfileDropdown && "rotate-180"
-            )} />
-          </button>
-
-          {/* Dropdown */}
-          {showProfileDropdown && (
-            <div className="absolute top-full left-0 right-0 mt-2 bg-white/50 backdrop-blur-xl rounded-xl border border-white/30 shadow-lg z-50 overflow-hidden">
-              <div className="max-h-64 overflow-y-auto p-2">
-                {profiles.map((profile) => (
-                  <button
-                    key={profile.id}
-                    onClick={() => handleProfileSelect(profile)}
-                    className={cn(
-                      "w-full flex items-center gap-3 px-3 py-2 rounded-lg transition-all text-left",
-                      selectedProfile?.id === profile.id
-                        ? "bg-accent-400 text-white"
-                        : "hover:bg-white/50 text-slate-800"
-                    )}
-                  >
-                    <div className={cn(
-                      "w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0",
-                      selectedProfile?.id === profile.id
-                        ? "bg-white/20"
-                        : "bg-gradient-to-br from-accent-400 to-accent-600"
-                    )}>
-                      <span className={cn(
-                        "font-bold text-xs",
-                        selectedProfile?.id === profile.id ? "text-white" : "text-white"
-                      )}>
-                        {profile.title?.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-semibold truncate">{profile.title}</p>
-                      <p className={cn(
-                        "text-xs truncate",
-                        selectedProfile?.id === profile.id ? "text-white/70" : "text-slate-500"
-                      )}>
-                        /{profile.slug}
-                      </p>
-                    </div>
-                    {profile.published && (
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          window.open(`/${profile.slug}`, '_blank')
-                        }}
-                        className={cn(
-                          "p-1.5 rounded-lg transition-all",
-                          selectedProfile?.id === profile.id
-                            ? "hover:bg-white/20"
-                            : "hover:bg-white/30"
-                        )}
-                      >
-                        <ExternalLink className="w-3 h-3" />
-                      </button>
-                    )}
-                  </button>
-                ))}
-              </div>
-              <div className="border-t border-white/30 p-2">
-                <button
-                  onClick={() => {
-                    setShowProfileDropdown(false)
-                    router.push('/dashboard/profiles')
-                  }}
-                  className="w-full flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-white/50 transition-all text-slate-800"
-                >
-                  <Plus className="w-4 h-4" />
-                  <span className="text-sm font-semibold">New Profile</span>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
+      {/* Profile Switcher - Wrapped in Suspense */}
+      <Suspense fallback={<div className="h-16 bg-white/30 rounded-xl animate-pulse" />}>
+        <ProfileSwitcher />
+      </Suspense>
 
       {/* Navigation */}
       <nav className="flex-1 space-y-2">
