@@ -20,13 +20,18 @@ export default function HomePage() {
   const scale = useTransform(scrollYProgress, [0, 1], [1, 0.8])
 
   return (
-    <div className="min-h-screen bg-white">
+    <div
+      className="min-h-screen"
+      style={{
+        background: 'radial-gradient(ellipse at top, #f3e8ff 0%, #fff7f3 50%, #fef3f2 100%)',
+      }}
+    >
       {/* Header */}
       <motion.header
         initial={{ y: -100, opacity: 0 }}
         animate={{ y: 0, opacity: 1 }}
         transition={{ duration: 0.6, ease: "easeOut" }}
-        className="border-b border-gray-200 bg-white/80 backdrop-blur-md sticky top-0 z-50 shadow-soft"
+        className="bg-white/50 backdrop-blur-xl border-b border-white/20 sticky top-0 z-50 shadow-sm"
       >
         <div className="container mx-auto px-6 py-5 flex justify-between items-center">
           <motion.div
@@ -35,13 +40,13 @@ export default function HomePage() {
             transition={{ type: "spring", stiffness: 400, damping: 10 }}
           >
             <motion.div
-              className="w-10 h-10 bg-gradient-to-br from-primary-500 to-purple-500 rounded-2xl flex items-center justify-center shadow-soft"
+              className="w-10 h-10 bg-gradient-to-br from-accent-400 to-accent-600 rounded-2xl flex items-center justify-center shadow-soft"
               whileHover={{ rotate: 360 }}
               transition={{ duration: 0.6, ease: "easeInOut" }}
             >
               <Link2 className="w-6 h-6 text-white" />
             </motion.div>
-            <span className="text-2xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">
+            <span className="text-2xl font-bold bg-gradient-to-r from-accent-400 to-accent-600 bg-clip-text text-transparent">
               Clicky
             </span>
           </motion.div>
@@ -53,10 +58,10 @@ export default function HomePage() {
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 * (i + 1), duration: 0.5 }}
-                className="text-gray-700 hover:text-gray-900 font-semibold transition-colors relative group"
+                className="text-slate-700 hover:text-slate-900 font-semibold transition-colors relative group"
               >
                 {item}
-                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary-500 to-purple-500 group-hover:w-full transition-all duration-300"></span>
+                <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-accent-400 to-accent-600 group-hover:w-full transition-all duration-300"></span>
               </motion.a>
             ))}
           </nav>
@@ -68,18 +73,17 @@ export default function HomePage() {
           >
             <Link
               href="/login"
-              className="text-gray-700 hover:text-gray-900 font-semibold transition-colors relative group"
+              className="text-slate-700 hover:text-slate-900 font-semibold transition-colors relative group"
             >
               Login
-              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary-500 to-purple-500 group-hover:w-full transition-all duration-300"></span>
+              <span className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-accent-400 to-accent-600 group-hover:w-full transition-all duration-300"></span>
             </Link>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href="/signup"
-                className="bg-primary-500 text-white px-6 py-3 rounded-xl hover:bg-primary-600 transition-all font-semibold shadow-soft hover:shadow-soft-lg relative overflow-hidden group"
+                className="bg-accent-400 text-white px-6 py-3 rounded-xl hover:bg-accent-500 transition-all font-semibold shadow-sm hover:shadow-md"
               >
-                <span className="relative z-10">Get Started Free</span>
-                <span className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                Get Started Free
               </Link>
             </motion.div>
           </motion.div>
@@ -96,7 +100,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="inline-flex items-center space-x-2 bg-gradient-to-r from-pastel-sky to-pastel-lavender text-gray-900 border border-gray-200 rounded-full px-6 py-3 mb-8 shadow-soft font-semibold group cursor-default"
+            className="inline-flex items-center space-x-2 bg-white/50 backdrop-blur-xl text-slate-800 border border-white/30 rounded-full px-6 py-3 mb-8 shadow-sm font-semibold group cursor-default"
           >
             <motion.div
               animate={{
@@ -109,7 +113,7 @@ export default function HomePage() {
                 repeatDelay: 1
               }}
             >
-              <Sparkles className="w-5 h-5" />
+              <Sparkles className="w-5 h-5 text-accent-500" />
             </motion.div>
             <span className="text-base">The most powerful link-in-bio builder</span>
           </motion.div>
@@ -118,7 +122,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.3 }}
-            className="text-5xl md:text-7xl font-bold mb-6 text-gray-900 leading-tight"
+            className="text-5xl md:text-7xl font-bold mb-6 text-slate-900 leading-tight"
           >
             One Link,
             <br />
@@ -126,7 +130,7 @@ export default function HomePage() {
               initial={{ opacity: 0, scale: 0.5 }}
               animate={{ opacity: 1, scale: 1 }}
               transition={{ duration: 0.8, delay: 0.5, type: "spring" }}
-              className="bg-gradient-to-r from-primary-500 to-purple-500 bg-clip-text text-transparent inline-block"
+              className="bg-gradient-to-r from-accent-400 to-accent-600 bg-clip-text text-transparent inline-block"
             >
               Infinite
             </motion.span>{' '}
@@ -137,7 +141,7 @@ export default function HomePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6, delay: 0.6 }}
-            className="text-xl text-gray-600 mb-12 max-w-2xl mx-auto"
+            className="text-xl text-slate-600 mb-12 max-w-2xl mx-auto"
           >
             Build stunning link-in-bio pages with our visual drag-and-drop builder.
             15+ module types, team collaboration, analytics, and more — all in one platform.
@@ -152,23 +156,21 @@ export default function HomePage() {
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href="/signup"
-                className="bg-primary-500 text-white px-8 py-4 rounded-xl hover:bg-primary-600 transition-all shadow-soft-lg hover:shadow-soft-xl flex items-center justify-center space-x-2 text-lg font-semibold relative overflow-hidden group"
+                className="bg-accent-400 text-white px-8 py-4 rounded-xl hover:bg-accent-500 transition-all shadow-md hover:shadow-lg flex items-center justify-center space-x-2 text-lg font-semibold"
               >
-                <span className="relative z-10">Start Building Free</span>
+                <span>Start Building Free</span>
                 <motion.div
-                  className="relative z-10"
                   animate={{ x: [0, 5, 0] }}
                   transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 0.5 }}
                 >
                   <ArrowRight className="w-6 h-6" />
                 </motion.div>
-                <span className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
               </Link>
             </motion.div>
             <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
               <Link
                 href="#features"
-                className="bg-white text-gray-700 px-8 py-4 rounded-xl border border-gray-300 hover:bg-gray-50 transition-all shadow-soft hover:shadow-soft-lg flex items-center justify-center space-x-2 text-lg font-semibold"
+                className="bg-white/50 backdrop-blur-xl text-slate-700 px-8 py-4 rounded-xl border border-white/30 hover:bg-white/70 transition-all shadow-sm hover:shadow-md flex items-center justify-center space-x-2 text-lg font-semibold"
               >
                 <span>See Features</span>
               </Link>
@@ -185,7 +187,7 @@ export default function HomePage() {
             <motion.div
               whileHover={{ y: -5 }}
               transition={{ type: "spring", stiffness: 300 }}
-              className="bg-white border border-gray-200 rounded-3xl shadow-soft-xl p-8 max-w-md mx-auto"
+              className="bg-white/50 backdrop-blur-xl border border-white/30 rounded-3xl shadow-lg p-8 max-w-md mx-auto"
             >
               <div className="flex flex-col items-center">
                 <motion.div
@@ -198,13 +200,13 @@ export default function HomePage() {
                     repeat: Infinity,
                     repeatType: "reverse"
                   }}
-                  className="w-24 h-24 bg-gradient-to-br from-primary-500 to-purple-500 rounded-full mb-4 shadow-soft"
+                  className="w-24 h-24 bg-gradient-to-br from-accent-400 to-accent-600 rounded-full mb-4 shadow-sm"
                 ></motion.div>
                 <motion.h3
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1.1 }}
-                  className="text-2xl font-bold mb-2"
+                  className="text-2xl font-bold mb-2 text-slate-800"
                 >
                   @yourname
                 </motion.h3>
@@ -212,15 +214,15 @@ export default function HomePage() {
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
                   transition={{ delay: 1.2 }}
-                  className="text-gray-600 text-base mb-6 text-center"
+                  className="text-slate-600 text-base mb-6 text-center"
                 >
                   Creator, Developer, Dreamer
                 </motion.p>
                 <div className="space-y-3 w-full">
                   {[
-                    { name: 'My Portfolio', color: 'bg-pastel-butter' },
-                    { name: 'Latest Project', color: 'bg-pastel-rose' },
-                    { name: 'Social Links', color: 'bg-pastel-sky' }
+                    { name: 'My Portfolio', color: 'from-blue-100 to-blue-200' },
+                    { name: 'Latest Project', color: 'from-purple-100 to-purple-200' },
+                    { name: 'Social Links', color: 'from-green-100 to-green-200' }
                   ].map((link, i) => (
                     <motion.div
                       key={i}
@@ -229,7 +231,7 @@ export default function HomePage() {
                       transition={{ delay: 1.3 + i * 0.1 }}
                       whileHover={{ scale: 1.05, x: 5 }}
                       whileTap={{ scale: 0.95 }}
-                      className={`${link.color} border border-gray-200 rounded-2xl p-4 text-center font-semibold shadow-soft hover:shadow-soft-lg transition-all cursor-pointer text-gray-900`}
+                      className={`bg-gradient-to-r ${link.color} backdrop-blur-sm border border-white/30 rounded-2xl p-4 text-center font-semibold shadow-sm hover:shadow-md transition-all cursor-pointer text-slate-800`}
                     >
                       {link.name}
                     </motion.div>
@@ -242,7 +244,7 @@ export default function HomePage() {
       </section>
 
       {/* Features Section */}
-      <section id="features" className="bg-gradient-to-br from-pastel-mint to-pastel-sage border-y border-gray-200 py-20">
+      <section id="features" className="py-20">
         <div className="container mx-auto px-6">
           <motion.div
             initial={{ opacity: 0, y: 30 }}
@@ -251,8 +253,8 @@ export default function HomePage() {
             transition={{ duration: 0.6 }}
             className="text-center mb-16"
           >
-            <h2 className="text-5xl font-bold mb-4 text-gray-900">Everything you need to stand out</h2>
-            <p className="text-xl text-gray-600">
+            <h2 className="text-5xl font-bold mb-4 text-slate-900">Everything you need to stand out</h2>
+            <p className="text-xl text-slate-600">
               Powerful features that make your links unforgettable
             </p>
           </motion.div>
@@ -262,56 +264,56 @@ export default function HomePage() {
               {
                 icon: <Layout className="w-8 h-8" />,
                 title: "Visual Page Builder",
-                description: "Drag-and-drop builder with live preview. Three-panel interface for effortless customization.",
-                color: "bg-pastel-butter"
+                description: "Drag-and-drop builder with live preview. Clean interface for effortless customization.",
+                color: "from-blue-100 to-blue-200"
               },
               {
                 icon: <Layers className="w-8 h-8" />,
                 title: "15+ Module Types",
                 description: "Links, headers, images, videos, music players, social icons, countdowns, FAQs, and more.",
-                color: "bg-pastel-rose"
+                color: "from-purple-100 to-purple-200"
               },
               {
                 icon: <Users className="w-8 h-8" />,
                 title: "Multi-Profile Support",
                 description: "Create unlimited profiles on Business plan. Perfect for managing multiple brands or clients.",
-                color: "bg-pastel-sky"
+                color: "from-green-100 to-green-200"
               },
               {
                 icon: <Palette className="w-8 h-8" />,
                 title: "Custom Styling",
                 description: "Full design control with backgrounds, animations, colors, and fonts. Make it uniquely yours.",
-                color: "bg-pastel-lavender"
+                color: "from-pink-100 to-pink-200"
               },
               {
                 icon: <BarChart3 className="w-8 h-8" />,
                 title: "Advanced Analytics",
                 description: "Track clicks, views, and engagement. Understand your audience with real-time insights.",
-                color: "bg-pastel-peach"
+                color: "from-yellow-100 to-yellow-200"
               },
               {
                 icon: <Zap className="w-8 h-8" />,
                 title: "15+ Integrations",
                 description: "Connect with Stripe, Mailchimp, Google Analytics, Facebook Pixel, Zapier, and more.",
-                color: "bg-pastel-mint"
+                color: "from-teal-100 to-teal-200"
               },
               {
                 icon: <Users className="w-8 h-8" />,
                 title: "Team Collaboration",
                 description: "Invite team members with role-based permissions. Work together seamlessly.",
-                color: "bg-pastel-sage"
+                color: "from-indigo-100 to-indigo-200"
               },
               {
                 icon: <Smartphone className="w-8 h-8" />,
                 title: "Mobile Optimized",
                 description: "Perfect on every device. Preview in mobile, tablet, and desktop modes.",
-                color: "bg-pastel-lilac"
+                color: "from-orange-100 to-orange-200"
               },
               {
                 icon: <Shield className="w-8 h-8" />,
                 title: "Secure & Fast",
                 description: "Enterprise-grade security with lightning-fast page loads. Your data is safe with us.",
-                color: "bg-pastel-butter"
+                color: "from-red-100 to-red-200"
               }
             ].map((feature, i) => (
               <FeatureCard
@@ -331,21 +333,21 @@ export default function HomePage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ duration: 0.6 }}
-            className="bg-white rounded-3xl border border-gray-200 p-8 md:p-12 shadow-soft-xl max-w-5xl mx-auto"
+            className="bg-white/50 backdrop-blur-xl rounded-3xl border border-white/30 p-8 md:p-12 shadow-lg max-w-5xl mx-auto"
           >
-            <h3 className="text-3xl font-bold text-center mb-8 text-gray-900">15+ Powerful Module Types</h3>
+            <h3 className="text-3xl font-bold text-center mb-8 text-slate-900">15+ Powerful Module Types</h3>
             <div className="grid grid-cols-3 md:grid-cols-5 gap-4">
               {[
-                { icon: <Link2 className="w-6 h-6" />, label: "Links", color: "bg-pastel-sky" },
-                { icon: <Type className="w-6 h-6" />, label: "Headers", color: "bg-pastel-lavender" },
-                { icon: <ImageIcon className="w-6 h-6" />, label: "Images", color: "bg-pastel-rose" },
-                { icon: <Video className="w-6 h-6" />, label: "Videos", color: "bg-pastel-peach" },
-                { icon: <Music className="w-6 h-6" />, label: "Music", color: "bg-pastel-mint" },
-                { icon: <Users className="w-6 h-6" />, label: "Social", color: "bg-pastel-butter" },
-                { icon: <Mail className="w-6 h-6" />, label: "Email", color: "bg-pastel-sage" },
-                { icon: <Globe className="w-6 h-6" />, label: "Buttons", color: "bg-pastel-lilac" },
-                { icon: <Type className="w-6 h-6" />, label: "Text", color: "bg-pastel-sky" },
-                { icon: <Layout className="w-6 h-6" />, label: "Dividers", color: "bg-pastel-rose" }
+                { icon: <Link2 className="w-6 h-6" />, label: "Links", color: "from-blue-100 to-blue-200" },
+                { icon: <Type className="w-6 h-6" />, label: "Headers", color: "from-purple-100 to-purple-200" },
+                { icon: <ImageIcon className="w-6 h-6" />, label: "Images", color: "from-pink-100 to-pink-200" },
+                { icon: <Video className="w-6 h-6" />, label: "Videos", color: "from-red-100 to-red-200" },
+                { icon: <Music className="w-6 h-6" />, label: "Music", color: "from-green-100 to-green-200" },
+                { icon: <Users className="w-6 h-6" />, label: "Social", color: "from-yellow-100 to-yellow-200" },
+                { icon: <Mail className="w-6 h-6" />, label: "Email", color: "from-teal-100 to-teal-200" },
+                { icon: <Globe className="w-6 h-6" />, label: "Buttons", color: "from-indigo-100 to-indigo-200" },
+                { icon: <Type className="w-6 h-6" />, label: "Text", color: "from-orange-100 to-orange-200" },
+                { icon: <Layout className="w-6 h-6" />, label: "Dividers", color: "from-cyan-100 to-cyan-200" }
               ].map((module, i) => (
                 <motion.div
                   key={i}
@@ -354,10 +356,10 @@ export default function HomePage() {
                   viewport={{ once: true }}
                   transition={{ delay: i * 0.05, duration: 0.3 }}
                   whileHover={{ scale: 1.1, rotate: 5 }}
-                  className={`${module.color} border border-gray-200 rounded-2xl p-4 flex flex-col items-center justify-center shadow-soft hover:shadow-soft-lg transition-all`}
+                  className={`bg-gradient-to-br ${module.color} border border-white/30 rounded-2xl p-4 flex flex-col items-center justify-center shadow-sm hover:shadow-md transition-all`}
                 >
-                  <div className="text-gray-900 mb-2">{module.icon}</div>
-                  <span className="text-xs font-semibold text-gray-900">{module.label}</span>
+                  <div className="text-slate-700 mb-2">{module.icon}</div>
+                  <span className="text-xs font-semibold text-slate-700">{module.label}</span>
                 </motion.div>
               ))}
             </div>
@@ -374,8 +376,8 @@ export default function HomePage() {
           transition={{ duration: 0.6 }}
           className="text-center mb-16"
         >
-          <h2 className="text-5xl font-bold mb-4 text-gray-900">Simple, transparent pricing</h2>
-          <p className="text-xl text-gray-600">
+          <h2 className="text-5xl font-bold mb-4 text-slate-900">Simple, transparent pricing</h2>
+          <p className="text-xl text-slate-600">
             Choose the perfect plan for your needs
           </p>
         </motion.div>
@@ -449,7 +451,7 @@ export default function HomePage() {
           whileInView={{ opacity: 1, scale: 1 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          className="bg-gradient-to-br from-pastel-lavender to-pastel-lilac border border-gray-200 rounded-3xl p-12 text-center text-gray-900 shadow-soft-xl"
+          className="bg-white/50 backdrop-blur-xl border border-white/30 rounded-3xl p-12 text-center text-slate-900 shadow-lg"
         >
           <motion.h2
             initial={{ opacity: 0, y: 20 }}
@@ -465,7 +467,7 @@ export default function HomePage() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
             transition={{ delay: 0.3, duration: 0.5 }}
-            className="text-xl mb-8 text-gray-700"
+            className="text-xl mb-8 text-slate-700"
           >
             Join thousands of creators sharing their links with Clicky
           </motion.p>
@@ -479,39 +481,37 @@ export default function HomePage() {
           >
             <Link
               href="/signup"
-              className="inline-flex items-center space-x-2 bg-primary-500 text-white px-8 py-4 rounded-xl hover:bg-primary-600 transition-all shadow-soft-lg hover:shadow-soft-xl text-lg font-semibold relative overflow-hidden group"
+              className="inline-flex items-center space-x-2 bg-accent-400 text-white px-8 py-4 rounded-xl hover:bg-accent-500 transition-all shadow-md hover:shadow-lg text-lg font-semibold"
             >
-              <span className="relative z-10">Create Your Free Account</span>
+              <span>Create Your Free Account</span>
               <motion.div
-                className="relative z-10"
                 animate={{ x: [0, 5, 0] }}
                 transition={{ duration: 1.5, repeat: Infinity, repeatDelay: 0.5 }}
               >
                 <ArrowRight className="w-6 h-6" />
               </motion.div>
-              <span className="absolute inset-0 bg-gradient-to-r from-purple-500 to-pink-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
             </Link>
           </motion.div>
         </motion.div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 py-12 bg-white">
+      <footer className="border-t border-white/30 py-12 bg-white/30 backdrop-blur-xl">
         <div className="container mx-auto px-6">
           <div className="flex flex-col md:flex-row justify-between items-center">
             <div className="flex items-center space-x-3 mb-4 md:mb-0">
-              <div className="w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-500 rounded-xl flex items-center justify-center">
+              <div className="w-8 h-8 bg-gradient-to-br from-accent-400 to-accent-600 rounded-xl flex items-center justify-center">
                 <Link2 className="w-5 h-5 text-white" />
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary-600 to-purple-600 bg-clip-text text-transparent">Clicky</span>
+              <span className="text-xl font-bold bg-gradient-to-r from-accent-400 to-accent-600 bg-clip-text text-transparent">Clicky</span>
             </div>
-            <div className="flex space-x-8 text-gray-600 font-semibold">
-              <a href="#" className="hover:text-gray-900 transition-colors">Terms</a>
-              <a href="#" className="hover:text-gray-900 transition-colors">Privacy</a>
-              <a href="#" className="hover:text-gray-900 transition-colors">Support</a>
+            <div className="flex space-x-8 text-slate-600 font-semibold">
+              <a href="#" className="hover:text-slate-900 transition-colors">Terms</a>
+              <a href="#" className="hover:text-slate-900 transition-colors">Privacy</a>
+              <a href="#" className="hover:text-slate-900 transition-colors">Support</a>
             </div>
           </div>
-          <div className="text-center mt-8 text-gray-500 text-sm">
+          <div className="text-center mt-8 text-slate-500 text-sm">
             © {new Date().getFullYear()} Clicky. All rights reserved.
           </div>
         </div>
@@ -540,17 +540,17 @@ function FeatureCard({
       viewport={{ once: true, margin: "-50px" }}
       transition={{ duration: 0.5, delay: index * 0.05 }}
       whileHover={{ y: -8, scale: 1.02 }}
-      className="p-6 border border-gray-200 rounded-2xl bg-white transition-all hover:shadow-soft-lg group"
+      className="p-6 border border-white/30 rounded-2xl bg-white/50 backdrop-blur-xl transition-all hover:shadow-lg group"
     >
       <motion.div
         whileHover={{ rotate: [0, -10, 10, -10, 0], scale: 1.1 }}
         transition={{ duration: 0.5 }}
-        className={`${color} text-gray-900 w-16 h-16 border border-gray-200 rounded-xl flex items-center justify-center mb-4 shadow-soft group-hover:shadow-soft-lg transition-all`}
+        className={`bg-gradient-to-br ${color} text-slate-700 w-16 h-16 border border-white/30 rounded-xl flex items-center justify-center mb-4 shadow-sm group-hover:shadow-md transition-all`}
       >
         {icon}
       </motion.div>
-      <h3 className="text-xl font-bold mb-2">{title}</h3>
-      <p className="text-gray-600 text-sm">{description}</p>
+      <h3 className="text-xl font-bold mb-2 text-slate-800">{title}</h3>
+      <p className="text-slate-600 text-sm">{description}</p>
     </motion.div>
   )
 }
@@ -583,28 +583,28 @@ function PricingCard({
       viewport={{ once: true }}
       transition={{ duration: 0.5, delay: index * 0.1 }}
       whileHover={{ y: -8 }}
-      className={`relative p-8 border-2 rounded-3xl bg-white transition-all hover:shadow-soft-xl ${
-        popular ? 'border-primary-500 shadow-soft-lg' : 'border-gray-200'
+      className={`relative p-8 border-2 rounded-3xl bg-white/50 backdrop-blur-xl transition-all hover:shadow-xl ${
+        popular ? 'border-accent-400 shadow-lg' : 'border-white/30'
       }`}
     >
       {popular && (
-        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-primary-500 to-purple-500 text-white px-6 py-1.5 rounded-full text-sm font-bold shadow-soft">
+        <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-accent-400 to-accent-600 text-white px-6 py-1.5 rounded-full text-sm font-bold shadow-sm">
           MOST POPULAR
         </div>
       )}
       <div className="text-center mb-6">
-        <h3 className="text-2xl font-bold text-gray-900 mb-2">{name}</h3>
+        <h3 className="text-2xl font-bold text-slate-900 mb-2">{name}</h3>
         <div className="mb-2">
-          <span className="text-5xl font-bold text-gray-900">{price}</span>
-          <span className="text-gray-600 ml-2">/ {period}</span>
+          <span className="text-5xl font-bold text-slate-900">{price}</span>
+          <span className="text-slate-600 ml-2">/ {period}</span>
         </div>
-        <p className="text-gray-600">{description}</p>
+        <p className="text-slate-600">{description}</p>
       </div>
       <ul className="space-y-3 mb-8">
         {features.map((feature, i) => (
           <li key={i} className="flex items-start gap-3">
-            <Check className="w-5 h-5 text-primary-500 flex-shrink-0 mt-0.5" />
-            <span className="text-gray-700">{feature}</span>
+            <Check className="w-5 h-5 text-accent-500 flex-shrink-0 mt-0.5" />
+            <span className="text-slate-700">{feature}</span>
           </li>
         ))}
       </ul>
@@ -612,8 +612,8 @@ function PricingCard({
         href="/signup"
         className={`block text-center px-6 py-3 rounded-xl font-semibold transition-all ${
           buttonVariant === 'primary'
-            ? 'bg-primary-500 text-white hover:bg-primary-600 shadow-soft hover:shadow-soft-lg'
-            : 'bg-white text-gray-900 border-2 border-gray-300 hover:border-gray-400'
+            ? 'bg-accent-400 text-white hover:bg-accent-500 shadow-sm hover:shadow-md'
+            : 'bg-white/50 backdrop-blur-sm text-slate-900 border-2 border-white/30 hover:bg-white/70'
         }`}
       >
         {buttonText}
