@@ -399,7 +399,7 @@ function BuilderPageContent() {
 
     setSaving(true)
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('modules')
         .insert({
           profile_id: profile.id,
