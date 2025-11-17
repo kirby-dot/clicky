@@ -471,7 +471,7 @@ export default function SettingsPage() {
                   </div>
                   <div>
                     <h2 className="text-xl font-bold text-slate-800">Current Plan</h2>
-                    <p className="text-sm text-slate-600">You're on the {planInfo.name} plan</p>
+                    <p className="text-sm text-slate-600">You&apos;re on the {planInfo.name} plan</p>
                   </div>
                 </div>
                 <GlassBadge variant="success">Active</GlassBadge>

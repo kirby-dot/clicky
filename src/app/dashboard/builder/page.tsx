@@ -1,12 +1,12 @@
 'use client'
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useCallback, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { createBrowserClient } from '@/lib/supabase'
 import { GlassPanel, GlassButton, GlassInput, GlassBadge } from '@/components/ui/glass'
 import {
   Search, Plus, GripVertical, MoreHorizontal, ChevronDown, ChevronRight,
-  Link as LinkIcon, Type, Image, Video, Mail, Users, Eye, EyeOff
+  Link as LinkIcon, Type, Image as ImageIcon, Video, Mail, Users, Eye, EyeOff
 } from 'lucide-react'
 import type { Module, Section, Profile } from '@/types'
 
@@ -15,7 +15,7 @@ const MODULE_ICONS: Record<string, React.ReactNode> = {
   link: <LinkIcon className="w-4 h-4" />,
   header: <Type className="w-4 h-4" />,
   text: <Type className="w-4 h-4" />,
-  image: <Image className="w-4 h-4" />,
+  image: <ImageIcon className="w-4 h-4" />,
   video: <Video className="w-4 h-4" />,
   'email-capture': <Mail className="w-4 h-4" />,
   'contact-form': <Mail className="w-4 h-4" />,
@@ -26,7 +26,7 @@ interface SectionWithModules extends Section {
   modules: Module[]
 }
 
-export default function BuilderPage() {
+function BuilderContent() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [sections, setSections] = useState<SectionWithModules[]>([])
   const [loading, setLoading] = useState(true)
@@ -36,11 +36,7 @@ export default function BuilderPage() {
   const searchParams = useSearchParams()
   const supabase = createBrowserClient()
 
-  useEffect(() => {
-    loadData()
-  }, [searchParams])
-
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) {
@@ -101,7 +97,11 @@ export default function BuilderPage() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [searchParams, supabase, router])
+
+  useEffect(() => {
+    loadData()
+  }, [loadData])
 
   const toggleSection = (sectionId: string) => {
     const newExpanded = new Set(expandedSections)
@@ -302,5 +302,17 @@ export default function BuilderPage() {
         )}
       </GlassPanel>
     </div>
+  )
+}
+
+export default function BuilderPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center h-full">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-accent-400"></div>
+      </div>
+    }>
+      <BuilderContent />
+    </Suspense>
   )
 }
