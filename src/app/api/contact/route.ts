@@ -45,7 +45,7 @@ export async function POST(request: Request) {
     )
 
     // Insert contact message
-    const { data: contactMessage, error: insertError } = await supabase
+    const { data: contactMessage, error: insertError } = await (supabase
       .from('contact_messages' as any)
       .insert({
         profile_id,
@@ -59,9 +59,9 @@ export async function POST(request: Request) {
           referer: request.headers.get('referer'),
           ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
         }
-      })
+      } as any)
       .select()
-      .single()
+      .single() as any)
 
     if (insertError) {
       console.error('Contact message error:', insertError)
