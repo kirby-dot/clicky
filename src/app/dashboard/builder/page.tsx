@@ -47,22 +47,38 @@ function BuilderContent() {
       // Get profile ID from URL parameter
       const profileId = searchParams.get('profile')
 
-      if (!profileId) {
-        // No profile specified, redirect to dashboard
-        router.push('/dashboard')
-        return
+      let profileData
+
+      if (profileId) {
+        // Load specific profile by ID
+        const { data } = await (supabase as any)
+          .from('profiles')
+          .select('*')
+          .eq('id', profileId)
+          .eq('user_id', user.id) // Ensure user owns this profile
+          .single()
+
+        profileData = data
+      } else {
+        // No profile specified, load user's first profile
+        const { data } = await (supabase as any)
+          .from('profiles')
+          .select('*')
+          .eq('user_id', user.id)
+          .order('created_at', { ascending: false })
+          .limit(1)
+          .maybeSingle()
+
+        profileData = data
+
+        // Update URL with the loaded profile ID
+        if (profileData) {
+          router.replace(`/dashboard/builder?profile=${profileData.id}`)
+        }
       }
 
-      // Load specific profile
-      const { data: profileData } = await (supabase as any)
-        .from('profiles')
-        .select('*')
-        .eq('id', profileId)
-        .eq('user_id', user.id) // Ensure user owns this profile
-        .single()
-
       if (!profileData) {
-        // Profile not found or doesn't belong to user
+        // No profiles found, redirect to dashboard to create one
         router.push('/dashboard')
         return
       }
