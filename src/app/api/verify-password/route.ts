@@ -20,7 +20,7 @@ export async function POST(request: Request) {
     )
 
     // Fetch profile with password
-    const { data: profile } = await supabase
+    const { data: profile } = await (supabase as any)
       .from('profiles')
       .select('meta_tags')
       .eq('id', profileId)
@@ -34,7 +34,7 @@ export async function POST(request: Request) {
     }
 
     // Check if profile has password protection
-    const metaTags = profile.meta_tags as any
+    const metaTags = (profile as any).meta_tags
     const profilePassword = metaTags?.password
 
     if (!profilePassword) {
