@@ -70,6 +70,26 @@ export interface AnalyticsData {
   }>
 }
 
+export interface GlobalTheme {
+  typography: {
+    fontFamily: string
+    headingSize: 'small' | 'medium' | 'large' | 'xlarge'
+    bodySize: 'small' | 'medium' | 'large'
+  }
+  colors: {
+    primary: string
+    secondary: string
+    accent: string
+    background: string
+    text: string
+  }
+  layout: {
+    buttonRoundness: 'square' | 'rounded' | 'pill'
+    sectionSpacing: 'compact' | 'normal' | 'spacious'
+    moduleSpacing: 'compact' | 'normal' | 'spacious'
+  }
+}
+
 // Module System Types
 export type ModuleType =
   | 'link'
@@ -82,6 +102,7 @@ export type ModuleType =
   | 'music'
   | 'contact-form'
   | 'email-signup'
+  | 'email-capture'
   | 'testimonial'
   | 'faq'
   | 'payment-button'
@@ -105,6 +126,7 @@ export interface BaseModule {
   type: ModuleType
   title?: string
   position: number
+  order?: number
   active: boolean
   clicks: number
   created_at: string

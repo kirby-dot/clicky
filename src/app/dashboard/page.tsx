@@ -95,10 +95,10 @@ export default function DashboardPage() {
         .eq('profile_id', profileId)
         .gte('timestamp', today.toISOString())
 
-      const views = allEvents?.filter(e => e.event_type === 'view').length || 0
-      const clicks = allEvents?.filter(e => e.event_type === 'click').length || 0
-      const viewsToday = todayEvents?.filter(e => e.event_type === 'view').length || 0
-      const clicksToday = todayEvents?.filter(e => e.event_type === 'click').length || 0
+      const views = allEvents?.filter((e: any) => e.event_type === 'view').length || 0
+      const clicks = allEvents?.filter((e: any) => e.event_type === 'click').length || 0
+      const viewsToday = todayEvents?.filter((e: any) => e.event_type === 'view').length || 0
+      const clicksToday = todayEvents?.filter((e: any) => e.event_type === 'click').length || 0
 
       setStats({
         views,
