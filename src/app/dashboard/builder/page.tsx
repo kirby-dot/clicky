@@ -427,7 +427,7 @@ function BuilderPageContent() {
 
   const handleMoveModuleToSection = async (moduleId: string, sectionId: string | null, columnIndex: number) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('modules')
         .update({
           section_id: sectionId,
@@ -466,7 +466,7 @@ function BuilderPageContent() {
 
   const handleToggleActive = async (module: Module) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('modules')
         .update({ active: !module.active })
         .eq('id', module.id)
@@ -555,7 +555,7 @@ function BuilderPageContent() {
 
   const handleUpdateModule = async (module: Module) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('modules')
         .update({
           title: module.title,
@@ -580,7 +580,7 @@ function BuilderPageContent() {
 
     setSaving(true)
     try {
-      const { data, error } = await supabase
+      const { data, error } = await (supabase as any)
         .from('sections')
         .insert({
           profile_id: profile.id,
@@ -620,7 +620,7 @@ function BuilderPageContent() {
 
   const handleUpdateSection = async (section: Section) => {
     try {
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('sections')
         .update({
           title: section.title,
@@ -1124,7 +1124,7 @@ function BuilderPageContent() {
           onSave={async (newStyle) => {
             if (!profile) return
             try {
-              const { error } = await supabase
+              const { error } = await (supabase as any)
                 .from('profiles')
                 .update({ style: newStyle })
                 .eq('id', profile.id)
