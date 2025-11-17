@@ -120,7 +120,7 @@ export default function AnalyticsPage() {
 
           const topLinks = Array.from(linkStats.entries())
             .map(([moduleId, stats]) => ({
-              module: modulesData?.find(m => m.id === moduleId)!,
+              module: modulesData?.find((m: any) => m.id === moduleId)!,
               ...stats
             }))
             .filter(item => item.module)
