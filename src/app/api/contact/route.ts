@@ -45,8 +45,8 @@ export async function POST(request: Request) {
     )
 
     // Insert contact message
-    const { data: contactMessage, error: insertError } = await (supabase
-      .from('contact_messages' as any)
+    const { data: contactMessage, error: insertError } = await (supabase as any)
+      .from('contact_messages')
       .insert({
         profile_id,
         module_id,
@@ -59,9 +59,9 @@ export async function POST(request: Request) {
           referer: request.headers.get('referer'),
           ip: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip'),
         }
-      } as any)
+      })
       .select()
-      .single() as any)
+      .single()
 
     if (insertError) {
       console.error('Contact message error:', insertError)
@@ -72,18 +72,18 @@ export async function POST(request: Request) {
     }
 
     // Fetch profile owner's email for notification
-    const { data: profile } = await (supabase
+    const { data: profile } = await (supabase as any)
       .from('profiles')
       .select('user_id, title')
       .eq('id', profile_id)
-      .maybeSingle() as any)
+      .maybeSingle()
 
     if (profile) {
-      const { data: userData } = await (supabase
+      const { data: userData } = await (supabase as any)
         .from('users')
         .select('email')
-        .eq('id', (profile as any).user_id)
-        .maybeSingle() as any)
+        .eq('id', profile.user_id)
+        .maybeSingle()
 
       if (userData) {
         // TODO: Send email notification to profile owner

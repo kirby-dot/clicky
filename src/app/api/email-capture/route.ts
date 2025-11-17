@@ -28,12 +28,12 @@ export async function POST(request: Request) {
     )
 
     // Check if email already captured for this profile
-    const { data: existing } = await (supabase
-      .from('email_captures' as any)
+    const { data: existing } = await (supabase as any)
+      .from('email_captures')
       .select('id, subscribed')
       .eq('profile_id', profile_id)
       .eq('email', email.toLowerCase())
-      .maybeSingle() as any)
+      .maybeSingle()
 
     if (existing) {
       if ((existing as any).subscribed) {
@@ -43,13 +43,13 @@ export async function POST(request: Request) {
         )
       } else {
         // Resubscribe
-        const result: any = await supabase
-          .from('email_captures' as any)
+        const result: any = await (supabase as any)
+          .from('email_captures')
           .update({
             subscribed: true,
             unsubscribed_at: null,
-          } as any)
-          .eq('id', (existing as any).id)
+          })
+          .eq('id', existing.id)
 
         const { error: updateError } = result
 
@@ -69,8 +69,8 @@ export async function POST(request: Request) {
     }
 
     // Insert new email capture
-    const insertResult: any = await supabase
-      .from('email_captures' as any)
+    const insertResult: any = await (supabase as any)
+      .from('email_captures')
       .insert({
         profile_id,
         module_id,
@@ -81,7 +81,7 @@ export async function POST(request: Request) {
           user_agent: request.headers.get('user-agent'),
           referer: request.headers.get('referer'),
         }
-      } as any)
+      })
 
     const { error: insertError } = insertResult
 
