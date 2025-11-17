@@ -324,12 +324,12 @@ export default function SettingsPage() {
     )
   }
 
-  if (!profile || !user) {
+  if (!user) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>No profile found</CardTitle>
-          <CardDescription>Please create a profile first</CardDescription>
+          <CardTitle>Not authenticated</CardTitle>
+          <CardDescription>Please log in to access settings</CardDescription>
         </CardHeader>
       </Card>
     )
