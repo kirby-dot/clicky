@@ -43,13 +43,15 @@ export async function POST(request: Request) {
         )
       } else {
         // Resubscribe
-        const { error: updateError } = await (supabase
+        const result: any = await supabase
           .from('email_captures' as any)
           .update({
             subscribed: true,
             unsubscribed_at: null,
           } as any)
-          .eq('id', (existing as any).id) as any)
+          .eq('id', (existing as any).id)
+
+        const { error: updateError } = result
 
         if (updateError) {
           console.error('Resubscribe error:', updateError)
@@ -67,7 +69,7 @@ export async function POST(request: Request) {
     }
 
     // Insert new email capture
-    const { error: insertError } = await (supabase
+    const insertResult: any = await supabase
       .from('email_captures' as any)
       .insert({
         profile_id,
@@ -79,7 +81,9 @@ export async function POST(request: Request) {
           user_agent: request.headers.get('user-agent'),
           referer: request.headers.get('referer'),
         }
-      } as any) as any)
+      } as any)
+
+    const { error: insertError } = insertResult
 
     if (insertError) {
       console.error('Email capture error:', insertError)
