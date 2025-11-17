@@ -10,7 +10,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { User, Link2, CreditCard, Bell, Shield, Palette, Zap, Crown, Check, Sparkles, Users, Plus, X, Mail } from 'lucide-react'
 import type { Profile } from '@/types'
 
-type TabType = 'profile' | 'account' | 'billing' | 'team' | 'notifications'
+type TabType = 'account' | 'billing' | 'notifications'
 
 interface Subscription {
   id: string
@@ -97,7 +97,7 @@ export default function SettingsPage() {
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
   const [message, setMessage] = useState('')
-  const [activeTab, setActiveTab] = useState<TabType>('profile')
+  const [activeTab, setActiveTab] = useState<TabType>('account')
   const [notifications, setNotifications] = useState({
     marketing: false,
     analytics: true,
@@ -123,12 +123,12 @@ export default function SettingsPage() {
       if (!userData) return
       setUser(userData)
 
-      // Load profile
+      // Load profile (optional - user might not have one yet)
       const { data: profileData } = await (supabase as any)
         .from('profiles')
         .select('*')
         .eq('user_id', userData.id)
-        .single()
+        .maybeSingle()
 
       setProfile(profileData)
 
@@ -144,14 +144,16 @@ export default function SettingsPage() {
 
       setSubscription(subData)
 
-      // Load team members
-      const { data: teamData } = await (supabase as any)
-        .from('team_members')
-        .select('*')
-        .eq('profile_id', profileData?.id)
-        .order('invited_at', { ascending: false })
+      // Load team members (only if profile exists)
+      if (profileData) {
+        const { data: teamData } = await (supabase as any)
+          .from('team_members')
+          .select('*')
+          .eq('profile_id', profileData.id)
+          .order('invited_at', { ascending: false })
 
-      setTeamMembers(teamData || [])
+        setTeamMembers(teamData || [])
+      }
     } catch (error) {
       console.error('Error loading data:', error)
     } finally {
@@ -355,18 +357,6 @@ export default function SettingsPage() {
       <div className="border-b border-gray-200">
         <nav className="flex gap-8">
           <button
-            onClick={() => setActiveTab('profile')}
-            className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors flex items-center gap-2 ${
-              activeTab === 'profile'
-                ? 'border-purple-500 text-purple-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            <User className="w-4 h-4" />
-            Profile
-          </button>
-
-          <button
             onClick={() => setActiveTab('account')}
             className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors flex items-center gap-2 ${
               activeTab === 'account'
@@ -391,18 +381,6 @@ export default function SettingsPage() {
           </button>
 
           <button
-            onClick={() => setActiveTab('team')}
-            className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors flex items-center gap-2 ${
-              activeTab === 'team'
-                ? 'border-purple-500 text-purple-600'
-                : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-            }`}
-          >
-            <Users className="w-4 h-4" />
-            Team
-          </button>
-
-          <button
             onClick={() => setActiveTab('notifications')}
             className={`py-4 px-1 border-b-2 font-semibold text-sm transition-colors flex items-center gap-2 ${
               activeTab === 'notifications'
@@ -418,96 +396,6 @@ export default function SettingsPage() {
 
       {/* Tab Content */}
       <div className="py-6">
-        {/* Profile Tab */}
-        {activeTab === 'profile' && (
-          <div className="space-y-6">
-            {/* Profile Settings */}
-            <Card>
-              <CardHeader className="bg-gradient-to-r from-pastel-peach to-pastel-butter border-b border-gray-200">
-                <CardTitle>Profile Information</CardTitle>
-                <CardDescription className="text-gray-600">
-                  Update your public profile information
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <form onSubmit={handleUpdateProfile} className="space-y-4">
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Display Name
-                    </label>
-                    <Input
-                      value={profile.title || ''}
-                      onChange={(e) => setProfile({ ...profile, title: e.target.value })}
-                      placeholder="Your Name"
-                      required
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Bio
-                    </label>
-                    <Textarea
-                      value={profile.bio || ''}
-                      onChange={(e) => setProfile({ ...profile, bio: e.target.value })}
-                      placeholder="Tell people about yourself..."
-                      rows={3}
-                    />
-                  </div>
-
-                  <div>
-                    <label className="block text-sm font-bold text-gray-700 mb-2">
-                      Avatar URL
-                    </label>
-                    <Input
-                      value={profile.avatar_url || ''}
-                      onChange={(e) => setProfile({ ...profile, avatar_url: e.target.value })}
-                      placeholder="https://example.com/avatar.jpg"
-                      type="url"
-                    />
-                  </div>
-
-                  <Checkbox
-                    checked={profile.published}
-                    onChange={(checked) => setProfile({ ...profile, published: checked })}
-                    label="Make profile public"
-                    id="published"
-                  />
-
-                  <div className="flex gap-3 pt-4 border-t border-gray-200">
-                    <Button type="submit" disabled={saving}>
-                      {saving ? 'Saving...' : 'Save Changes'}
-                    </Button>
-                  </div>
-                </form>
-              </CardContent>
-            </Card>
-
-            {/* URL Settings */}
-            <Card>
-              <CardHeader className="bg-gradient-to-r from-pastel-sky to-pastel-lavender border-b border-gray-200">
-                <CardTitle>Your Clicky URL</CardTitle>
-                <CardDescription className="text-gray-600">
-                  Customize your profile link
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4">
-                  <div className="flex-1">
-                    <p className="text-sm font-semibold text-gray-700 mb-2">Current URL:</p>
-                    <div className="bg-gray-50 border border-gray-300 rounded-xl p-4 font-mono">
-                      clicky.com/{profile.slug}
-                    </div>
-                  </div>
-                  <Button onClick={handleChangeSlug} variant="outline">
-                    Change Username
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          </div>
-        )}
-
         {/* Account Tab */}
         {activeTab === 'account' && (
           <div className="space-y-6">
@@ -680,184 +568,6 @@ export default function SettingsPage() {
                 </div>
               </div>
             </div>
-          </div>
-        )}
-
-        {/* Team Tab */}
-        {activeTab === 'team' && (
-          <div className="space-y-6">
-            {/* Team Overview */}
-            <Card>
-              <CardHeader className="bg-gradient-to-r from-pastel-sky to-pastel-mint border-b border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <CardTitle>Team Members</CardTitle>
-                    <CardDescription className="text-gray-600">
-                      Invite and manage your team
-                    </CardDescription>
-                  </div>
-                  <div className="text-right">
-                    <div className="text-sm text-gray-600">Team Size</div>
-                    <div className="text-2xl font-bold text-purple-600">
-                      {teamMembers.filter(m => m.status === 'active').length + 1}/{PLAN_FEATURES[currentPlan].limits.teamMembers}
-                    </div>
-                  </div>
-                </div>
-              </CardHeader>
-              <CardContent className="p-6">
-                {/* Plan info */}
-                {currentPlan === 'free' && (
-                  <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4 mb-6">
-                    <p className="text-sm text-yellow-800 font-semibold">
-                      Team collaboration is not available on the Free plan. Upgrade to Pro or Business to invite team members.
-                    </p>
-                  </div>
-                )}
-
-                {currentPlan === 'pro' && (
-                  <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 mb-6">
-                    <p className="text-sm text-blue-800 font-semibold">
-                      <strong>Pro Plan:</strong> 1 user included + $3/mo per additional user
-                    </p>
-                  </div>
-                )}
-
-                {currentPlan === 'business' && (
-                  <div className="bg-purple-50 border border-purple-200 rounded-xl p-4 mb-6">
-                    <p className="text-sm text-purple-800 font-semibold">
-                      <strong>Business Plan:</strong> 3 users included + $3/mo per additional user
-                    </p>
-                  </div>
-                )}
-
-                {/* Invite Form */}
-                {currentPlan !== 'free' && (
-                  <form onSubmit={handleInviteTeamMember} className="space-y-4 mb-6 p-4 bg-gray-50 rounded-xl border border-gray-200">
-                    <h3 className="font-bold text-gray-900">Invite Team Member</h3>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="md:col-span-2">
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Email Address
-                        </label>
-                        <div className="relative">
-                          <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                          <Input
-                            type="email"
-                            value={inviteEmail}
-                            onChange={(e) => setInviteEmail(e.target.value)}
-                            placeholder="colleague@example.com"
-                            required
-                            className="pl-10"
-                          />
-                        </div>
-                      </div>
-                      <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-2">
-                          Role
-                        </label>
-                        <select
-                          value={inviteRole}
-                          onChange={(e) => setInviteRole(e.target.value as 'admin' | 'member')}
-                          className="w-full px-3 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-purple-500"
-                        >
-                          <option value="member">Member</option>
-                          <option value="admin">Admin</option>
-                        </select>
-                      </div>
-                    </div>
-                    <Button type="submit" className="gap-2">
-                      <Plus className="w-4 h-4" />
-                      Send Invitation
-                    </Button>
-                  </form>
-                )}
-
-                {/* Team Member List */}
-                <div className="space-y-3">
-                  {/* Owner (current user) */}
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-pastel-lavender to-pastel-lilac rounded-xl border border-purple-200">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 bg-white rounded-full flex items-center justify-center">
-                        <User className="w-5 h-5 text-purple-600" />
-                      </div>
-                      <div>
-                        <p className="font-bold text-gray-900">{user?.email}</p>
-                        <p className="text-sm text-gray-600">Owner</p>
-                      </div>
-                    </div>
-                    <span className="px-3 py-1 bg-purple-600 text-white text-xs font-bold rounded-full">
-                      OWNER
-                    </span>
-                  </div>
-
-                  {/* Team Members */}
-                  {teamMembers.length === 0 && currentPlan !== 'free' && (
-                    <div className="text-center py-8 text-gray-500">
-                      <Users className="w-12 h-12 mx-auto mb-3 text-gray-400" />
-                      <p className="font-semibold">No team members yet</p>
-                      <p className="text-sm">Invite your first team member to get started</p>
-                    </div>
-                  )}
-
-                  {teamMembers.map((member) => (
-                    <div
-                      key={member.id}
-                      className="flex items-center justify-between p-4 bg-white rounded-xl border border-gray-200 hover:border-gray-300 transition-colors"
-                    >
-                      <div className="flex items-center gap-4">
-                        <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                          <User className="w-5 h-5 text-gray-600" />
-                        </div>
-                        <div>
-                          <p className="font-semibold text-gray-900">{member.email}</p>
-                          <p className="text-sm text-gray-600 capitalize">
-                            {member.role} • {member.status === 'pending' ? 'Pending invitation' : 'Active'}
-                          </p>
-                        </div>
-                      </div>
-                      <div className="flex items-center gap-2">
-                        <span className={`px-3 py-1 text-xs font-bold rounded-full ${
-                          member.status === 'active'
-                            ? 'bg-green-100 text-green-800'
-                            : member.status === 'pending'
-                            ? 'bg-yellow-100 text-yellow-800'
-                            : 'bg-red-100 text-red-800'
-                        }`}>
-                          {member.status.toUpperCase()}
-                        </span>
-                        <button
-                          onClick={() => handleRemoveTeamMember(member.id)}
-                          className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                          title="Remove member"
-                        >
-                          <X className="w-4 h-4" />
-                        </button>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-
-                {/* Additional Users Cost */}
-                {currentPlan !== 'free' && teamMembers.filter(m => m.status === 'active').length + 1 > (currentPlan === 'pro' ? 1 : 3) && (
-                  <div className="mt-6 p-4 bg-blue-50 border border-blue-200 rounded-xl">
-                    <div className="flex items-center justify-between">
-                      <div>
-                        <p className="font-semibold text-blue-900">Additional Users</p>
-                        <p className="text-sm text-blue-700">
-                          {teamMembers.filter(m => m.status === 'active').length + 1 - (currentPlan === 'pro' ? 1 : 3)} extra user{teamMembers.filter(m => m.status === 'active').length + 1 - (currentPlan === 'pro' ? 1 : 3) > 1 ? 's' : ''} × $3/mo
-                        </p>
-                      </div>
-                      <div className="text-right">
-                        <p className="text-2xl font-bold text-blue-900">
-                          ${(teamMembers.filter(m => m.status === 'active').length + 1 - (currentPlan === 'pro' ? 1 : 3)) * 3}
-                        </p>
-                        <p className="text-sm text-blue-700">per month</p>
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
         )}
 
