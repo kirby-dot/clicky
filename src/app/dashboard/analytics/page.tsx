@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react'
 import { createBrowserClient } from '@/lib/supabase'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { BarChart3, TrendingUp, MousePointerClick, Eye, Globe, Smartphone } from 'lucide-react'
+import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts'
 import type { Profile, Module } from '@/types'
 
 interface AnalyticsData {
@@ -281,156 +282,149 @@ export default function AnalyticsPage() {
         </Card>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-        {/* Top Performing Links */}
-        <Card className="border-2 border-gray-200 shadow-soft">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <BarChart3 className="w-5 h-5 text-primary-500" />
-              Top Performing Links
-            </CardTitle>
-            <CardDescription>Your most clicked modules</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {analytics.topLinks.length > 0 ? (
-              <div className="space-y-4">
-                {analytics.topLinks.map((link, index) => (
-                  <div key={link.module.id} className="flex items-center gap-3">
-                    <div className="flex-shrink-0 w-8 h-8 bg-gradient-to-br from-primary-500 to-purple-500 rounded-lg flex items-center justify-center text-white font-bold">
-                      {index + 1}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-gray-900 truncate">{link.module.title || 'Untitled'}</p>
-                      <p className="text-sm text-gray-600">
-                        {link.clicks} clicks • {link.views} views
-                      </p>
-                    </div>
-                    <div className="flex-shrink-0">
-                      <div className="text-right">
-                        <p className="text-sm font-semibold text-primary-600">
-                          {link.views > 0 ? ((link.clicks / link.views) * 100).toFixed(1) : 0}%
-                        </p>
-                        <p className="text-xs text-gray-500">CTR</p>
-                      </div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <p className="text-center text-gray-500 py-8">No link clicks yet</p>
-            )}
-          </CardContent>
-        </Card>
-
-        {/* Geographic Breakdown */}
-        <Card className="border-2 border-gray-200 shadow-soft">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Globe className="w-5 h-5 text-primary-500" />
-              Top Countries
-            </CardTitle>
-            <CardDescription>Where your visitors are from</CardDescription>
-          </CardHeader>
-          <CardContent>
-            {analytics.countries.length > 0 ? (
-              <div className="space-y-3">
-                {analytics.countries.map((country) => {
-                  const percentage = (country.count / analytics.totalViews) * 100
-                  return (
-                    <div key={country.country} className="space-y-1">
-                      <div className="flex justify-between text-sm">
-                        <span className="font-semibold text-gray-900">{country.country || 'Unknown'}</span>
-                        <span className="text-gray-600">{country.count} visits</span>
-                      </div>
-                      <div className="w-full bg-gray-200 rounded-full h-2">
-                        <div
-                          className="bg-gradient-to-r from-primary-500 to-purple-500 h-2 rounded-full transition-all"
-                          style={{ width: `${percentage}%` }}
-                        ></div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            ) : (
-              <p className="text-center text-gray-500 py-8">No geographic data yet</p>
-            )}
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Device Breakdown */}
+      {/* Geographic Breakdown */}
       <Card className="border-2 border-gray-200 shadow-soft mb-8">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
+            <Globe className="w-5 h-5 text-primary-500" />
+            Top Countries
+          </CardTitle>
+          <CardDescription>Where your visitors are from</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {analytics.countries.length > 0 ? (
+            <div className="space-y-3">
+              {analytics.countries.map((country) => {
+                const percentage = (country.count / analytics.totalViews) * 100
+                return (
+                  <div key={country.country} className="space-y-1">
+                    <div className="flex justify-between text-sm">
+                      <span className="font-semibold text-gray-900">{country.country || 'Unknown'}</span>
+                      <span className="text-gray-600">{country.count} visits ({percentage.toFixed(1)}%)</span>
+                    </div>
+                    <div className="w-full bg-gray-200 rounded-full h-3">
+                      <div
+                        className="bg-gradient-to-r from-accent-400 to-purple-500 h-3 rounded-full transition-all"
+                        style={{ width: `${percentage}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )
+              })}
+            </div>
+          ) : (
+            <p className="text-center text-gray-500 py-8">No geographic data yet</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Views Over Time - Line Chart */}
+      <Card className="border-2 border-gray-200 shadow-soft mb-8">
+        <CardHeader>
+          <CardTitle>Activity Over Time</CardTitle>
+          <CardDescription>Daily views and clicks trends</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {analytics.dailyStats.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <LineChart data={analytics.dailyStats}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis
+                  dataKey="date"
+                  tickFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
+                  stroke="#64748b"
+                />
+                <YAxis stroke="#64748b" />
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '12px', border: '1px solid #e2e8f0' }}
+                  labelFormatter={(date) => new Date(date).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })}
+                />
+                <Legend />
+                <Line type="monotone" dataKey="views" stroke="#0EA5E9" strokeWidth={3} dot={{ fill: '#0EA5E9', r: 4 }} name="Views" />
+                <Line type="monotone" dataKey="clicks" stroke="#F43F5E" strokeWidth={3} dot={{ fill: '#F43F5E', r: 4 }} name="Clicks" />
+              </LineChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-center text-gray-500 py-8">No activity data yet</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Top Links - Bar Chart */}
+      <Card className="border-2 border-gray-200 shadow-soft mb-8">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <BarChart3 className="w-5 h-5 text-primary-500" />
+            Link Performance
+          </CardTitle>
+          <CardDescription>Clicks by link</CardDescription>
+        </CardHeader>
+        <CardContent>
+          {analytics.topLinks.length > 0 ? (
+            <ResponsiveContainer width="100%" height={300}>
+              <BarChart data={analytics.topLinks}>
+                <CartesianGrid strokeDasharray="3 3" stroke="#e2e8f0" />
+                <XAxis
+                  dataKey="module.title"
+                  stroke="#64748b"
+                  angle={-45}
+                  textAnchor="end"
+                  height={80}
+                />
+                <YAxis stroke="#64748b" />
+                <Tooltip
+                  contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '12px', border: '1px solid #e2e8f0' }}
+                />
+                <Legend />
+                <Bar dataKey="clicks" fill="#FF8F6B" name="Clicks" radius={[8, 8, 0, 0]} />
+                <Bar dataKey="views" fill="#0EA5E9" name="Views" radius={[8, 8, 0, 0]} />
+              </BarChart>
+            </ResponsiveContainer>
+          ) : (
+            <p className="text-center text-gray-500 py-8">No link data yet</p>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Device Types - Pie Chart */}
+      <Card className="border-2 border-gray-200 shadow-soft">
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
             <Smartphone className="w-5 h-5 text-primary-500" />
-            Device Types
+            Device Distribution
           </CardTitle>
           <CardDescription>How visitors access your profile</CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-3 gap-4">
-            {[
-              { label: 'Mobile', count: analytics.devices.mobile, color: 'from-pastel-sky to-blue-400' },
-              { label: 'Desktop', count: analytics.devices.desktop, color: 'from-pastel-mint to-green-400' },
-              { label: 'Tablet', count: analytics.devices.tablet, color: 'from-pastel-lavender to-purple-400' },
-            ].map((device) => {
-              const total = analytics.devices.mobile + analytics.devices.desktop + analytics.devices.tablet
-              const percentage = total > 0 ? (device.count / total) * 100 : 0
-              return (
-                <div key={device.label} className="text-center">
-                  <div className={`w-full h-32 bg-gradient-to-br ${device.color} rounded-2xl flex items-center justify-center mb-3 shadow-soft`}>
-                    <div className="text-center">
-                      <p className="text-3xl font-bold text-gray-900">{device.count}</p>
-                      <p className="text-sm text-gray-700">{percentage.toFixed(0)}%</p>
-                    </div>
-                  </div>
-                  <p className="font-semibold text-gray-900">{device.label}</p>
-                </div>
-              )
-            })}
-          </div>
-        </CardContent>
-      </Card>
-
-      {/* Views Over Time */}
-      <Card className="border-2 border-gray-200 shadow-soft">
-        <CardHeader>
-          <CardTitle>Activity Over Time</CardTitle>
-          <CardDescription>Daily views and clicks</CardDescription>
-        </CardHeader>
-        <CardContent>
-          {analytics.dailyStats.length > 0 ? (
-            <div className="space-y-4">
-              {analytics.dailyStats.map((day) => (
-                <div key={day.date} className="space-y-2">
-                  <div className="flex justify-between text-sm">
-                    <span className="font-semibold text-gray-900">
-                      {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                    </span>
-                    <span className="text-gray-600">
-                      {day.views} views • {day.clicks} clicks
-                    </span>
-                  </div>
-                  <div className="flex gap-2">
-                    <div className="flex-1 bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-gradient-to-r from-pastel-sky to-blue-400 h-2 rounded-full"
-                        style={{ width: `${(day.views / Math.max(...analytics.dailyStats.map(d => d.views))) * 100}%` }}
-                      ></div>
-                    </div>
-                    <div className="flex-1 bg-gray-200 rounded-full h-2">
-                      <div
-                        className="bg-gradient-to-r from-pastel-rose to-pink-400 h-2 rounded-full"
-                        style={{ width: `${(day.clicks / Math.max(...analytics.dailyStats.map(d => d.clicks || 1))) * 100}%` }}
-                      ></div>
-                    </div>
-                  </div>
-                </div>
-              ))}
+          {(analytics.devices.mobile + analytics.devices.desktop + analytics.devices.tablet) > 0 ? (
+            <div className="flex items-center justify-center">
+              <ResponsiveContainer width="100%" height={300}>
+                <PieChart>
+                  <Pie
+                    data={[
+                      { name: 'Mobile', value: analytics.devices.mobile },
+                      { name: 'Desktop', value: analytics.devices.desktop },
+                      { name: 'Tablet', value: analytics.devices.tablet },
+                    ].filter(d => d.value > 0)}
+                    cx="50%"
+                    cy="50%"
+                    labelLine={false}
+                    label={({ name, percent }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
+                    outerRadius={100}
+                    fill="#8884d8"
+                    dataKey="value"
+                  >
+                    <Cell fill="#0EA5E9" />
+                    <Cell fill="#10B981" />
+                    <Cell fill="#A78BFA" />
+                  </Pie>
+                  <Tooltip contentStyle={{ backgroundColor: 'rgba(255, 255, 255, 0.9)', borderRadius: '12px', border: '1px solid #e2e8f0' }} />
+                  <Legend />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           ) : (
-            <p className="text-center text-gray-500 py-8">No activity data yet</p>
+            <p className="text-center text-gray-500 py-8">No device data yet</p>
           )}
         </CardContent>
       </Card>

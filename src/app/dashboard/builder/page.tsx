@@ -215,12 +215,20 @@ function SortableModule({ module, isEditing, onEdit, onDelete, onToggleActive, o
 function ModuleEditor({ module, onSave, onCancel }: { module: Module, onSave: (data: Partial<Module>) => void, onCancel: () => void }) {
   const [formData, setFormData] = useState<any>(module.content || {})
   const [title, setTitle] = useState(module.title || '')
+  const [scheduleStart, setScheduleStart] = useState<string>(
+    (module as any).schedule_start || ''
+  )
+  const [scheduleEnd, setScheduleEnd] = useState<string>(
+    (module as any).schedule_end || ''
+  )
 
   const handleSave = () => {
     onSave({
       title,
-      content: formData
-    })
+      content: formData,
+      ...(scheduleStart && { schedule_start: scheduleStart }),
+      ...(scheduleEnd && { schedule_end: scheduleEnd }),
+    } as any)
   }
 
   return (
@@ -387,6 +395,52 @@ function ModuleEditor({ module, onSave, onCancel }: { module: Module, onSave: (d
               ))}
             </div>
           )}
+
+          {/* Scheduling Section */}
+          <div className="pt-4 mt-4 border-t border-white/30">
+            <div className="flex items-center gap-2 mb-3">
+              <input
+                type="checkbox"
+                id="enable-schedule"
+                checked={!!(scheduleStart || scheduleEnd)}
+                onChange={(e) => {
+                  if (!e.target.checked) {
+                    setScheduleStart('')
+                    setScheduleEnd('')
+                  }
+                }}
+                className="w-4 h-4 rounded border-slate-300 text-accent-400 focus:ring-accent-400"
+              />
+              <label htmlFor="enable-schedule" className="text-sm font-semibold text-slate-700 cursor-pointer">
+                Schedule this module
+              </label>
+            </div>
+
+            {(scheduleStart || scheduleEnd) && (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">Start Date</label>
+                  <input
+                    type="datetime-local"
+                    value={scheduleStart}
+                    onChange={(e) => setScheduleStart(e.target.value)}
+                    className="w-full bg-white/50 backdrop-blur-xl border border-white/20 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent-400/50"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">When to show</p>
+                </div>
+                <div>
+                  <label className="block text-xs font-medium text-slate-600 mb-1">End Date</label>
+                  <input
+                    type="datetime-local"
+                    value={scheduleEnd}
+                    onChange={(e) => setScheduleEnd(e.target.value)}
+                    className="w-full bg-white/50 backdrop-blur-xl border border-white/20 rounded-xl px-3 py-2 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-accent-400/50"
+                  />
+                  <p className="text-xs text-slate-500 mt-1">When to hide</p>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </GlassPanel>
     </motion.div>
