@@ -7,13 +7,14 @@ import { GlassPanel, GlassCard, GlassButton, GlassInput, GlassBadge } from '@/co
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ModuleRenderer } from '@/components/modules/module-renderer'
+import { QRCodeModal } from '@/components/qr-code-modal'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, Plus, GripVertical, MoreHorizontal, ChevronDown, ChevronRight,
   Link as LinkIcon, Type, Image as ImageIcon, Video, Mail, Users, Eye, EyeOff,
   Edit2, Trash2, ExternalLink, X, Check, Save, Smartphone, Copy, Settings as SettingsIcon,
   Instagram, Twitter, Youtube, Linkedin, Facebook, Github, MessageCircle, Send, Music,
-  Sparkles, Layers
+  Sparkles, Layers, QrCode
 } from 'lucide-react'
 import type { Module, ModuleType, Section, Profile } from '@/types'
 import {
@@ -110,9 +111,10 @@ interface SortableModuleProps {
   onEdit: () => void
   onDelete: () => void
   onToggleActive: () => void
+  onDuplicate: () => void
 }
 
-function SortableModule({ module, isEditing, onEdit, onDelete, onToggleActive }: SortableModuleProps) {
+function SortableModule({ module, isEditing, onEdit, onDelete, onToggleActive, onDuplicate }: SortableModuleProps) {
   const {
     attributes,
     listeners,
@@ -186,6 +188,15 @@ function SortableModule({ module, isEditing, onEdit, onDelete, onToggleActive }:
           whileTap={{ scale: 0.9 }}
         >
           <Edit2 className="w-4 h-4 text-blue-600" />
+        </motion.button>
+        <motion.button
+          onClick={onDuplicate}
+          className="p-2 hover:bg-white/50 rounded-lg transition-opacity opacity-0 group-hover:opacity-100"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          title="Duplicate module"
+        >
+          <Copy className="w-4 h-4 text-purple-600" />
         </motion.button>
         <motion.button
           onClick={onDelete}
@@ -478,6 +489,7 @@ function BuilderContent() {
   const [activeSection, setActiveSection] = useState<string | null>(null)
   const [showPreview, setShowPreview] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
+  const [showQRModal, setShowQRModal] = useState(false)
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -689,6 +701,38 @@ function BuilderContent() {
     await handleUpdateModule(module.id, { active: !module.active })
   }
 
+  const handleDuplicateModule = async (module: Module) => {
+    if (!profile) return
+
+    try {
+      const section = sections.find(s => s.id === module.section_id)
+      if (!section) return
+
+      const { data, error } = await (supabase as any)
+        .from('modules')
+        .insert({
+          profile_id: profile.id,
+          section_id: module.section_id,
+          type: module.type,
+          title: `${module.title} (copy)`,
+          content: module.content,
+          order: section.modules.length,
+          active: module.active
+        })
+        .select()
+        .single()
+
+      if (error) throw error
+
+      await loadData()
+      // Show success feedback
+      console.log('Module duplicated successfully:', data)
+    } catch (error: any) {
+      console.error('Error duplicating module:', error)
+      alert(`Failed to duplicate module: ${error.message || 'Unknown error'}`)
+    }
+  }
+
   const handleCreateSection = async (title: string) => {
     if (!profile) return
 
@@ -763,6 +807,15 @@ function BuilderContent() {
         onSave={handleCreateSection}
       />
 
+      {profile && (
+        <QRCodeModal
+          isOpen={showQRModal}
+          onClose={() => setShowQRModal(false)}
+          url={`${window.location.origin}/${profile.slug}`}
+          profileName={profile.title || profile.slug}
+        />
+      )}
+
       {/* Main Editor */}
       <div className="flex-1 p-8 overflow-y-auto">
         {/* Header */}
@@ -795,6 +848,16 @@ function BuilderContent() {
                   >
                     <ExternalLink className="w-4 h-4 mr-2" />
                     View Live
+                  </GlassButton>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <GlassButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowQRModal(true)}
+                  >
+                    <QrCode className="w-4 h-4 mr-2" />
+                    QR Code
                   </GlassButton>
                 </motion.div>
               </div>
@@ -927,6 +990,7 @@ function BuilderContent() {
                                       onEdit={() => setEditingModule(module)}
                                       onDelete={() => handleDeleteModule(module.id)}
                                       onToggleActive={() => handleToggleModuleActive(module)}
+                                      onDuplicate={() => handleDuplicateModule(module)}
                                     />
                                   ))}
                                 </AnimatePresence>
