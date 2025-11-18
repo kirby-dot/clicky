@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { GlassPanel, GlassButton, GlassBadge } from '@/components/ui/glass';
 import {
   X,
@@ -39,11 +39,7 @@ export function TemplatePreviewModal({
 
   const supabase = createBrowserClient();
 
-  useEffect(() => {
-    loadProfiles();
-  }, []);
-
-  const loadProfiles = async () => {
+  const loadProfiles = useCallback(async () => {
     try {
       const {
         data: { user },
@@ -64,7 +60,11 @@ export function TemplatePreviewModal({
     } catch (error) {
       console.error('Error loading profiles:', error);
     }
-  };
+  }, [supabase]);
+
+  useEffect(() => {
+    loadProfiles();
+  }, [loadProfiles]);
 
   const handleInstall = async () => {
     if (!selectedProfile) {
@@ -253,7 +253,7 @@ export function TemplatePreviewModal({
 
         {/* Template Details */}
         <div className="px-6 pb-6 border-t border-white/10 pt-6 space-y-4">
-          <h3 className="text-lg font-semibold text-white">What's Included</h3>
+          <h3 className="text-lg font-semibold text-white">What&apos;s Included</h3>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="flex items-start gap-3">

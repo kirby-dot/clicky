@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, Suspense } from 'react'
+import { useState, useEffect, useCallback, Suspense } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { Home, BarChart, Settings, LogOut, Box, ChevronDown, Plus, ExternalLink, Sparkles } from 'lucide-react'
@@ -33,22 +33,7 @@ function ProfileSwitcher() {
   const [showProfileDropdown, setShowProfileDropdown] = useState(false)
   const [loading, setLoading] = useState(true)
 
-  useEffect(() => {
-    loadProfiles()
-  }, [])
-
-  useEffect(() => {
-    // Update selected profile based on URL param
-    const profileId = searchParams.get('profile')
-    if (profileId && profiles.length > 0) {
-      const profile = profiles.find(p => p.id === profileId)
-      if (profile) setSelectedProfile(profile)
-    } else if (profiles.length > 0 && !selectedProfile) {
-      setSelectedProfile(profiles[0])
-    }
-  }, [searchParams, profiles])
-
-  const loadProfiles = async () => {
+  const loadProfiles = useCallback(async () => {
     try {
       const { data: { user } } = await supabase.auth.getUser()
       if (!user) return
@@ -68,7 +53,23 @@ function ProfileSwitcher() {
     } finally {
       setLoading(false)
     }
-  }
+  }, [supabase])
+
+  useEffect(() => {
+    loadProfiles()
+  }, [loadProfiles])
+
+  useEffect(() => {
+    // Update selected profile based on URL param
+    const profileId = searchParams.get('profile')
+    if (profileId && profiles.length > 0) {
+      const profile = profiles.find(p => p.id === profileId)
+      if (profile) setSelectedProfile(profile)
+    } else if (profiles.length > 0 && !selectedProfile) {
+      setSelectedProfile(profiles[0])
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [searchParams, profiles])
 
   const handleProfileSelect = (profile: Profile) => {
     setSelectedProfile(profile)
