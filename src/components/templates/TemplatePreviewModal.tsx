@@ -102,7 +102,7 @@ export function TemplatePreviewModal({
                 </GlassBadge>
               )}
               {template.is_premium && (
-                <GlassBadge variant="primary">
+                <GlassBadge variant="info">
                   <Crown className="w-3 h-3 mr-1" />
                   Premium
                 </GlassBadge>

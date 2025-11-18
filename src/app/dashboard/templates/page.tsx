@@ -288,7 +288,7 @@ function TemplateCard({ template, onPreview, onToggleFavorite }: TemplateCardPro
             </GlassBadge>
           )}
           {template.is_premium && (
-            <GlassBadge variant="primary" className="text-xs">
+            <GlassBadge variant="info" className="text-xs">
               <Crown className="w-3 h-3 mr-1" />
               Premium
             </GlassBadge>
