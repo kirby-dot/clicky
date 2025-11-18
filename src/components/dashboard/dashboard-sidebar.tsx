@@ -3,7 +3,7 @@
 import { useState, useEffect, Suspense } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import { Home, BarChart, Settings, LogOut, Box, ChevronDown, Plus, ExternalLink } from 'lucide-react'
+import { Home, BarChart, Settings, LogOut, Box, ChevronDown, Plus, ExternalLink, Sparkles } from 'lucide-react'
 import { GlassPanel } from '@/components/ui/glass'
 import { cn } from '@/lib/utils'
 import { createBrowserClient } from '@/lib/supabase'
@@ -17,6 +17,7 @@ interface NavItem {
 
 const navItems: NavItem[] = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
+  { name: 'Templates', href: '/dashboard/templates', icon: Sparkles },
   { name: 'Builder', href: '/dashboard/builder', icon: Box },
   { name: 'Analytics', href: '/dashboard/analytics', icon: BarChart },
   { name: 'Settings', href: '/dashboard/settings', icon: Settings },
