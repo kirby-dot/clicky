@@ -8,13 +8,14 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { ModuleRenderer } from '@/components/modules/module-renderer'
 import { QRCodeModal } from '@/components/qr-code-modal'
+import { ColorThemeModal, COLOR_THEMES, type ColorTheme } from '@/components/color-theme-modal'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, Plus, GripVertical, MoreHorizontal, ChevronDown, ChevronRight,
   Link as LinkIcon, Type, Image as ImageIcon, Video, Mail, Users, Eye, EyeOff,
   Edit2, Trash2, ExternalLink, X, Check, Save, Smartphone, Copy, Settings as SettingsIcon,
   Instagram, Twitter, Youtube, Linkedin, Facebook, Github, MessageCircle, Send, Music,
-  Sparkles, Layers, QrCode
+  Sparkles, Layers, QrCode, Palette
 } from 'lucide-react'
 import type { Module, ModuleType, Section, Profile } from '@/types'
 import {
@@ -490,6 +491,8 @@ function BuilderContent() {
   const [showPreview, setShowPreview] = useState(false)
   const [activeId, setActiveId] = useState<string | null>(null)
   const [showQRModal, setShowQRModal] = useState(false)
+  const [showThemeModal, setShowThemeModal] = useState(false)
+  const [currentTheme, setCurrentTheme] = useState<ColorTheme | undefined>()
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -753,6 +756,28 @@ function BuilderContent() {
     }
   }
 
+  const handleSelectTheme = async (theme: ColorTheme) => {
+    if (!profile) return
+
+    try {
+      // Save theme colors to profile metadata
+      const { error } = await (supabase as any)
+        .from('profiles')
+        .update({
+          theme_colors: theme.colors
+        })
+        .eq('id', profile.id)
+
+      if (error) throw error
+
+      setCurrentTheme(theme)
+      console.log('Theme updated successfully:', theme.name)
+    } catch (error: any) {
+      console.error('Error updating theme:', error)
+      alert(`Failed to update theme: ${error.message || 'Unknown error'}`)
+    }
+  }
+
   const toggleSection = (sectionId: string) => {
     const newExpanded = new Set(expandedSections)
     if (newExpanded.has(sectionId)) {
@@ -816,6 +841,13 @@ function BuilderContent() {
         />
       )}
 
+      <ColorThemeModal
+        isOpen={showThemeModal}
+        onClose={() => setShowThemeModal(false)}
+        currentTheme={currentTheme}
+        onSelectTheme={handleSelectTheme}
+      />
+
       {/* Main Editor */}
       <div className="flex-1 p-8 overflow-y-auto">
         {/* Header */}
@@ -858,6 +890,16 @@ function BuilderContent() {
                   >
                     <QrCode className="w-4 h-4 mr-2" />
                     QR Code
+                  </GlassButton>
+                </motion.div>
+                <motion.div whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }}>
+                  <GlassButton
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setShowThemeModal(true)}
+                  >
+                    <Palette className="w-4 h-4 mr-2" />
+                    Theme
                   </GlassButton>
                 </motion.div>
               </div>
