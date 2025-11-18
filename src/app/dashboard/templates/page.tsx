@@ -331,16 +331,15 @@ function TemplateCard({ template, onPreview, onToggleFavorite }: TemplateCardPro
           >
             Use Template
           </GlassButton>
-          <GlassButton
-            size="sm"
-            variant="secondary"
-            onClick={(e) => {
-              e.stopPropagation();
-              onToggleFavorite(template.id);
-            }}
-          >
-            <Heart className="w-4 h-4" />
-          </GlassButton>
+          <div onClick={(e) => e.stopPropagation()}>
+            <GlassButton
+              size="sm"
+              variant="secondary"
+              onClick={() => onToggleFavorite(template.id)}
+            >
+              <Heart className="w-4 h-4" />
+            </GlassButton>
+          </div>
         </div>
       </div>
     </GlassCard>
