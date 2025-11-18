@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react'
 import { createBrowserClient } from '@/lib/supabase'
 import { GlassPanel, GlassCard, GlassButton, GlassInput, GlassBadge } from '@/components/ui/glass'
-import { User, CreditCard, Bell, Shield, Crown, Check, Sparkles, Mail, AlertTriangle, Trash2 } from 'lucide-react'
+import { User, CreditCard, Bell, Shield, Crown, Check, Sparkles, Mail, AlertTriangle, Trash2, Lock } from 'lucide-react'
 import type { Profile } from '@/types'
 
 type TabType = 'account' | 'billing' | 'notifications'
@@ -103,6 +103,8 @@ export default function SettingsPage() {
   const [teamMembers, setTeamMembers] = useState<TeamMember[]>([])
   const [inviteEmail, setInviteEmail] = useState('')
   const [inviteRole, setInviteRole] = useState<'admin' | 'member'>('member')
+  const [profilePassword, setProfilePassword] = useState('')
+  const [isPasswordProtected, setIsPasswordProtected] = useState(false)
 
   const supabase = createBrowserClient()
 
@@ -127,6 +129,11 @@ export default function SettingsPage() {
         .maybeSingle()
 
       setProfile(profileData)
+
+      // Check if profile has password protection
+      if ((profileData as any)?.metadata?.password_hash) {
+        setIsPasswordProtected(true)
+      }
 
       // Load subscription
       const { data: subData } = await (supabase as any)
@@ -312,6 +319,61 @@ export default function SettingsPage() {
     }
   }
 
+  const handleSetPassword = async () => {
+    if (!profile) return
+
+    const password = prompt('Enter password to protect your profile:')
+    if (!password) return
+
+    try {
+      // Simple hash for demo - in production use bcrypt
+      const hash = btoa(password)
+
+      const metadata = (profile as any).metadata || {}
+      const { error } = await (supabase as any)
+        .from('profiles')
+        .update({
+          metadata: { ...metadata, password_hash: hash }
+        })
+        .eq('id', profile.id)
+
+      if (error) throw error
+
+      setIsPasswordProtected(true)
+      setMessage('Password protection enabled!')
+      setTimeout(() => setMessage(''), 3000)
+      await loadData()
+    } catch (error: any) {
+      setMessage('Error: ' + error.message)
+    }
+  }
+
+  const handleRemovePassword = async () => {
+    if (!profile) return
+    if (!confirm('Remove password protection from your profile?')) return
+
+    try {
+      const metadata = (profile as any).metadata || {}
+      delete metadata.password_hash
+
+      const { error } = await (supabase as any)
+        .from('profiles')
+        .update({
+          metadata
+        })
+        .eq('id', profile.id)
+
+      if (error) throw error
+
+      setIsPasswordProtected(false)
+      setMessage('Password protection removed!')
+      setTimeout(() => setMessage(''), 3000)
+      await loadData()
+    } catch (error: any) {
+      setMessage('Error: ' + error.message)
+    }
+  }
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
@@ -430,6 +492,61 @@ export default function SettingsPage() {
                 </div>
               </div>
             </GlassPanel>
+
+            {/* Password Protection */}
+            {profile && (
+              <GlassPanel className="p-6">
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="p-3 bg-purple-100/50 rounded-xl">
+                    <Lock className="w-6 h-6 text-purple-600" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-slate-800">Profile Password Protection</h2>
+                    <p className="text-sm text-slate-600">Require a password to view your profile</p>
+                  </div>
+                </div>
+
+                <div className="space-y-4">
+                  <div className="flex items-center justify-between p-4 bg-white/20 rounded-xl">
+                    <div>
+                      <p className="font-semibold text-slate-800">
+                        {isPasswordProtected ? 'Password Protection Enabled' : 'Password Protection Disabled'}
+                      </p>
+                      <p className="text-sm text-slate-600">
+                        {isPasswordProtected
+                          ? 'Visitors must enter a password to view your profile'
+                          : 'Anyone can view your profile without a password'}
+                      </p>
+                    </div>
+                    <GlassBadge variant={isPasswordProtected ? 'success' : 'default'}>
+                      {isPasswordProtected ? 'Protected' : 'Public'}
+                    </GlassBadge>
+                  </div>
+
+                  <div className="pt-4">
+                    {isPasswordProtected ? (
+                      <div className="flex gap-2">
+                        <GlassButton variant="secondary" onClick={handleSetPassword}>
+                          Change Password
+                        </GlassButton>
+                        <GlassButton
+                          variant="secondary"
+                          onClick={handleRemovePassword}
+                          className="border-red-300 text-red-700 hover:bg-red-50/50"
+                        >
+                          Remove Password
+                        </GlassButton>
+                      </div>
+                    ) : (
+                      <GlassButton onClick={handleSetPassword}>
+                        <Lock className="w-4 h-4 mr-2" />
+                        Enable Password Protection
+                      </GlassButton>
+                    )}
+                  </div>
+                </div>
+              </GlassPanel>
+            )}
 
             {/* Danger Zone */}
             <GlassPanel className="p-6 border-2 border-red-300 bg-red-50/30">

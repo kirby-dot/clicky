@@ -23,8 +23,8 @@ export function ProfilePageClient({
   const [isUnlocked, setIsUnlocked] = useState(false)
 
   // Check if profile is password protected
-  const metaTags = profile.meta_tags as any
-  const isPasswordProtected = !!(metaTags?.password)
+  const metadata = (profile as any).metadata as any
+  const isPasswordProtected = !!(metadata?.password_hash)
 
   // Owners bypass password protection
   const shouldShowContent = isOwner || !isPasswordProtected || isUnlocked
@@ -41,19 +41,13 @@ export function ProfilePageClient({
 
   const handleUnlock = async (password: string): Promise<boolean> => {
     try {
-      const response = await fetch('/api/verify-password', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          profileId: profile.id,
-          password
-        })
-      })
+      // Simple hash verification - in production use bcrypt
+      const hash = btoa(password)
 
-      const data = await response.json()
-
-      if (response.ok && data.success) {
+      if (hash === metadata?.password_hash) {
         setIsUnlocked(true)
+        // Set cookie for persistent access
+        document.cookie = `profile_access_${profile.id}=granted; path=/; max-age=604800` // 7 days
         return true
       }
 

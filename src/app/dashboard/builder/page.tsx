@@ -9,13 +9,14 @@ import { Textarea } from '@/components/ui/textarea'
 import { ModuleRenderer } from '@/components/modules/module-renderer'
 import { QRCodeModal } from '@/components/qr-code-modal'
 import { ColorThemeModal, COLOR_THEMES, type ColorTheme } from '@/components/color-theme-modal'
+import { ABTestModal } from '@/components/ab-test-modal'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   Search, Plus, GripVertical, MoreHorizontal, ChevronDown, ChevronRight,
   Link as LinkIcon, Type, Image as ImageIcon, Video, Mail, Users, Eye, EyeOff,
   Edit2, Trash2, ExternalLink, X, Check, Save, Smartphone, Copy, Settings as SettingsIcon,
   Instagram, Twitter, Youtube, Linkedin, Facebook, Github, MessageCircle, Send, Music,
-  Sparkles, Layers, QrCode, Palette
+  Sparkles, Layers, QrCode, Palette, FlaskConical
 } from 'lucide-react'
 import type { Module, ModuleType, Section, Profile } from '@/types'
 import {
@@ -113,9 +114,10 @@ interface SortableModuleProps {
   onDelete: () => void
   onToggleActive: () => void
   onDuplicate: () => void
+  onABTest: () => void
 }
 
-function SortableModule({ module, isEditing, onEdit, onDelete, onToggleActive, onDuplicate }: SortableModuleProps) {
+function SortableModule({ module, isEditing, onEdit, onDelete, onToggleActive, onDuplicate, onABTest }: SortableModuleProps) {
   const {
     attributes,
     listeners,
@@ -198,6 +200,15 @@ function SortableModule({ module, isEditing, onEdit, onDelete, onToggleActive, o
           title="Duplicate module"
         >
           <Copy className="w-4 h-4 text-purple-600" />
+        </motion.button>
+        <motion.button
+          onClick={onABTest}
+          className="p-2 hover:bg-white/50 rounded-lg transition-opacity opacity-0 group-hover:opacity-100"
+          whileHover={{ scale: 1.1 }}
+          whileTap={{ scale: 0.9 }}
+          title="A/B test this module"
+        >
+          <FlaskConical className="w-4 h-4 text-pink-600" />
         </motion.button>
         <motion.button
           onClick={onDelete}
@@ -547,6 +558,8 @@ function BuilderContent() {
   const [showQRModal, setShowQRModal] = useState(false)
   const [showThemeModal, setShowThemeModal] = useState(false)
   const [currentTheme, setCurrentTheme] = useState<ColorTheme | undefined>()
+  const [showABTestModal, setShowABTestModal] = useState(false)
+  const [abTestModule, setABTestModule] = useState<Module | null>(null)
 
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -810,12 +823,42 @@ function BuilderContent() {
     }
   }
 
+  const handleOpenABTest = (module: Module) => {
+    setABTestModule(module)
+    setShowABTestModal(true)
+  }
+
+  const handleSaveABTest = async (variants: any[]) => {
+    if (!abTestModule || !profile) return
+
+    try {
+      // Save variants to module metadata
+      const moduleMetadata = (abTestModule as any).metadata || {}
+      const { error } = await (supabase as any)
+        .from('modules')
+        .update({
+          metadata: { ...moduleMetadata, ab_variants: variants }
+        })
+        .eq('id', abTestModule.id)
+
+      if (error) throw error
+
+      await loadData()
+      setShowABTestModal(false)
+      setABTestModule(null)
+      console.log('A/B test variants saved successfully')
+    } catch (error: any) {
+      console.error('Error saving A/B test:', error)
+      alert(`Failed to save A/B test: ${error.message || 'Unknown error'}`)
+    }
+  }
+
   const handleSelectTheme = async (theme: ColorTheme) => {
     if (!profile) return
 
     try {
       // Save theme colors to profile metadata
-      const { error } = await (supabase as any)
+      const { error} = await (supabase as any)
         .from('profiles')
         .update({
           theme_colors: theme.colors
@@ -901,6 +944,18 @@ function BuilderContent() {
         currentTheme={currentTheme}
         onSelectTheme={handleSelectTheme}
       />
+
+      {abTestModule && (
+        <ABTestModal
+          isOpen={showABTestModal}
+          onClose={() => {
+            setShowABTestModal(false)
+            setABTestModule(null)
+          }}
+          module={abTestModule}
+          onSave={handleSaveABTest}
+        />
+      )}
 
       {/* Main Editor */}
       <div className="flex-1 p-8 overflow-y-auto">
@@ -1087,6 +1142,7 @@ function BuilderContent() {
                                       onDelete={() => handleDeleteModule(module.id)}
                                       onToggleActive={() => handleToggleModuleActive(module)}
                                       onDuplicate={() => handleDuplicateModule(module)}
+                                      onABTest={() => handleOpenABTest(module)}
                                     />
                                   ))}
                                 </AnimatePresence>
