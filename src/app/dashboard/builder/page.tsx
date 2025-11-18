@@ -603,11 +603,29 @@ function BuilderContent() {
   }
 
   const handleAddModule = async (template: ModuleTemplate) => {
-    if (!profile || !activeSection) return
+    if (!profile) {
+      console.error('No profile loaded')
+      alert('Error: No profile loaded. Please refresh the page.')
+      return
+    }
+
+    if (!activeSection) {
+      console.error('No active section')
+      alert('Error: No section selected. Please try clicking "Add Module" again.')
+      return
+    }
 
     try {
       const section = sections.find(s => s.id === activeSection)
       const nextOrder = section ? section.modules.length : 0
+
+      console.log('Adding module:', {
+        profile_id: profile.id,
+        section_id: activeSection,
+        type: template.type,
+        title: template.label,
+        order: nextOrder
+      })
 
       const { data, error } = await (supabase as any)
         .from('modules')
@@ -623,13 +641,18 @@ function BuilderContent() {
         .select()
         .single()
 
-      if (error) throw error
+      if (error) {
+        console.error('Supabase error:', error)
+        throw error
+      }
 
+      console.log('Module created successfully:', data)
       await loadData()
       setShowModuleTemplates(false)
       setEditingModule(data)
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding module:', error)
+      alert(`Failed to add module: ${error.message || 'Unknown error'}. Check console for details.`)
     }
   }
 
