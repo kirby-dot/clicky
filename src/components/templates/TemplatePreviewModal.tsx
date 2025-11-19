@@ -198,7 +198,7 @@ export function TemplatePreviewModal({
           <div className="px-6 pb-4">
             <div className="flex flex-wrap gap-2">
               {template.tags.map((tag) => (
-                <GlassBadge key={tag} variant="secondary" className="text-xs">
+                <GlassBadge key={tag} variant="default" className="text-xs">
                   {tag}
                 </GlassBadge>
               ))}
