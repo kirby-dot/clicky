@@ -6,6 +6,8 @@ import { Input } from '@/components/ui/input'
 import { CheckCircle2, XCircle, AlertCircle, ExternalLink, Copy, Check } from 'lucide-react'
 import type { Profile } from '@/types'
 
+const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || 'clicky.com'
+
 interface CustomDomainSettingsProps {
   profile: Profile
   userPlan: 'free' | 'pro' | 'enterprise'
@@ -105,7 +107,7 @@ export function CustomDomainSettings({ profile, userPlan, onUpdate }: CustomDoma
           <div className="flex-1">
             <h3 className="text-lg font-bold text-gray-900 mb-2">Custom Domain</h3>
             <p className="text-gray-600 mb-4">
-              Use your own domain (e.g., links.yourbrand.com) instead of clicky.com/{profile.slug}
+              Use your own domain (e.g., links.yourbrand.com) instead of {APP_DOMAIN}/{profile.slug}
             </p>
             <Button
               className="bg-gradient-to-r from-purple-500 to-pink-500 hover:from-purple-600 hover:to-pink-600 text-white"
@@ -203,10 +205,10 @@ export function CustomDomainSettings({ profile, userPlan, onUpdate }: CustomDoma
               <div className="flex items-center justify-between">
                 <div>
                   <span className="text-gray-500 text-xs">Value</span>
-                  <p className="font-semibold">clicky.com</p>
+                  <p className="font-semibold">{APP_DOMAIN}</p>
                 </div>
                 <button
-                  onClick={() => copyToClipboard('clicky.com')}
+                  onClick={() => copyToClipboard(APP_DOMAIN)}
                   className="text-gray-400 hover:text-gray-600"
                   title="Copy"
                 >
