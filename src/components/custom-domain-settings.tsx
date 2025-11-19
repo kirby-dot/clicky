@@ -10,7 +10,7 @@ const APP_DOMAIN = process.env.NEXT_PUBLIC_APP_DOMAIN || 'clicky.com'
 
 interface CustomDomainSettingsProps {
   profile: Profile
-  userPlan: 'free' | 'pro' | 'enterprise'
+  userPlan: 'free' | 'pro' | 'business'
   onUpdate: () => void
 }
 
@@ -21,7 +21,7 @@ export function CustomDomainSettings({ profile, userPlan, onUpdate }: CustomDoma
   const [success, setSuccess] = useState('')
   const [copied, setCopied] = useState(false)
 
-  const isBusinessPlan = userPlan === 'enterprise'
+  const isBusinessPlan = userPlan === 'business'
 
   const handleVerifyDomain = async () => {
     if (!domain.trim()) {

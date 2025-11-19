@@ -5,6 +5,7 @@ import { createBrowserClient } from '@/lib/supabase'
 import { GlassPanel, GlassCard, GlassButton, GlassInput, GlassBadge } from '@/components/ui/glass'
 import { User, CreditCard, Bell, Shield, Crown, Check, Sparkles, Mail, AlertTriangle, Trash2, Lock } from 'lucide-react'
 import type { Profile } from '@/types'
+import { CustomDomainSettings } from '@/components/custom-domain-settings'
 
 type TabType = 'account' | 'billing' | 'notifications'
 
@@ -546,6 +547,14 @@ export default function SettingsPage() {
                   </div>
                 </div>
               </GlassPanel>
+            )}
+
+            {profile && (
+              <CustomDomainSettings
+                profile={profile}
+                userPlan={(subscription?.plan || 'free') as 'free' | 'pro' | 'business'}
+                onUpdate={loadData}
+              />
             )}
 
             {/* Danger Zone */}

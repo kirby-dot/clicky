@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { createTemplateFromProfile } from '@/lib/templates/serializer';
+import { DEFAULT_TEMPLATES } from '@/lib/templates/defaultTemplates';
 
 /**
  * GET /api/templates
@@ -65,7 +66,7 @@ export async function GET(request: NextRequest) {
 
     query = query.range(from, to);
 
-    const { data: templates, error, count } = await query;
+    const { data: templates, error } = await query;
 
     if (error) {
       console.error('Error fetching templates:', error);
@@ -75,13 +76,43 @@ export async function GET(request: NextRequest) {
       );
     }
 
+    const filteredDefaultTemplates = DEFAULT_TEMPLATES.filter((template) => {
+      if (categoryId && template.category_id !== categoryId) return false;
+      if (tag && !(template.tags || []).includes(tag)) return false;
+      if (priceFilter === 'free' && template.is_premium) return false;
+      if (priceFilter === 'premium' && !template.is_premium) return false;
+      if (featured === 'true' && !template.featured) return false;
+
+      if (search) {
+        const queryText = search.toLowerCase();
+        return (
+          template.name.toLowerCase().includes(queryText) ||
+          (template.description || '').toLowerCase().includes(queryText) ||
+          (template.tags || []).some((t) => t.toLowerCase().includes(queryText))
+        );
+      }
+
+      return true;
+    });
+
+    const combinedTemplates = [...(templates || []), ...filteredDefaultTemplates].sort((a, b) => {
+      if (a.featured === b.featured) {
+        return (b.installs_count || 0) - (a.installs_count || 0);
+      }
+
+      return Number(b.featured) - Number(a.featured);
+    });
+
+    const paginated = combinedTemplates.slice(from, to + 1);
+    const total = combinedTemplates.length;
+
     return NextResponse.json({
-      templates,
+      templates: paginated,
       pagination: {
         page,
         limit,
-        total: count || 0,
-        totalPages: Math.ceil((count || 0) / limit),
+        total,
+        totalPages: Math.ceil(total / limit),
       },
     });
   } catch (error) {

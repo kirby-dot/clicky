@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { DEFAULT_TEMPLATES } from '@/lib/templates/defaultTemplates';
 
 /**
  * GET /api/templates/[id]
@@ -13,17 +14,23 @@ export async function GET(
   try {
     const supabase = createRouteHandlerClient({ cookies });
 
-    const { data: template, error } = await supabase
-      .from('templates')
-      .select(`
+    const defaultTemplate = DEFAULT_TEMPLATES.find(
+      (template) => template.id === params.id || template.slug === params.id
+    );
+
+    const { data: template, error } = defaultTemplate
+      ? { data: defaultTemplate as any, error: null }
+      : await supabase
+          .from('templates')
+          .select(`
         *,
         category:template_categories(id, name, display_name, icon, color),
         creator:users(id, username)
       `)
-      .eq('id', params.id)
-      .eq('is_active', true)
-      .not('published_at', 'is', null)
-      .single();
+          .eq('id', params.id)
+          .eq('is_active', true)
+          .not('published_at', 'is', null)
+          .single();
 
     if (error || !template) {
       return NextResponse.json(

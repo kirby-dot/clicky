@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
+import { DEFAULT_TEMPLATE_CATEGORIES } from '@/lib/templates/defaultTemplates';
 
 export const dynamic = 'force-dynamic';
 
@@ -26,7 +27,14 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    return NextResponse.json({ categories });
+    const mergedCategories = [
+      ...DEFAULT_TEMPLATE_CATEGORIES,
+      ...((categories || []).filter(
+        (category) => !DEFAULT_TEMPLATE_CATEGORIES.find((defaultCategory) => defaultCategory.id === category.id)
+      )),
+    ];
+
+    return NextResponse.json({ categories: mergedCategories });
   } catch (error) {
     console.error('Categories API error:', error);
     return NextResponse.json(
