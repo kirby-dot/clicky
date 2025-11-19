@@ -49,13 +49,15 @@ export function TemplatePreviewModal({
       const { data } = await supabase
         .from('profiles')
         .select('id, slug, title')
-        .eq('user_id', user.id);
+        .eq('user_id', user.id)
+        .returns<Profile[]>();
 
-      if (data) {
-        setProfiles(data);
-        if (data.length > 0) {
-          setSelectedProfile(data[0].id);
-        }
+      const profileOptions = data ?? [];
+      setProfiles(profileOptions);
+
+      const defaultProfileId = profileOptions[0]?.id;
+      if (defaultProfileId) {
+        setSelectedProfile(defaultProfileId);
       }
     } catch (error) {
       console.error('Error loading profiles:', error);
