@@ -117,7 +117,7 @@ export async function serializeProfileToTemplate(
   }
 
   // Fetch theme if exists
-  let themeData = null;
+  let themeData: TemplateConfig['theme'] = undefined;
   if (profile.theme_id) {
     const { data: theme } = await supabase
       .from('themes')
