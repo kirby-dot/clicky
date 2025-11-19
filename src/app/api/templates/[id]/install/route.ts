@@ -3,6 +3,9 @@ import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { applyTemplateToProfile } from '@/lib/templates/serializer';
 import { DEFAULT_TEMPLATES } from '@/lib/templates/defaultTemplates';
+import { Database } from '@/types/database';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/templates/[id]/install
@@ -13,7 +16,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = createRouteHandlerClient<Database>({ cookies });
 
     // Check authentication
     const {
@@ -98,10 +101,15 @@ export async function POST(
     }
 
     // Apply the template to the profile
-    await applyTemplateToProfile(template.config, profile_id, {
-      preservePersonalInfo: preserve_personal_info,
-      preserveCustomCss: false,
-    });
+    await applyTemplateToProfile(
+      template.config,
+      profile_id,
+      {
+        preservePersonalInfo: preserve_personal_info,
+        preserveCustomCss: false,
+      },
+      supabase
+    );
 
     // Record the installation
     if (!defaultTemplate) {

@@ -5,6 +5,8 @@
  */
 
 import { createClientComponentClient } from '@supabase/auth-helpers-nextjs';
+import { SupabaseClient } from '@supabase/supabase-js';
+import { Database } from '@/types/database';
 
 export interface TemplateConfig {
   version: string; // Schema version for future compatibility
@@ -205,9 +207,10 @@ export async function applyTemplateToProfile(
   options?: {
     preservePersonalInfo?: boolean; // Keep existing title, bio, avatar
     preserveCustomCss?: boolean;
-  }
+  },
+  client?: SupabaseClient<Database>
 ): Promise<void> {
-  const supabase = createClientComponentClient();
+  const supabase = client || createClientComponentClient<Database>();
 
   try {
     // Get existing profile data if we need to preserve info

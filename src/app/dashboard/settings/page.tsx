@@ -87,6 +87,15 @@ const PLAN_FEATURES = {
   }
 }
 
+const normalizePlan = (plan?: string): 'free' | 'pro' | 'business' => {
+  const value = (plan || '').toLowerCase()
+
+  if (value.includes('business')) return 'business'
+  if (value.includes('pro')) return 'pro'
+
+  return 'free'
+}
+
 export default function SettingsPage() {
   const [profile, setProfile] = useState<Profile | null>(null)
   const [user, setUser] = useState<any>(null)
@@ -394,7 +403,7 @@ export default function SettingsPage() {
     )
   }
 
-  const currentPlan = subscription?.plan || 'free'
+  const currentPlan = normalizePlan(subscription?.plan)
   const planInfo = PLAN_FEATURES[currentPlan]
 
   return (
@@ -552,7 +561,7 @@ export default function SettingsPage() {
             {profile && (
               <CustomDomainSettings
                 profile={profile}
-                userPlan={(subscription?.plan || 'free') as 'free' | 'pro' | 'business'}
+                userPlan={currentPlan}
                 onUpdate={loadData}
               />
             )}
