@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server';
 import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs';
 import { cookies } from 'next/headers';
 import { applyTemplateToProfile } from '@/lib/templates/serializer';
+import { DEFAULT_TEMPLATES } from '@/lib/templates/defaultTemplates';
+import { Database } from '@/types/database';
+
+export const dynamic = 'force-dynamic';
 
 /**
  * POST /api/templates/[id]/install
@@ -12,7 +16,7 @@ export async function POST(
   { params }: { params: { id: string } }
 ) {
   try {
-    const supabase = createRouteHandlerClient({ cookies });
+    const supabase = createRouteHandlerClient<Database>({ cookies });
 
     // Check authentication
     const {
@@ -48,13 +52,19 @@ export async function POST(
     }
 
     // Get the template
-    const { data: template, error: templateError } = await supabase
-      .from('templates')
-      .select('*')
-      .eq('id', params.id)
-      .eq('is_active', true)
-      .not('published_at', 'is', null)
-      .single();
+    const defaultTemplate = DEFAULT_TEMPLATES.find(
+      (template) => template.id === params.id || template.slug === params.id
+    );
+
+    const { data: template, error: templateError } = defaultTemplate
+      ? { data: defaultTemplate as any, error: null }
+      : await supabase
+          .from('templates')
+          .select('*')
+          .eq('id', params.id)
+          .eq('is_active', true)
+          .not('published_at', 'is', null)
+          .single();
 
     if (templateError || !template) {
       return NextResponse.json(
@@ -91,25 +101,32 @@ export async function POST(
     }
 
     // Apply the template to the profile
-    await applyTemplateToProfile(template.config, profile_id, {
-      preservePersonalInfo: preserve_personal_info,
-      preserveCustomCss: false,
-    });
+    await applyTemplateToProfile(
+      template.config,
+      profile_id,
+      {
+        preservePersonalInfo: preserve_personal_info,
+        preserveCustomCss: false,
+      },
+      supabase
+    );
 
     // Record the installation
-    const { error: installError } = await supabase
-      .from('template_installs')
-      .insert({
-        template_id: params.id,
-        user_id: session.user.id,
-        profile_id: profile_id,
-      })
-      .select()
-      .single();
+    if (!defaultTemplate) {
+      const { error: installError } = await supabase
+        .from('template_installs')
+        .insert({
+          template_id: params.id,
+          user_id: session.user.id,
+          profile_id: profile_id,
+        })
+        .select()
+        .single();
 
-    // Ignore conflict errors (user already installed this template to this profile)
-    if (installError && installError.code !== '23505') {
-      console.error('Install tracking error:', installError);
+      // Ignore conflict errors (user already installed this template to this profile)
+      if (installError && installError.code !== '23505') {
+        console.error('Install tracking error:', installError);
+      }
     }
 
     return NextResponse.json({

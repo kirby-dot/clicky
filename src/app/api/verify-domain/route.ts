@@ -1,7 +1,16 @@
 import { NextResponse } from 'next/server'
-import { createClient } from '@supabase/supabase-js'
 import { cookies } from 'next/headers'
+import { createRouteHandlerClient } from '@supabase/auth-helpers-nextjs'
 import type { Database } from '@/types/database'
+
+const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i
+
+const normalizeDomain = (domain: string) =>
+  domain
+    .trim()
+    .toLowerCase()
+    .replace(/^https?:\/\//, '')
+    .replace(/\/$/, '')
 
 export async function POST(request: Request) {
   try {
@@ -14,23 +23,24 @@ export async function POST(request: Request) {
       )
     }
 
+    const normalizedDomain = normalizeDomain(domain)
+
     // Validate domain format
-    const domainRegex = /^([a-z0-9]+(-[a-z0-9]+)*\.)+[a-z]{2,}$/i
-    if (!domainRegex.test(domain)) {
+    if (!domainRegex.test(normalizedDomain)) {
       return NextResponse.json(
         { error: 'Invalid domain format' },
         { status: 400 }
       )
     }
 
-    const supabase = createClient<Database>(
-      'https://ddekvujqgnhkndhvdfma.supabase.co',
-      'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImRkZWt2dWpxZ25oa25kaHZkZm1hIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjMwMTcwMTYsImV4cCI6MjA3ODU5MzAxNn0.9pwv0Ma6HMnjxM8XsysmsovJKFnd6eqsfxNJuSeNBY8'
-    )
+    const supabase = createRouteHandlerClient<Database>({ cookies })
 
     // Verify user is authenticated
-    const { data: { user } } = await supabase.auth.getUser()
-    if (!user) {
+    const {
+      data: { session },
+    } = await supabase.auth.getSession()
+
+    if (!session) {
       return NextResponse.json(
         { error: 'Unauthorized' },
         { status: 401 }
@@ -46,7 +56,7 @@ export async function POST(request: Request) {
 
     const profile = profileData as { user_id: string } | null
 
-    if (!profile || profile.user_id !== user.id) {
+    if (!profile || profile.user_id !== session.user.id) {
       return NextResponse.json(
         { error: 'Profile not found or unauthorized' },
         { status: 403 }
@@ -57,7 +67,7 @@ export async function POST(request: Request) {
     const { data: userData } = await (supabase as any)
       .from('users')
       .select('subscription_tier')
-      .eq('id', user.id)
+      .eq('id', session.user.id)
       .maybeSingle()
 
     const userTier = userData as { subscription_tier: string } | null
@@ -69,6 +79,20 @@ export async function POST(request: Request) {
       )
     }
 
+    // Ensure the domain isn't already claimed by another profile
+    const { data: existingDomain } = await (supabase as any)
+      .from('profiles')
+      .select('id, user_id')
+      .eq('custom_domain', normalizedDomain)
+      .maybeSingle()
+
+    if (existingDomain && existingDomain.id !== profileId) {
+      return NextResponse.json(
+        { error: 'This domain is already connected to another profile' },
+        { status: 409 }
+      )
+    }
+
     // Verify DNS configuration
     // In production, you'd use DNS lookup to verify CNAME record
     // For now, we'll do a simple HTTP check
@@ -77,7 +101,7 @@ export async function POST(request: Request) {
 
     try {
       // Try to fetch from the custom domain
-      const response = await fetch(`https://${domain}`, {
+      const response = await fetch(`https://${normalizedDomain}`, {
         method: 'HEAD',
         redirect: 'manual',
         signal: AbortSignal.timeout(5000)
@@ -92,7 +116,7 @@ export async function POST(request: Request) {
 
     // Update profile with verification status
     const updateData: any = {
-      custom_domain: domain,
+      custom_domain: normalizedDomain,
       domain_verified: verified,
       domain_verified_at: verified ? new Date().toISOString() : null
     }
