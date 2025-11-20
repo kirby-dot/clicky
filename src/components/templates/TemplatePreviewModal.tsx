@@ -26,6 +26,8 @@ export function TemplatePreviewModal({
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [selectedProfile, setSelectedProfile] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [didLoadProfiles, setDidLoadProfiles] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
 
   const supabase = createBrowserClient();
@@ -35,7 +37,10 @@ export function TemplatePreviewModal({
       const {
         data: { user },
       } = await supabase.auth.getUser();
-      if (!user) return;
+      if (!user) {
+        setDidLoadProfiles(true);
+        return;
+      }
 
       const { data } = await supabase
         .from('profiles')
@@ -50,8 +55,10 @@ export function TemplatePreviewModal({
       if (defaultProfileId) {
         setSelectedProfile(defaultProfileId);
       }
+      setDidLoadProfiles(true);
     } catch (error) {
       console.error('Error loading profiles:', error);
+      setDidLoadProfiles(true);
     }
   }, [supabase]);
 
@@ -61,15 +68,21 @@ export function TemplatePreviewModal({
 
   const handleInstall = async () => {
     if (!selectedProfile) {
-      alert('Please select a profile');
+      setError('Please select a profile');
       return;
     }
 
     setLoading(true);
+    setError(null);
     try {
       await onInstall(template.id, selectedProfile);
     } catch (error) {
       console.error('Error installing template:', error);
+      setError(
+        error instanceof Error
+          ? error.message
+          : 'Something went wrong while installing this template.'
+      );
     } finally {
       setLoading(false);
     }
@@ -200,12 +213,13 @@ export function TemplatePreviewModal({
 
           <div className="space-y-5 bg-white/5 rounded-2xl border border-white/10 p-5 shadow-lg">
             {/* Profile Selection */}
-            <div className="space-y-2">
+            <div className="space-y-3">
               <label className="block text-sm font-medium text-white">Install to Profile</label>
               <select
                 value={selectedProfile || ''}
                 onChange={(e) => setSelectedProfile(e.target.value)}
                 className="w-full px-4 py-3 bg-slate-800 border border-white/15 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-purple-400"
+                disabled={!profiles.length}
               >
                 {profiles.map((profile) => (
                   <option key={profile.id} value={profile.id}>
@@ -213,10 +227,17 @@ export function TemplatePreviewModal({
                   </option>
                 ))}
               </select>
-              <p className="text-xs text-gray-300">
-                Your current profile content will be replaced. Personal info (title, bio,
-                avatar) will be preserved.
-              </p>
+
+              {!profiles.length && didLoadProfiles ? (
+                <p className="text-xs text-amber-200 bg-amber-500/10 border border-amber-500/30 rounded-lg p-3">
+                  You need an active profile before installing a template. Create a profile from your dashboard, then reopen this modal.
+                </p>
+              ) : (
+                <p className="text-xs text-gray-300">
+                  Your current profile content will be replaced. Personal info (title, bio,
+                  avatar) will be preserved.
+                </p>
+              )}
             </div>
 
             {/* Actions */}
@@ -225,7 +246,7 @@ export function TemplatePreviewModal({
                 variant="primary"
                 className="flex-1"
                 onClick={handleInstall}
-                disabled={loading || !selectedProfile}
+                disabled={loading || !selectedProfile || !profiles.length}
               >
                 {loading ? (
                   <>
@@ -243,6 +264,12 @@ export function TemplatePreviewModal({
                 Cancel
               </GlassButton>
             </div>
+
+            {error && (
+              <div className="p-3 rounded-lg border border-red-500/40 bg-red-500/10 text-sm text-red-100">
+                {error}
+              </div>
+            )}
 
             {/* Template Details */}
             <div className="space-y-4">
