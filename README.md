@@ -63,6 +63,9 @@ SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 ```
 
+> **Production tip:** In Vercel (or your host), set `NEXT_PUBLIC_APP_URL` to your live domain (for example, `https://yourapp.com`).
+> This prevents preview/share links from falling back to `http://localhost:3000`.
+
 5. Run the development server:
 
 ```bash
